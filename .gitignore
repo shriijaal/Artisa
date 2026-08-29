@@ -24,6 +24,9 @@ frontend/.env.local
 .idea/
 .claude/
 .codex/
+
+# Design references (not app code)
+sample images for ui-ux/
 *.swp
 *.swo
 .DS_Store
