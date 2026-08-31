@@ -6,9 +6,39 @@ This guide explains how to start the backend and frontend servers and access the
 
 ## Prerequisites
 
-- Python 3.8+ installed
-- Node.js 16+ installed
+- Python 3.12+ installed
+- Node.js 20+ installed
 - PostgreSQL running (or SQLite fallback)
+- pgAdmin or HeidiSQL (optional, for database management)
+
+---
+
+## Database Management (Optional)
+
+### Using pgAdmin (Primary)
+
+1. Open pgAdmin from the Start Menu
+2. Enter your master password
+3. Connect to: `localhost:5432`, user: `postgres`
+4. Browse: `Databases → artisa_db → Schemas → public → Tables`
+
+### Using HeidiSQL (Alternative)
+
+1. Download and install from [heidisql.com](https://www.heidisql.com/)
+2. Create a new session:
+   - Network type: `PostgreSQL`
+   - Hostname: `localhost`
+   - Port: `5432`
+   - User: `postgres`
+   - Password: `postgres`
+   - Database: `artisa_db`
+3. Click **Open** to connect
+4. See [Database Management Guide](database-management.md) for detailed instructions
+
+### Alternative Tools (Mac/Linux)
+
+- **pgAdmin:** https://www.pgadmin.org/
+- **DBeaver:** https://dbeaver.io/ (cross-platform)
 
 ---
 

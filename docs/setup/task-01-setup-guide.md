@@ -17,6 +17,8 @@ Install the following before starting:
 | Node.js | 20 LTS or newer | https://nodejs.org/ |
 | Git | Latest | https://git-scm.com/ |
 | PostgreSQL | 16+ | https://www.postgresql.org/download/ |
+| pgAdmin | Latest | https://www.pgadmin.org/ *(installed with PostgreSQL)* |
+| HeidiSQL *(optional)* | Latest | https://www.heidisql.com/ *(lightweight alternative)* |
 | Docker Desktop *(optional)* | Latest | https://www.docker.com/products/docker-desktop/ |
 
 Verify installations:
@@ -44,7 +46,25 @@ If starting from scratch on a new machine, clone from your Git remote after push
 
 Choose **one** option:
 
-### Option A — Docker (recommended)
+### Option A — Local PostgreSQL install (Recommended)
+
+1. Install PostgreSQL 16+ from https://www.postgresql.org/download/
+2. During installation, note your `postgres` password (default: `postgres`)
+3. Verify the service is running:
+
+```powershell
+Get-Service postgresql*
+```
+
+4. Open pgAdmin (installed with PostgreSQL) or HeidiSQL and create the database:
+
+```sql
+CREATE DATABASE artisa_db;
+```
+
+### Option B — Docker (Optional)
+
+Only use this if you have Docker installed and prefer a containerized database:
 
 ```powershell
 docker compose up -d
@@ -56,20 +76,46 @@ This starts PostgreSQL with:
 - Password: `postgres`
 - Port: `5432`
 
-### Option B — Local PostgreSQL install
-
-1. Install PostgreSQL 16+
-2. Open pgAdmin or `psql`
-3. Create the database:
-
-```sql
-CREATE DATABASE artisa_db;
-```
-
 ### Option C — SQLite (quick test only)
 
 Skip PostgreSQL and set `USE_SQLITE=True` in `backend/.env`.  
 **Not recommended for production or later tasks** — use PostgreSQL for the full project.
+
+### Database Management (Optional but Recommended)
+
+Visual GUI tools make it easier to browse tables, run queries, and manage data.
+
+#### pgAdmin (Primary — Already Installed with PostgreSQL)
+
+1. Open **pgAdmin** from the Start Menu
+2. Enter your **pgAdmin master password** (set during PostgreSQL installation)
+3. Right-click **Servers → Create → Server**
+4. Fill in the **General** tab:
+   - **Name:** `Artisa Local`
+5. Switch to the **Connection** tab:
+   - **Host name/address:** `localhost`
+   - **Port:** `5432`
+   - **Maintenance database:** `postgres`
+   - **Username:** `postgres`
+   - **Password:** `postgres`
+6. Click **Save**
+7. Navigate to: `Databases → artisa_db → Schemas → public → Tables`
+
+See [Database Management Guide](database-management.md) for detailed instructions, screenshots, and common queries.
+
+#### HeidiSQL (Lightweight Alternative)
+
+- **Download:** https://www.heidisql.com/
+- **Connection settings:**
+  - Network type: `PostgreSQL`
+  - Hostname: `localhost`
+  - Port: `5432`
+  - User: `postgres`
+  - Password: `postgres`
+  - Database: `artisa_db`
+- Click **Open** to connect
+
+See [Database Management Guide](database-management.md) for detailed instructions, screenshots, and common queries.
 
 ---
 
@@ -229,7 +275,15 @@ artisa/
 
 ### `connection to server at localhost:5432 failed`
 
-PostgreSQL is not running. Start Docker (`docker compose up -d`) or your local PostgreSQL service. Or set `USE_SQLITE=True` temporarily.
+PostgreSQL is not running. Start your local PostgreSQL service or Docker container. Or set `USE_SQLITE=True` temporarily.
+
+```powershell
+# Check if PostgreSQL is running
+Get-Service postgresql*
+
+# Start it if stopped
+Start-Service postgresql-x64-18
+```
 
 ### `ModuleNotFoundError` for Django packages
 

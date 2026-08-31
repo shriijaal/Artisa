@@ -39,6 +39,7 @@ A modern, multi-vendor e-commerce platform designed specifically for Nepali arti
 | **Payments** | Khalti (Nepal payment gateway) |
 | **Recommendations** | Hybrid engine: scikit-learn, NumPy, SciPy (collaborative + content-based filtering) |
 | **Containerization** | Docker Compose |
+| **Database Tools** | pgAdmin (primary), HeidiSQL (alternative) |
 
 ---
 
@@ -149,6 +150,21 @@ npm run dev
 
 ---
 
+## 🗄️ Database Management
+
+### Option 1: pgAdmin (Recommended for Windows)
+- Already installed with PostgreSQL
+- Connect to: `localhost:5432`, user: `postgres`
+- See [Database Management Guide](docs/setup/database-management.md) for setup
+
+### Option 2: HeidiSQL (Lightweight Alternative)
+- Download: [heidisql.com](https://www.heidisql.com/)
+- Connection: Network type: PostgreSQL, Host: `localhost`, Port: `5432`, 
+  User: `postgres`, Password: `postgres`, Database: `artisa_db`
+- See [Database Management Guide](docs/setup/database-management.md) for details
+
+---
+
 ## 🔑 Demo Accounts
 
 | Role | Username | Password | Access |
@@ -225,8 +241,10 @@ KHALTI_SECRET_KEY=your-khalti-key
 - Check `vite.config.js` proxy settings
 
 **Database connection error:**
-- If using Docker, ensure container is running: `docker ps`
-- For SQLite, set `USE_SQLITE=True` in `.env`
+- Ensure PostgreSQL service is running: `Get-Service postgresql*`
+- Verify credentials in `backend/.env`
+- For SQLite fallback, set `USE_SQLITE=True` in `.env`
+- See [Database Management Guide](docs/setup/database-management.md) for GUI tools
 
 ---
 

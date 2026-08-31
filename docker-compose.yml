@@ -1,3 +1,7 @@
+# Optional: Docker PostgreSQL Setup
+# Most users should use native PostgreSQL installation (see docs/setup/task-01-setup-guide.md)
+# Use this only if you have Docker installed and prefer a containerized database
+
 services:
   db:
     image: postgres:16-alpine
