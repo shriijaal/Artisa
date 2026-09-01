@@ -268,7 +268,7 @@ const Header = () => {
                       </>
                     )}
 
-                    {user?.artist_profile?.status !== 'approved' && (
+                    {user?.artist_profile?.status !== 'approved' && user.role !== 'admin' && (
                       <Link
                         to={!user?.artist_profile ? '/artist-application' : user.artist_profile.status === 'rejected' ? '/artist-application' : '/profile/edit'}
                         onClick={() => setMenuOpen(false)}
