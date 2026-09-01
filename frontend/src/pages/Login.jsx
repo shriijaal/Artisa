@@ -54,7 +54,7 @@ const Login = () => {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label htmlFor="username" className="block text-sm font-medium text-stone-700 mb-1">
-                Username
+                Email or username
               </label>
               <input
                 type="text"
@@ -62,6 +62,7 @@ const Login = () => {
                 name="username"
                 value={formData.username}
                 onChange={handleChange}
+                placeholder="Enter your email or username"
                 className="w-full px-4 py-2.5 border border-stone-200 bg-white rounded-lg text-sm focus:ring-1 focus:ring-stone-400 focus:border-stone-400 outline-none transition"
                 required
               />
