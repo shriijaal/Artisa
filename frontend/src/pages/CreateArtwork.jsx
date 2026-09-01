@@ -311,48 +311,49 @@ const CreateArtwork = () => {
 
           <div>
             <label className="block text-sm font-medium text-stone-700 mb-2">
-              Images *
+              Images * (max 5)
             </label>
             <input
               type="file"
               multiple
               accept="image/*"
-              onChange={(e) => setImages(Array.from(e.target.files))}
+              onChange={handleImageChange}
               className="w-full rounded-lg border border-stone-200 bg-white px-4 py-3 text-sm text-stone-900 focus:border-stone-400 focus:outline-none focus:ring-1 focus:ring-stone-400"
-              required
             />
-            {images.length > 0 && (
-              <p className="mt-2 text-sm text-stone-600">{images.length} file(s) selected</p>
+            {previews.length > 0 && (
+              <div className="mt-3 flex flex-wrap gap-3">
+                {previews.map((src, i) => (
+                  <div key={i} className="relative group">
+                    <img src={src} alt="" className="h-20 w-20 rounded-lg object-cover border border-stone-200" />
+                    <button
+                      type="button"
+                      onClick={() => removeImage(i)}
+                      className="absolute -top-2 -right-2 h-5 w-5 rounded-full bg-red-500 text-white text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      ×
+                    </button>
+                    {i === 0 && <span className="absolute bottom-1 left-1 text-[9px] bg-black/60 text-white px-1 rounded">Primary</span>}
+                  </div>
+                ))}
+              </div>
             )}
           </div>
 
           {formData.type === 'digital' && (
-            <>
-              <div>
-                <label className="block text-sm font-medium text-stone-700 mb-2">
-                  Digital File *
-                </label>
-                <input
-                  type="file"
-                  accept=".zip,.rar,.pdf,.jpg,.png"
-                  onChange={(e) => setDigitalFile(e.target.files[0])}
-                  className="w-full rounded-lg border border-stone-200 bg-white px-4 py-3 text-sm text-stone-900 focus:border-stone-400 focus:outline-none focus:ring-1 focus:ring-stone-400"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-stone-700 mb-2">
-                  Preview Image (Optional)
-                </label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => setPreviewImage(e.target.files[0])}
-                  className="w-full rounded-lg border border-stone-200 bg-white px-4 py-3 text-sm text-stone-900 focus:border-stone-400 focus:outline-none focus:ring-1 focus:ring-stone-400"
-                />
-              </div>
-            </>
+            <div>
+              <label className="block text-sm font-medium text-stone-700 mb-2">
+                Digital File *
+              </label>
+              <input
+                type="file"
+                accept=".zip,.rar,.pdf,.jpg,.png"
+                onChange={(e) => setFormData({ ...formData, digital_file: e.target.files[0] })}
+                className="w-full rounded-lg border border-stone-200 bg-white px-4 py-3 text-sm text-stone-900 focus:border-stone-400 focus:outline-none focus:ring-1 focus:ring-stone-400"
+              />
+              {formData.digital_file && (
+                <p className="mt-1 text-sm text-stone-500">{formData.digital_file.name}</p>
+              )}
+            </div>
           )}
 
           <div className="flex items-start gap-3">
