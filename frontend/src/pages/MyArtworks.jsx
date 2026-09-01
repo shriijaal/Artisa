@@ -88,6 +88,26 @@ const MyArtworks = () => {
     }
   };
 
+  const cancelSubmission = async (artworkId) => {
+    if (!confirm('Cancel this submission? The artwork will return to draft.')) return;
+
+    try {
+      const token = localStorage.getItem('access_token');
+      const response = await fetch(`/api/artworks/my-artworks/${artworkId}/cancel/`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+      if (response.ok) {
+        addToast('Submission cancelled', 'info');
+        fetchArtworks();
+      } else {
+        addToast('Failed to cancel submission', 'error');
+      }
+    } catch (err) {
+      addToast('Network error', 'error');
+    }
+  };
+
   if (loading) {
     return <LoadingSpinner label="Loading your portfolio..." />;
   }
@@ -190,7 +210,21 @@ const MyArtworks = () => {
                         </>
                       )}
                       {artwork.status === 'pending_review' && (
-                        <span className="text-xs text-amber-600">Awaiting admin review</span>
+                        <div className="flex gap-2">
+                          <span className="text-xs text-amber-600">Awaiting admin review</span>
+                          <button
+                            onClick={() => cancelSubmission(artwork.id)}
+                            className="rounded-lg border border-stone-200 px-3 py-1.5 text-xs font-medium text-stone-600 hover:bg-stone-50 transition-colors"
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            onClick={() => deleteArtwork(artwork.id)}
+                            className="rounded-lg border border-stone-200 px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50 transition-colors"
+                          >
+                            Delete
+                          </button>
+                        </div>
                       )}
                       {artwork.status === 'published' && (
                         <span className="text-xs text-emerald-600 font-medium">Published</span>

@@ -68,9 +68,9 @@ def artwork_detail(request, artwork_id):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     elif request.method == 'DELETE':
-        if artwork.status != Artwork.Status.DRAFT:
+        if artwork.status not in [Artwork.Status.DRAFT, Artwork.Status.PENDING_REVIEW]:
             return Response(
-                {'error': 'Can only delete draft artworks'},
+                {'error': 'Can only delete draft or pending review artworks'},
                 status=status.HTTP_400_BAD_REQUEST
             )
         artwork.delete()
@@ -98,6 +98,25 @@ def submit_artwork(request, artwork_id):
         artwork.save()
         return Response(ArtworkSerializer(artwork).data)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def cancel_submission(request, artwork_id):
+    try:
+        artwork = Artwork.objects.get(id=artwork_id, artist=request.user)
+    except Artwork.DoesNotExist:
+        return Response({'error': 'Artwork not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    if artwork.status != Artwork.Status.PENDING_REVIEW:
+        return Response(
+            {'error': 'Can only cancel pending review artworks'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    artwork.status = Artwork.Status.DRAFT
+    artwork.save()
+    return Response(ArtworkSerializer(artwork).data)
 
 
 @api_view(['POST'])
