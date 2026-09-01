@@ -48,11 +48,16 @@ const PublicArtistProfile = () => {
   const [loading, setLoading] = useState(true);
   const [artworksLoading, setArtworksLoading] = useState(true);
   const [error, setError] = useState('');
+  const [artistRating, setArtistRating] = useState({ avg_rating: null, review_count: 0 });
 
   useEffect(() => {
     fetchProfile();
     fetchArtistArtworks();
   }, [username]);
+
+  useEffect(() => {
+    if (profile?.user?.id) fetchArtistRating();
+  }, [profile?.user?.id]);
 
   useEffect(() => {
     if (profile && profile.user) {
@@ -75,6 +80,13 @@ const PublicArtistProfile = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const fetchArtistRating = async () => {
+    try {
+      const res = await fetch(`/api/reviews/artist/${profile.user.id}/avg/`);
+      if (res.ok) setArtistRating(await res.json());
+    } catch {}
   };
 
   const fetchArtistArtworks = async () => {
@@ -227,6 +239,24 @@ const PublicArtistProfile = () => {
                   {profile.user.last_name ? ` ${profile.user.last_name}` : ''}
                 </h1>
                 <p className="text-sm text-stone-500 mt-0.5">@{profile.user.username}</p>
+                {artistRating.review_count > 0 && (
+                  <div className="flex items-center gap-1.5 mt-1.5">
+                    <div className="flex items-center gap-0.5">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <svg
+                          key={star}
+                          className={`h-4 w-4 ${star <= Math.round(artistRating.avg_rating) ? 'text-amber-500' : 'text-stone-200'}`}
+                          fill="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                        </svg>
+                      ))}
+                    </div>
+                    <span className="text-sm font-semibold text-stone-900">{artistRating.avg_rating}</span>
+                    <span className="text-xs text-stone-500">({artistRating.review_count} review{artistRating.review_count !== 1 ? 's' : ''})</span>
+                  </div>
+                )}
               </div>
 
               {/* Social Links (Desktop) + Actions */}

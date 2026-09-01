@@ -48,15 +48,26 @@ class ArtworkSerializer(serializers.ModelSerializer):
     images = ArtworkImageSerializer(many=True, read_only=True)
     tags = ArtworkTagSerializer(many=True, read_only=True)
     digital_file = DigitalFileSerializer(read_only=True)
+    avg_rating = serializers.SerializerMethodField()
+    review_count = serializers.SerializerMethodField()
 
     class Meta:
         model = Artwork
         fields = (
             'id', 'artist', 'title', 'description', 'price', 'type', 
             'category', 'stock', 'status', 'originality_confirmed',
-            'images', 'tags', 'digital_file', 'created_at', 'updated_at'
+            'images', 'tags', 'digital_file', 'avg_rating', 'review_count',
+            'created_at', 'updated_at'
         )
         read_only_fields = ('id', 'artist', 'status', 'created_at', 'updated_at')
+
+    def get_avg_rating(self, obj):
+        from django.db.models import Avg
+        stats = obj.reviews.aggregate(avg=Avg('rating'))
+        return round(stats['avg'], 1) if stats['avg'] else None
+
+    def get_review_count(self, obj):
+        return obj.reviews.count()
 
 
 class ArtworkCreateSerializer(serializers.ModelSerializer):

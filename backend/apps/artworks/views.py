@@ -265,8 +265,8 @@ def published_artworks(request):
     elif sort_by == 'price_desc':
         artworks = artworks.order_by('-price')
     elif sort_by == 'rating':
-        # Rating sort uses seed data until Task 17
-        artworks = artworks.order_by('-created_at')
+        from django.db.models import Avg
+        artworks = artworks.annotate(avg_rating=Avg('reviews__rating')).order_by('-avg_rating')
     
     serializer = ArtworkSerializer(artworks, many=True, context={'request': request})
     return Response(serializer.data)

@@ -5,6 +5,32 @@ import Header from '../components/Header';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { useToast } from '../components/Toast';
 
+const StarRatingInput = ({ rating, onChange }) => {
+  const [hover, setHover] = useState(0);
+  return (
+    <div className="flex items-center gap-0.5">
+      {[1, 2, 3, 4, 5].map((star) => (
+        <button
+          key={star}
+          type="button"
+          onClick={() => onChange(star)}
+          onMouseEnter={() => setHover(star)}
+          onMouseLeave={() => setHover(0)}
+          className="cursor-pointer"
+        >
+          <svg
+            className={`h-6 w-6 ${star <= (hover || rating) ? 'text-amber-500' : 'text-stone-200'} transition-colors`}
+            fill="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+          </svg>
+        </button>
+      ))}
+    </div>
+  );
+};
+
 const OrderHistory = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -13,6 +39,11 @@ const OrderHistory = () => {
   const [loading, setLoading] = useState(true);
   const [payingOrderId, setPayingOrderId] = useState(null);
   const [expandedOrderId, setExpandedOrderId] = useState(null);
+  const [reviewedItems, setReviewedItems] = useState(new Set());
+  const [reviewingItemId, setReviewingItemId] = useState(null);
+  const [reviewRating, setReviewRating] = useState(0);
+  const [reviewComment, setReviewComment] = useState('');
+  const [submittingReview, setSubmittingReview] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -21,6 +52,66 @@ const OrderHistory = () => {
     }
     fetchOrders();
   }, [user]);
+
+  useEffect(() => {
+    if (user && orders.length > 0) checkReviewedItems();
+  }, [orders, user]);
+
+  const checkReviewedItems = async () => {
+    try {
+      const token = localStorage.getItem('access_token');
+      const reviewed = new Set();
+      for (const order of orders) {
+        if (!order.items) continue;
+        for (const item of order.items) {
+          const res = await fetch(`/api/reviews/?artwork_id=${item.artwork.id}`, {
+            headers: { 'Authorization': `Bearer ${token}` },
+          });
+          if (res.ok) {
+            const reviews = await res.json();
+            if (reviews.some(r => r.reviewer?.id === user.id)) {
+              reviewed.add(item.id);
+            }
+          }
+        }
+      }
+      setReviewedItems(reviewed);
+    } catch {}
+  };
+
+  const handleSubmitReview = async (itemId, artworkId) => {
+    if (!reviewRating || !reviewComment.trim()) return;
+    setSubmittingReview(true);
+    try {
+      const token = localStorage.getItem('access_token');
+      const res = await fetch('/api/reviews/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          order_item_id: itemId,
+          rating: reviewRating,
+          comment: reviewComment.trim(),
+        }),
+      });
+      if (res.ok) {
+        setReviewedItems((prev) => new Set([...prev, itemId]));
+        setReviewingItemId(null);
+        setReviewRating(0);
+        setReviewComment('');
+        addToast('Review submitted!', 'success');
+      } else {
+        const err = await res.json();
+        addToast(err.order_item_id?.[0] || err.detail || 'Failed to submit review', 'error');
+      }
+    } catch {
+      addToast('Network error', 'error');
+    } finally {
+      setSubmittingReview(false);
+    }
+  };
 
   const fetchOrders = async () => {
     try {
@@ -265,7 +356,50 @@ const OrderHistory = () => {
                                     Download
                                   </button>
                                 )}
+
+                                {(order.status === 'delivered' || order.status === 'completed') && !reviewedItems.has(item.id) && (
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setReviewingItemId(reviewingItemId === item.id ? null : item.id);
+                                      setReviewRating(0);
+                                      setReviewComment('');
+                                    }}
+                                    className="text-xs font-semibold text-amber-600 border border-amber-300 bg-amber-50 hover:bg-amber-100 px-3 py-1.5 rounded-lg transition cursor-pointer"
+                                  >
+                                    {reviewingItemId === item.id ? 'Cancel' : 'Write Review'}
+                                  </button>
+                                )}
+                                {reviewedItems.has(item.id) && (
+                                  <span className="text-xs font-medium text-green-600 bg-green-50 border border-green-200 px-3 py-1.5 rounded-lg">
+                                    Reviewed
+                                  </span>
+                                )}
                               </div>
+
+                              {reviewingItemId === item.id && (
+                                <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50/50 p-4">
+                                  <p className="text-xs font-semibold text-stone-700 mb-2">Your Rating</p>
+                                  <StarRatingInput rating={reviewRating} onChange={setReviewRating} />
+                                  <textarea
+                                    value={reviewComment}
+                                    onChange={(e) => setReviewComment(e.target.value)}
+                                    placeholder="Share your experience with this artwork..."
+                                    rows={3}
+                                    className="w-full mt-3 rounded-xl border border-stone-200 bg-white px-4 py-3 text-sm text-stone-900 placeholder-stone-400 focus:border-stone-400 focus:outline-none focus:ring-1 focus:ring-stone-400"
+                                  />
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleSubmitReview(item.id, item.artwork.id);
+                                    }}
+                                    disabled={!reviewRating || !reviewComment.trim() || submittingReview}
+                                    className="mt-3 rounded-xl bg-amber-600 px-5 py-2 text-sm font-semibold text-white hover:bg-amber-700 transition disabled:opacity-40 disabled:cursor-not-allowed shadow-sm"
+                                  >
+                                    {submittingReview ? 'Submitting...' : 'Submit Review'}
+                                  </button>
+                                </div>
+                              )}
                             </div>
                           ))}
                         </div>

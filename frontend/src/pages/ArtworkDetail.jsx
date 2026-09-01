@@ -7,6 +7,37 @@ import { useToast } from '../components/Toast';
 import { trackInteraction } from '../services/api';
 import RecommendedCarousel from '../components/RecommendedCarousel';
 
+const StarRating = ({ rating, size = 'sm', interactive = false, onChange }) => {
+  const [hover, setHover] = useState(0);
+  const starSize = size === 'sm' ? 'h-4 w-4' : size === 'md' ? 'h-5 w-5' : 'h-6 w-6';
+
+  return (
+    <div className="flex items-center gap-0.5">
+      {[1, 2, 3, 4, 5].map((star) => (
+        <button
+          key={star}
+          type="button"
+          disabled={!interactive}
+          onClick={() => interactive && onChange?.(star)}
+          onMouseEnter={() => interactive && setHover(star)}
+          onMouseLeave={() => interactive && setHover(0)}
+          className={`${interactive ? 'cursor-pointer' : 'cursor-default'}`}
+        >
+          <svg
+            className={`${starSize} ${
+              star <= (hover || rating) ? 'text-amber-500' : 'text-stone-200'
+            } transition-colors`}
+            fill="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+          </svg>
+        </button>
+      ))}
+    </div>
+  );
+};
+
 const ArtworkDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -17,6 +48,12 @@ const ArtworkDetail = () => {
   const [loading, setLoading] = useState(true);
   const [favoriteLoading, setFavoriteLoading] = useState(false);
   const [addingToCart, setAddingToCart] = useState(false);
+  const [reviews, setReviews] = useState([]);
+  const [reviewRating, setReviewRating] = useState(0);
+  const [reviewComment, setReviewComment] = useState('');
+  const [submittingReview, setSubmittingReview] = useState(false);
+  const [purchasedItemId, setPurchasedItemId] = useState(null);
+  const [hasReviewed, setHasReviewed] = useState(false);
 
   useEffect(() => {
     fetchArtwork();
@@ -30,6 +67,82 @@ const ArtworkDetail = () => {
       trackInteraction('artwork', id, 'view');
     }
   }, [artwork?.id, user]);
+
+  useEffect(() => {
+    fetchReviews();
+    if (user) checkPurchased();
+  }, [id, user]);
+
+  const fetchReviews = async () => {
+    try {
+      const response = await fetch(`/api/reviews/?artwork_id=${id}`);
+      if (response.ok) {
+        setReviews(await response.json());
+      }
+    } catch {}
+  };
+
+  const checkPurchased = async () => {
+    try {
+      const token = localStorage.getItem('access_token');
+      const res = await fetch('/api/orders/', {
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+      if (res.ok) {
+        const orders = await res.json();
+        for (const order of orders) {
+          if (order.status === 'delivered' || order.status === 'completed') {
+            for (const item of order.items || []) {
+              if (item.artwork?.id === id) {
+                const alreadyReviewed = reviews.some(r => r.artwork === id);
+                if (!alreadyReviewed) {
+                  setPurchasedItemId(item.id);
+                }
+                return;
+              }
+            }
+          }
+        }
+      }
+    } catch {}
+  };
+
+  const handleSubmitReview = async (e) => {
+    e.preventDefault();
+    if (!reviewRating || !reviewComment.trim() || !purchasedItemId) return;
+    setSubmittingReview(true);
+    try {
+      const token = localStorage.getItem('access_token');
+      const res = await fetch('/api/reviews/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          order_item_id: purchasedItemId,
+          rating: reviewRating,
+          comment: reviewComment.trim(),
+        }),
+      });
+      if (res.ok) {
+        const newReview = await res.json();
+        setReviews((prev) => [newReview, ...prev]);
+        setHasReviewed(true);
+        setPurchasedItemId(null);
+        setReviewRating(0);
+        setReviewComment('');
+        addToast('Review submitted!', 'success');
+      } else {
+        const err = await res.json();
+        addToast(err.order_item_id?.[0] || err.detail || 'Failed to submit review', 'error');
+      }
+    } catch {
+      addToast('Network error', 'error');
+    } finally {
+      setSubmittingReview(false);
+    }
+  };
 
   const fetchArtwork = async () => {
     try {
@@ -240,7 +353,18 @@ const ArtworkDetail = () => {
             </div>
 
             <div className="mt-6">
-              <p className="text-3xl font-bold text-stone-900">NPR {artwork.price}</p>
+              <div className="flex items-center gap-3">
+                <p className="text-3xl font-bold text-stone-900">NPR {artwork.price}</p>
+                {artwork.review_count > 0 && (
+                  <div className="flex items-center gap-1.5 rounded-full bg-amber-50 border border-amber-200 px-3 py-1">
+                    <svg className="h-4 w-4 text-amber-500" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                    </svg>
+                    <span className="text-sm font-semibold text-stone-900">{artwork.avg_rating}</span>
+                    <span className="text-xs text-stone-500">({artwork.review_count})</span>
+                  </div>
+                )}
+              </div>
               <p className="mt-1 text-sm text-stone-600 capitalize">{artwork.type}</p>
             </div>
 
@@ -319,8 +443,63 @@ const ArtworkDetail = () => {
 
         {/* Reviews Section */}
         <div className="mt-12">
-          <h2 className="text-2xl font-semibold text-stone-900">Reviews</h2>
-          <p className="mt-2 text-stone-600">Reviews coming soon...</p>
+          <h2 className="text-2xl font-semibold text-stone-900">
+            Reviews {reviews.length > 0 && <span className="text-base font-normal text-stone-500">({reviews.length})</span>}
+          </h2>
+
+          {/* Review Form */}
+          {user && purchasedItemId && !hasReviewed && (
+            <form onSubmit={handleSubmitReview} className="mt-6 rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
+              <h3 className="text-sm font-semibold text-stone-700 mb-3">Write a Review</h3>
+              <div className="mb-4">
+                <label className="text-xs font-medium text-stone-500 mb-2 block">Your Rating</label>
+                <StarRating rating={reviewRating} size="md" interactive onChange={setReviewRating} />
+              </div>
+              <textarea
+                value={reviewComment}
+                onChange={(e) => setReviewComment(e.target.value)}
+                placeholder="Share your experience with this artwork..."
+                rows={3}
+                className="w-full rounded-xl border border-stone-200 bg-stone-50/50 px-4 py-3 text-sm text-stone-900 placeholder-stone-400 focus:border-stone-400 focus:bg-white focus:outline-none focus:ring-1 focus:ring-stone-400 mb-4"
+              />
+              <button
+                type="submit"
+                disabled={!reviewRating || !reviewComment.trim() || submittingReview}
+                className="rounded-xl bg-amber-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-amber-700 transition disabled:opacity-40 disabled:cursor-not-allowed shadow-sm"
+              >
+                {submittingReview ? 'Submitting...' : 'Submit Review'}
+              </button>
+            </form>
+          )}
+
+          {/* Reviews List */}
+          <div className="mt-6 space-y-4">
+            {reviews.length === 0 ? (
+              <p className="text-stone-500 text-sm">No reviews yet. Be the first to review this artwork!</p>
+            ) : (
+              reviews.map((review) => (
+                <div key={review.id} className="rounded-2xl border border-stone-200 bg-white p-5 shadow-sm">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <div className="h-9 w-9 rounded-full bg-stone-200 flex items-center justify-center flex-shrink-0">
+                        <span className="text-sm font-bold text-stone-600">
+                          {review.reviewer?.username?.charAt(0).toUpperCase()}
+                        </span>
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-stone-900">{review.reviewer?.username}</p>
+                        <StarRating rating={review.rating} size="sm" />
+                      </div>
+                    </div>
+                    <span className="text-xs text-stone-400">
+                      {new Date(review.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                    </span>
+                  </div>
+                  <p className="mt-3 text-sm text-stone-700 whitespace-pre-wrap">{review.comment}</p>
+                </div>
+              ))
+            )}
+          </div>
         </div>
       </main>
     </div>

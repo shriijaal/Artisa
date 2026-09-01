@@ -420,9 +420,19 @@ const Marketplace = () => {
                           <span className="text-base font-bold text-stone-900">
                             NPR {Math.round(artwork.price).toLocaleString()}
                           </span>
-                          <span className="text-xs font-medium text-amber-600 whitespace-nowrap">
-                            View
-                          </span>
+                          <div className="flex items-center gap-2">
+                            {artwork.review_count > 0 && (
+                              <span className="flex items-center gap-0.5 text-xs text-stone-600">
+                                <svg className="h-3 w-3 text-amber-500" fill="currentColor" viewBox="0 0 24 24">
+                                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                                </svg>
+                                <span className="font-medium">{artwork.avg_rating}</span>
+                              </span>
+                            )}
+                            <span className="text-xs font-medium text-amber-600 whitespace-nowrap">
+                              View
+                            </span>
+                          </div>
                         </div>
 
                         {artwork.type === 'physical' && (artwork.width || artwork.height) && (
