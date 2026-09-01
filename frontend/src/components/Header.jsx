@@ -270,6 +270,24 @@ const Header = () => {
                       </div>
                     )}
 
+                    {user.role === 'admin' && (
+                      <div className="py-1 border-t border-stone-100">
+                        <p className="px-4 pt-1.5 pb-1 text-[10px] font-bold uppercase tracking-wider text-violet-700">
+                          Administration
+                        </p>
+                        <Link
+                          to="/admin"
+                          onClick={() => setMenuOpen(false)}
+                          className="flex items-center gap-2.5 px-4 py-2 text-sm text-stone-700 hover:bg-violet-50 hover:text-violet-900 transition-colors"
+                        >
+                          <svg className="h-4 w-4 text-violet-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" />
+                          </svg>
+                          Admin Dashboard
+                        </Link>
+                      </div>
+                    )}
+
                     <div className={`py-1 ${user?.artist_profile?.status === 'approved' ? 'border-t border-stone-100' : ''}`}>
                       <p className="px-4 pt-1.5 pb-1 text-[10px] font-bold uppercase tracking-wider text-stone-400">
                         Personal & Buying

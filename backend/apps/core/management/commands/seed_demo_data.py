@@ -49,7 +49,7 @@ class Command(BaseCommand):
         admin, created = User.objects.get_or_create(
             username='admin',
             defaults={
-                'email': 'admin@artisa.com',
+                'email': 'artisaadmin@artisa.com',
                 'role': User.Role.ADMIN,
                 'is_staff': True,
                 'is_superuser': True,

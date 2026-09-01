@@ -2,6 +2,8 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { ToastProvider } from './components/Toast'
 import ProtectedRoute from './components/ProtectedRoute'
+import AdminRoute from './components/AdminRoute'
+import AdminLayout from './components/AdminLayout'
 import Login from './pages/Login'
 import Register from './pages/Register'
 import ArtistApplication from './pages/ArtistApplication'
@@ -23,6 +25,12 @@ import CommissionRequest from './pages/CommissionRequest'
 import CommissionDetail from './pages/CommissionDetail'
 import ArtistCommissions from './pages/ArtistCommissions'
 import MyCommissions from './pages/MyCommissions'
+import AdminDashboard from './pages/AdminDashboard'
+import AdminApplications from './pages/AdminApplications'
+import AdminArtworks from './pages/AdminArtworks'
+import AdminCategories from './pages/AdminCategories'
+import AdminUsers from './pages/AdminUsers'
+import AdminOrders from './pages/AdminOrders'
 
 const DashboardRedirect = () => {
   const { user } = useAuth();
@@ -173,6 +181,23 @@ function App() {
             }
           />
           <Route path="/" element={<Home />} />
+
+          {/* Admin Routes */}
+          <Route
+            path="/admin"
+            element={
+              <AdminRoute>
+                <AdminLayout />
+              </AdminRoute>
+            }
+          >
+            <Route index element={<AdminDashboard />} />
+            <Route path="applications" element={<AdminApplications />} />
+            <Route path="artworks" element={<AdminArtworks />} />
+            <Route path="categories" element={<AdminCategories />} />
+            <Route path="users" element={<AdminUsers />} />
+            <Route path="orders" element={<AdminOrders />} />
+          </Route>
         </Routes>
       </Router>
       </ToastProvider>

@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'apps.reviews',
     'apps.payments',
     'apps.recs',
+    'apps.admin_api',
 ]
 
 MIDDLEWARE = [
@@ -152,6 +153,20 @@ CORS_ALLOW_CREDENTIALS = True
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'Artisa <noreply@artisa.com>')
+
+# --- SMTP (Gmail) — uncomment for production ---
+# To enable real emails:
+# 1. Enable 2FA on your Gmail account
+# 2. Generate an App Password at https://myaccount.google.com/apppasswords
+# 3. Set the env vars below in .env, then uncomment the SMTP lines and
+#    comment out the CONSOLE line above.
+#
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.gmail.com')
+# EMAIL_PORT = int(os.getenv('EMAIL_PORT', '587'))
+# EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
+# EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
+# EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True').lower() in ('true', '1', 'yes')
 # Khalti Payment Gateway
 # Sandbox secret key from test-admin.khalti.com, production key from admin.khalti.com
 KHALTI_SECRET_KEY = os.getenv('KHALTI_SECRET_KEY', '')

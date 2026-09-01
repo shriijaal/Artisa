@@ -14,6 +14,7 @@ urlpatterns = [
     path('api/commissions/', include('apps.commissions.urls')),
     path('api/messages/', include('apps.messaging.urls')),
     path('api/reviews/', include('apps.reviews.urls')),
+    path('api/admin/', include('apps.admin_api.urls')),
 ]
 
 if settings.DEBUG:
