@@ -49,6 +49,13 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         return token
 
     def validate(self, attrs):
+        username = attrs.get('username', '')
+        if username and '@' in username:
+            try:
+                user = User.objects.get(email__iexact=username)
+                attrs['username'] = user.username
+            except User.DoesNotExist:
+                pass
         data = super().validate(attrs)
         data['user'] = UserSerializer(self.user).data
         return data
