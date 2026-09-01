@@ -16,6 +16,16 @@ from apps.commissions.serializers import (
     CommissionReferenceUploadSerializer,
     CommissionStatusSerializer,
 )
+from apps.core.email import (
+    send_new_commission_email,
+    send_commission_accepted_email,
+    send_commission_started_email,
+    send_commission_declined_email,
+    send_commission_delivered_email,
+    send_commission_completed_email,
+    send_commission_revision_email,
+    send_commission_cancelled_email,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -42,6 +52,7 @@ class CommissionCreateView(APIView):
         except Exception:
             pass  # Never block commission creation on tracking failure
 
+        send_new_commission_email(commission)
         return Response(
             CommissionDetailSerializer(commission).data,
             status=status.HTTP_201_CREATED,
@@ -129,6 +140,7 @@ class CommissionAcceptView(APIView):
         commission.status = Commission.Status.ACCEPTED
         commission.response_at = timezone.now()
         commission.save()
+        send_commission_accepted_email(commission)
         return Response(CommissionDetailSerializer(commission).data)
 
 
@@ -153,6 +165,7 @@ class CommissionStartView(APIView):
 
         commission.status = Commission.Status.IN_PROGRESS
         commission.save()
+        send_commission_started_email(commission)
         return Response(CommissionDetailSerializer(commission).data)
 
 
@@ -184,6 +197,7 @@ class CommissionDeclineView(APIView):
         commission.rejection_reason = serializer.validated_data['rejection_reason']
         commission.response_at = timezone.now()
         commission.save()
+        send_commission_declined_email(commission)
         return Response(CommissionDetailSerializer(commission).data)
 
 
@@ -221,6 +235,7 @@ class CommissionDeliverView(APIView):
             revision_number=commission.current_revision,
         )
 
+        send_commission_delivered_email(commission)
         return Response(
             CommissionDeliverableSerializer(deliverable).data,
             status=status.HTTP_201_CREATED,
@@ -248,6 +263,7 @@ class CommissionApproveView(APIView):
 
         commission.status = Commission.Status.COMPLETED
         commission.save()
+        send_commission_completed_email(commission)
         return Response(CommissionDetailSerializer(commission).data)
 
 
@@ -279,6 +295,7 @@ class CommissionRevisionView(APIView):
 
         commission.status = Commission.Status.IN_PROGRESS
         commission.save()
+        send_commission_revision_email(commission)
         return Response(CommissionDetailSerializer(commission).data)
 
 
@@ -309,4 +326,5 @@ class CommissionCancelView(APIView):
 
         commission.status = Commission.Status.CANCELLED
         commission.save()
+        send_commission_cancelled_email(commission, cancelled_by=request.user)
         return Response(CommissionDetailSerializer(commission).data)

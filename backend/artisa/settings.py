@@ -58,7 +58,7 @@ ROOT_URLCONF = 'artisa.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -151,6 +151,7 @@ CORS_ALLOWED_ORIGINS = [
 CORS_ALLOW_CREDENTIALS = True
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'Artisa <noreply@artisa.com>')
 # Khalti Payment Gateway
 # Sandbox secret key from test-admin.khalti.com, production key from admin.khalti.com
 KHALTI_SECRET_KEY = os.getenv('KHALTI_SECRET_KEY', '')

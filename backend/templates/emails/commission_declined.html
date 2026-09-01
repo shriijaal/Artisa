@@ -1,0 +1,16 @@
+{% extends "emails/base.html" %}
+{% block content %}
+<h2 style="margin:0 0 16px;color:#1c1917;font-size:20px;">Commission Declined</h2>
+<p style="margin:0 0 12px;color:#44403c;font-size:15px;line-height:1.6;">
+  Hi {{ commission.customer.username }}, unfortunately <strong>{{ commission.artist.username }}</strong> has declined your commission request.
+</p>
+{% if reason %}
+<table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 20px;">
+  <tr><td style="background-color:#fef2f2;border-left:4px solid #dc2626;padding:16px;border-radius:0 8px 8px 0;">
+    <p style="margin:0;font-size:13px;color:#78716c;font-weight:600;">Reason:</p>
+    <p style="margin:8px 0 0;color:#44403c;font-size:14px;">{{ reason }}</p>
+  </td></tr>
+</table>
+{% endif %}
+<p style="margin:0;color:#78716c;font-size:13px;">You can send a new commission request to another artist.</p>
+{% endblock %}

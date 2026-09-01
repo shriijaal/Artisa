@@ -1,0 +1,28 @@
+{% extends "emails/base.html" %}
+{% block content %}
+<h2 style="margin:0 0 16px;color:#1c1917;font-size:20px;">Order Confirmed</h2>
+<p style="margin:0 0 12px;color:#44403c;font-size:15px;line-height:1.6;">
+  Hi {{ order.customer.username }}, your order <strong>#{{ order.id|truncatechars:8 }}</strong> has been placed.
+</p>
+
+<table width="100%" cellpadding="8" cellspacing="0" style="margin:0 0 16px;border:1px solid #e7e5e4;border-radius:8px;">
+  <tr style="background-color:#f5f5f4;">
+    <td style="font-size:12px;font-weight:600;color:#78716c;">ITEM</td>
+    <td style="font-size:12px;font-weight:600;color:#78716c;text-align:center;">QTY</td>
+    <td style="font-size:12px;font-weight:600;color:#78716c;text-align:right;">PRICE</td>
+  </tr>
+  {% for item in order.items.all %}
+  <tr>
+    <td style="font-size:14px;color:#44403c;border-top:1px solid #e7e5e4;">{{ item.artwork.title }}</td>
+    <td style="font-size:14px;color:#44403c;text-align:center;border-top:1px solid #e7e5e4;">{{ item.quantity }}</td>
+    <td style="font-size:14px;color:#44403c;text-align:right;border-top:1px solid #e7e5e4;">NPR {{ item.price }}</td>
+  </tr>
+  {% endfor %}
+  <tr>
+    <td colspan="2" style="font-size:14px;color:#78716c;border-top:1px solid #e7e5e4;font-weight:600;">Total</td>
+    <td style="font-size:14px;color:#d97706;text-align:right;border-top:1px solid #e7e5e4;font-weight:700;">NPR {{ order.total }}</td>
+  </tr>
+</table>
+
+<p style="margin:0 0 8px;color:#78716c;font-size:13px;">You'll receive another email when your order ships.</p>
+{% endblock %}

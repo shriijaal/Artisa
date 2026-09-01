@@ -1,0 +1,15 @@
+{% extends "emails/base.html" %}
+{% block content %}
+<h2 style="margin:0 0 16px;color:#1c1917;font-size:20px;">Order Delivered</h2>
+<p style="margin:0 0 12px;color:#44403c;font-size:15px;line-height:1.6;">
+  Hi {{ order.customer.username }}, your order <strong>#{{ order.id|truncatechars:8 }}</strong> has been delivered.
+</p>
+<table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 20px;">
+  <tr><td style="background-color:#f0fdf4;border-left:4px solid #16a34a;padding:16px;border-radius:0 8px 8px 0;">
+    <p style="margin:0;font-size:14px;color:#16a34a;font-weight:700;">Delivered</p>
+  </td></tr>
+</table>
+<p style="margin:0 0 12px;color:#44403c;font-size:15px;line-height:1.6;">
+  We hope you love your purchase! If you have a moment, leave a review to support the artist.
+</p>
+{% endblock %}

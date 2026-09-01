@@ -1,0 +1,13 @@
+{% extends "emails/base.html" %}
+{% block content %}
+<h2 style="margin:0 0 16px;color:#1c1917;font-size:20px;">Commission Accepted</h2>
+<p style="margin:0 0 12px;color:#44403c;font-size:15px;line-height:1.6;">
+  Hi {{ commission.customer.username }}, great news! <strong>{{ commission.artist.username }}</strong> has accepted your commission.
+</p>
+<table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 20px;">
+  <tr><td style="background-color:#f0fdf4;border-left:4px solid #16a34a;padding:16px;border-radius:0 8px 8px 0;">
+    <p style="margin:0;font-size:14px;color:#16a34a;font-weight:700;">Accepted</p>
+    <p style="margin:4px 0 0;font-size:13px;color:#78716c;">The artist will begin working on your commission shortly.</p>
+  </td></tr>
+</table>
+{% endblock %}

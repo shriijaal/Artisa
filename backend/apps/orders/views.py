@@ -20,6 +20,12 @@ from apps.orders.serializers import (
     OrderItemSerializer, 
     OrderShipmentSerializer
 )
+from apps.core.email import (
+    send_order_confirmation_email,
+    send_payment_confirmation_email,
+    send_shipping_notification_email,
+    send_delivery_notification_email,
+)
 
 
 @api_view(['GET', 'POST'])
@@ -219,6 +225,7 @@ def orders(request):
         # Clear cart
         cart_items.delete()
 
+        send_order_confirmation_email(order)
         return Response(OrderSerializer(order).data, status=status.HTTP_201_CREATED)
 
 
@@ -256,6 +263,8 @@ def mock_pay_order(request, order_id):
     order.status = Order.Status.PROCESSING
     order.save()
     
+    send_payment_confirmation_email(order)
+
     # Log purchase interactions
     from apps.recs.utils import log_interaction
     for item in order.items.all():
@@ -311,9 +320,11 @@ def update_shipment(request, shipment_id):
     if all(s and s.status == OrderShipment.Status.DELIVERED for s in shipments):
         order.status = Order.Status.DELIVERED
         order.save()
+        send_delivery_notification_email(order, shipment)
     elif all(s and s.status in [OrderShipment.Status.SHIPPED, OrderShipment.Status.DELIVERED] for s in shipments):
         order.status = Order.Status.SHIPPED
         order.save()
+        send_shipping_notification_email(order, shipment)
         
     return Response(OrderShipmentSerializer(shipment).data)
 

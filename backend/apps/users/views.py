@@ -21,6 +21,12 @@ from apps.users.serializers import (
     UserAvatarSerializer,
     UserSerializer,
 )
+from apps.core.email import (
+    send_welcome_email,
+    send_password_reset_email,
+    send_artist_approved_email,
+    send_artist_rejected_email,
+)
 
 
 class CustomTokenObtainPairView(TokenObtainPairView):
@@ -33,6 +39,7 @@ def register(request):
     serializer = RegisterSerializer(data=request.data)
     if serializer.is_valid():
         user = serializer.save()
+        send_welcome_email(user)
         return Response(
             {
                 'user': UserSerializer(user).data,
@@ -75,9 +82,9 @@ def password_reset_request(request):
         token = default_token_generator.make_token(user)
         uid = urlsafe_base64_encode(force_str(user.pk).encode())
         
-        # In production, send email with reset link
-        # For now, return the reset link in response (dev only)
+        # Send email with reset link
         reset_link = f"http://localhost:5173/reset-password/{uid}/{token}/"
+        send_password_reset_email(user, reset_link)
         
         return Response({
             'message': 'Password reset link generated',
@@ -304,6 +311,7 @@ def admin_approve_application(request, application_id):
                 profile.verified_badge = True
                 profile.save()
             
+            send_artist_approved_email(application.user)
             return Response({'message': 'Application approved'}, status=status.HTTP_200_OK)
         
         elif action == 'reject':
@@ -313,6 +321,7 @@ def admin_approve_application(request, application_id):
             application.reviewed_at = timezone.now()
             application.save()
             
+            send_artist_rejected_email(application.user, rejection_reason)
             return Response({'message': 'Application rejected'}, status=status.HTTP_200_OK)
         
         else:

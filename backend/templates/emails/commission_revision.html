@@ -1,0 +1,18 @@
+{% extends "emails/base.html" %}
+{% block content %}
+<h2 style="margin:0 0 16px;color:#1c1917;font-size:20px;">Revision Requested</h2>
+<p style="margin:0 0 12px;color:#44403c;font-size:15px;line-height:1.6;">
+  Hi {{ commission.artist.username }}, <strong>{{ commission.customer.username }}</strong> has requested a revision on your commission "<strong>{{ commission.title }}</strong>".
+</p>
+<table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 20px;">
+  <tr><td style="background-color:#fff7ed;border-left:4px solid #ea580c;padding:16px;border-radius:0 8px 8px 0;">
+    <p style="margin:0;font-size:14px;color:#ea580c;font-weight:700;">Revision Requested</p>
+    <p style="margin:4px 0 0;font-size:13px;color:#78716c;">Revision {{ commission.current_revision }} of {{ commission.revision_limit }}</p>
+  </td></tr>
+</table>
+<table cellpadding="0" cellspacing="0" style="margin:0 0 20px;">
+  <tr><td style="background-color:#d97706;border-radius:8px;padding:12px 28px;">
+    <a href="{{ site_url }}/commissions" style="color:#ffffff;text-decoration:none;font-size:15px;font-weight:600;">View Commission</a>
+  </td></tr>
+</table>
+{% endblock %}
