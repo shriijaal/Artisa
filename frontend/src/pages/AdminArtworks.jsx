@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import authFetch from '../utils/authFetch';
 
 const statusColors = {
   draft: 'bg-stone-100 text-stone-600',
@@ -19,7 +20,7 @@ const AdminArtworks = () => {
     if (search) params.set('q', search);
     if (statusFilter) params.set('status', statusFilter);
     if (typeFilter) params.set('type', typeFilter);
-    fetch(`/api/admin/artworks/?${params}`)
+    authFetch(`/api/admin/artworks/?${params}`)
       .then((r) => r.json())
       .then(setArtworks)
       .catch(() => {})
@@ -29,7 +30,7 @@ const AdminArtworks = () => {
   useEffect(() => { fetchArtworks(); }, [search, statusFilter, typeFilter]);
 
   const handleAction = async (artworkId, action) => {
-    const res = await fetch(`/api/admin/artworks/${artworkId}/${action}/`, { method: 'PUT' });
+    const res = await authFetch(`/api/admin/artworks/${artworkId}/${action}/`, { method: 'PUT' });
     if (res.ok) fetchArtworks();
   };
 

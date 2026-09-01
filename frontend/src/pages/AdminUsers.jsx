@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import authFetch from '../utils/authFetch';
 
 const roleColors = {
   admin: 'bg-violet-50 text-violet-700',
@@ -15,7 +16,7 @@ const AdminUsers = () => {
     const params = new URLSearchParams();
     if (search) params.set('q', search);
     if (roleFilter) params.set('role', roleFilter);
-    fetch(`/api/admin/users/?${params}`)
+    authFetch(`/api/admin/users/?${params}`)
       .then((r) => r.json())
       .then(setUsers)
       .catch(() => {})
@@ -25,7 +26,7 @@ const AdminUsers = () => {
   useEffect(() => { fetchUsers(); }, [search, roleFilter]);
 
   const handleDeactivate = async (userId) => {
-    const res = await fetch(`/api/admin/users/${userId}/deactivate/`, { method: 'PUT' });
+    const res = await authFetch(`/api/admin/users/${userId}/deactivate/`, { method: 'PUT' });
     if (res.ok) {
       const data = await res.json();
       setUsers((prev) => prev.map((u) =>

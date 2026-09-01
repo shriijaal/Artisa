@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import authFetch from '../utils/authFetch';
 
 const AdminCategories = () => {
   const [categories, setCategories] = useState([]);
@@ -11,7 +12,7 @@ const AdminCategories = () => {
   const fetchCategories = () => {
     const params = new URLSearchParams();
     if (search) params.set('q', search);
-    fetch(`/api/admin/categories/?${params}`)
+    authFetch(`/api/admin/categories/?${params}`)
       .then((r) => r.json())
       .then(setCategories)
       .catch(() => {})
@@ -26,7 +27,7 @@ const AdminCategories = () => {
       ? `/api/admin/categories/${editCategory.id}/`
       : '/api/admin/categories/';
     const method = editCategory ? 'PUT' : 'POST';
-    const res = await fetch(url, {
+    const res = await authFetch(url, {
       method,
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -46,7 +47,7 @@ const AdminCategories = () => {
 
   const handleDelete = async (categoryId) => {
     if (!confirm('Delete this category?')) return;
-    const res = await fetch(`/api/admin/categories/${categoryId}/`, { method: 'DELETE' });
+    const res = await authFetch(`/api/admin/categories/${categoryId}/`, { method: 'DELETE' });
     if (res.ok) fetchCategories();
   };
 

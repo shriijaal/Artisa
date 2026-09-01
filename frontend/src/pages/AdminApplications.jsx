@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import authFetch from '../utils/authFetch';
 
 const statusColors = {
   pending: 'bg-amber-50 text-amber-700',
@@ -19,7 +20,7 @@ const AdminApplications = () => {
     const params = new URLSearchParams();
     if (search) params.set('q', search);
     if (statusFilter) params.set('status', statusFilter);
-    fetch(`/api/admin/applications/?${params}`)
+    authFetch(`/api/admin/applications/?${params}`)
       .then((r) => r.json())
       .then(setApplications)
       .catch(() => {})
@@ -31,7 +32,7 @@ const AdminApplications = () => {
   const handleAction = async (applicationId, action) => {
     setProcessing(true);
     try {
-      const res = await fetch(`/api/admin/applications/${applicationId}/`, {
+      const res = await authFetch(`/api/admin/applications/${applicationId}/`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action, rejection_reason: rejectReason }),

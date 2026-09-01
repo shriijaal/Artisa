@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import authFetch from '../utils/authFetch';
 
 const statusColors = {
   pending: 'bg-amber-50 text-amber-700',
@@ -25,7 +26,7 @@ const AdminOrders = () => {
     const params = new URLSearchParams();
     if (search) params.set('q', search);
     if (statusFilter) params.set('status', statusFilter);
-    fetch(`/api/admin/orders/?${params}`)
+    authFetch(`/api/admin/orders/?${params}`)
       .then((r) => r.json())
       .then(setOrders)
       .catch(() => {})

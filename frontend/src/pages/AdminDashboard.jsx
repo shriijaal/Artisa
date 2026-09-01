@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import authFetch from '../utils/authFetch';
 
 const StatCard = ({ label, value, icon, color }) => (
   <div className="bg-white rounded-xl border border-stone-200 p-6">
@@ -22,7 +23,7 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/api/admin/stats/')
+    authFetch('/api/admin/stats/')
       .then((r) => r.json())
       .then(setStats)
       .catch(() => {})
