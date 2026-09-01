@@ -30,7 +30,7 @@ const Login = () => {
     const result = await login(formData.username, formData.password);
 
     if (result.success) {
-      navigate('/');
+      navigate(result.user?.role === 'admin' ? '/admin' : '/');
     } else {
       setError(result.error.detail || 'Login failed');
     }

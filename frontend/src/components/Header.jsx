@@ -236,156 +236,70 @@ const Header = () => {
                   <svg className={`h-4 w-4 text-stone-500 transition-transform ${menuOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
                 </button>
                 {menuOpen && (
-                  <div className="absolute right-0 mt-2 w-56 rounded-2xl border border-stone-200 bg-white shadow-xl py-2 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
-                    <div className="px-4 py-2.5 border-b border-stone-100">
-                      <p className="text-[11px] font-medium text-stone-400">Signed in as</p>
-                      <p className="text-sm font-bold text-stone-900 truncate">@{user.username}</p>
+                  <div className="absolute right-0 mt-2 w-52 rounded-xl border border-stone-200 bg-white shadow-xl py-1.5 z-50">
+                    <div className="px-4 py-2 border-b border-stone-100">
+                      <p className="text-sm font-semibold text-stone-900 truncate">@{user.username}</p>
+                      {user.role === 'admin' && <span className="text-[10px] font-medium text-violet-600">Admin</span>}
                     </div>
-
-                    {user?.artist_profile?.status === 'approved' && (
-                      <div className="py-1">
-                        <p className="px-4 pt-1.5 pb-1 text-[10px] font-bold uppercase tracking-wider text-amber-700">
-                          Artist Studio
-                        </p>
-                        <Link
-                          to={`/artists/${user.username}`}
-                          onClick={() => setMenuOpen(false)}
-                          className="flex items-center gap-2.5 px-4 py-2 text-sm text-stone-700 hover:bg-amber-50 hover:text-amber-900 transition-colors"
-                        >
-                          <svg className="h-4 w-4 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                          </svg>
-                          Public Profile
-                        </Link>
-                        <Link
-                          to="/profile/edit"
-                          onClick={() => setMenuOpen(false)}
-                          className="flex items-center gap-2.5 px-4 py-2 text-sm text-stone-700 hover:bg-stone-50 transition-colors"
-                        >
-                          <svg className="h-4 w-4 text-stone-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                          </svg>
-                          Edit Profile
-                        </Link>
-                      </div>
-                    )}
 
                     {user.role === 'admin' && (
-                      <div className="py-1 border-t border-stone-100">
-                        <p className="px-4 pt-1.5 pb-1 text-[10px] font-bold uppercase tracking-wider text-violet-700">
-                          Administration
-                        </p>
-                        <Link
-                          to="/admin"
-                          onClick={() => setMenuOpen(false)}
-                          className="flex items-center gap-2.5 px-4 py-2 text-sm text-stone-700 hover:bg-violet-50 hover:text-violet-900 transition-colors"
-                        >
-                          <svg className="h-4 w-4 text-violet-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" />
-                          </svg>
-                          Admin Dashboard
+                      <Link
+                        to="/admin"
+                        onClick={() => setMenuOpen(false)}
+                        className="flex items-center gap-2.5 px-4 py-2 text-sm text-stone-700 hover:bg-stone-50"
+                      >
+                        <svg className="h-4 w-4 text-stone-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" />
+                        </svg>
+                        Admin Dashboard
+                      </Link>
+                    )}
+
+                    {user?.artist_profile?.status === 'approved' && (
+                      <>
+                        <Link to={`/artists/${user.username}`} onClick={() => setMenuOpen(false)} className="flex items-center gap-2.5 px-4 py-2 text-sm text-stone-700 hover:bg-stone-50">
+                          <svg className="h-4 w-4 text-stone-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                          My Profile
                         </Link>
-                      </div>
+                        <Link to="/my-artworks" onClick={() => setMenuOpen(false)} className="flex items-center gap-2.5 px-4 py-2 text-sm text-stone-700 hover:bg-stone-50">
+                          <svg className="h-4 w-4 text-stone-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                          My Artworks
+                        </Link>
+                      </>
                     )}
 
-                    <div className={`py-1 ${user?.artist_profile?.status === 'approved' ? 'border-t border-stone-100' : ''}`}>
-                      <p className="px-4 pt-1.5 pb-1 text-[10px] font-bold uppercase tracking-wider text-stone-400">
-                        Personal & Buying
-                      </p>
-                      <Link
-                        to="/orders"
-                        onClick={() => setMenuOpen(false)}
-                        className="flex items-center gap-2.5 px-4 py-2 text-sm text-stone-700 hover:bg-stone-50 transition-colors"
-                      >
-                        <svg className="h-4 w-4 text-stone-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                        </svg>
-                        My Purchases
-                      </Link>
-                      <Link
-                        to="/wishlist"
-                        onClick={() => setMenuOpen(false)}
-                        className="flex items-center gap-2.5 px-4 py-2 text-sm text-stone-700 hover:bg-stone-50 transition-colors"
-                      >
-                        <svg className="h-4 w-4 text-stone-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                        </svg>
-                        Wishlist
-                      </Link>
-                      <Link
-                        to="/commissions/mine"
-                        onClick={() => setMenuOpen(false)}
-                        className="flex items-center gap-2.5 px-4 py-2 text-sm text-stone-700 hover:bg-stone-50 transition-colors"
-                      >
-                        <svg className="h-4 w-4 text-stone-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                        </svg>
-                        Sent Commissions
-                      </Link>
-                      <Link
-                        to="/profile/edit"
-                        onClick={() => setMenuOpen(false)}
-                        className="flex items-center gap-2.5 px-4 py-2 text-sm text-stone-700 hover:bg-stone-50 transition-colors"
-                      >
-                        <svg className="h-4 w-4 text-stone-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                        </svg>
-                        Profile Settings
-                      </Link>
-                    </div>
-
-                    {/* Artist Application CTA for Non-Approved Users */}
                     {user?.artist_profile?.status !== 'approved' && (
-                      <div className="border-t border-stone-100 py-1 px-2">
-                        {!user?.artist_profile ? (
-                          <Link
-                            to="/artist-application"
-                            onClick={() => setMenuOpen(false)}
-                            className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold text-amber-800 bg-amber-50 hover:bg-amber-100 transition-colors"
-                          >
-                            <svg className="h-4 w-4 text-amber-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-                            </svg>
-                            Apply as Artist
-                          </Link>
-                        ) : user.artist_profile.status === 'pending' ? (
-                          <Link
-                            to="/profile/edit"
-                            onClick={() => setMenuOpen(false)}
-                            className="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold text-yellow-800 bg-yellow-50 hover:bg-yellow-100 transition-colors"
-                          >
-                            <span className="flex items-center gap-1.5">
-                              <span className="h-2 w-2 rounded-full bg-yellow-500 animate-pulse" />
-                              Artist Under Review
-                            </span>
-                            <span className="text-[10px] text-yellow-600">Pending</span>
-                          </Link>
-                        ) : user.artist_profile.status === 'rejected' ? (
-                          <Link
-                            to="/artist-application"
-                            onClick={() => setMenuOpen(false)}
-                            className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold text-red-800 bg-red-50 hover:bg-red-100 transition-colors"
-                          >
-                            <svg className="h-4 w-4 text-red-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                            </svg>
-                            Re-apply as Artist
-                          </Link>
-                        ) : null}
-                      </div>
+                      <Link
+                        to={!user?.artist_profile ? '/artist-application' : user.artist_profile.status === 'rejected' ? '/artist-application' : '/profile/edit'}
+                        onClick={() => setMenuOpen(false)}
+                        className="flex items-center gap-2.5 px-4 py-2 text-sm text-amber-700 hover:bg-amber-50"
+                      >
+                        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
+                        {!user?.artist_profile ? 'Apply as Artist' : user.artist_profile.status === 'pending' ? 'Application Pending' : 'Re-apply as Artist'}
+                      </Link>
                     )}
 
-                    <div className="border-t border-stone-100 mt-1 pt-1">
-                      <button
-                        onClick={handleLogout}
-                        className="flex w-full items-center gap-2.5 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
-                      >
-                        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                        </svg>
-                        Sign out
-                      </button>
-                    </div>
+                    <div className="border-t border-stone-100 my-1" />
+
+                    <Link to="/orders" onClick={() => setMenuOpen(false)} className="flex items-center gap-2.5 px-4 py-2 text-sm text-stone-700 hover:bg-stone-50">
+                      <svg className="h-4 w-4 text-stone-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
+                      My Purchases
+                    </Link>
+                    <Link to="/wishlist" onClick={() => setMenuOpen(false)} className="flex items-center gap-2.5 px-4 py-2 text-sm text-stone-700 hover:bg-stone-50">
+                      <svg className="h-4 w-4 text-stone-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
+                      Wishlist
+                    </Link>
+                    <Link to="/profile/edit" onClick={() => setMenuOpen(false)} className="flex items-center gap-2.5 px-4 py-2 text-sm text-stone-700 hover:bg-stone-50">
+                      <svg className="h-4 w-4 text-stone-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                      Settings
+                    </Link>
+
+                    <div className="border-t border-stone-100 my-1" />
+
+                    <button onClick={handleLogout} className="flex w-full items-center gap-2.5 px-4 py-2 text-sm text-stone-500 hover:text-red-600 hover:bg-red-50">
+                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+                      Sign out
+                    </button>
                   </div>
                 )}
               </div>
