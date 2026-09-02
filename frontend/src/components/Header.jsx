@@ -199,8 +199,8 @@ const Header = () => {
   return (
     <header className="sticky top-0 z-50 border-b border-stone-200 bg-white/95 backdrop-blur-sm">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3.5 gap-4">
-        <Link to="/" className="group flex-shrink-0">
-          <span className="font-heading text-xl font-bold text-stone-900 tracking-tight group-hover:text-amber-600 transition-colors">Artisa</span>
+        <Link to="/" className="group flex-shrink-0 logo-link">
+          <span className="font-heading text-xl font-bold tracking-tight logo-text">Artisa</span>
         </Link>
         <nav className="hidden md:flex items-center gap-7 flex-shrink-0">
           <Link to="/marketplace" className={navLinkClass('/marketplace')}>Marketplace</Link>
