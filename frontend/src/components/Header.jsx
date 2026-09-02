@@ -13,11 +13,26 @@ const Header = () => {
   const [searchResults, setSearchResults] = useState({ artworks: [], artists: [], categories: [] });
   const [trending, setTrending] = useState({ artworks: [], artists: [], categories: [] });
   const [searching, setSearching] = useState(false);
+  const [catDropdown, setCatDropdown] = useState(false);
+  const [categories, setCategories] = useState([]);
   const searchInputRef = useRef(null);
   const searchTimerRef = useRef(null);
   const searchWrapperRef = useRef(null);
+  const catDropdownRef = useRef(null);
 
   useEffect(() => { if (searchFocused && searchInputRef.current) searchInputRef.current.focus(); }, [searchFocused]);
+
+  useEffect(() => {
+    fetch('/api/artworks/categories/').then(r => r.json()).then(d => setCategories(d)).catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    const h = (e) => {
+      if (catDropdownRef.current && !catDropdownRef.current.contains(e.target)) setCatDropdown(false);
+    };
+    document.addEventListener('mousedown', h);
+    return () => document.removeEventListener('mousedown', h);
+  }, []);
 
   useEffect(() => {
     const h = (e) => {
@@ -203,7 +218,38 @@ const Header = () => {
           <span className="font-heading text-xl font-bold tracking-tight logo-text">Artisa</span>
         </Link>
         <nav className="hidden md:flex items-center gap-7 flex-shrink-0">
-          <Link to="/marketplace" className={navLinkClass('/marketplace')}>Marketplace</Link>
+          <Link to="/marketplace" className={navLinkClass('/marketplace')}>Discover</Link>
+          <Link to="/artists" className={navLinkClass('/artists')}>Artists</Link>
+          <div ref={catDropdownRef} className="relative">
+            <button
+              onClick={() => setCatDropdown(!catDropdown)}
+              className={`text-sm font-medium transition-colors ${catDropdown ? 'text-amber-600' : 'text-stone-600 hover:text-stone-900'}`}
+            >
+              Categories
+              <svg className={`inline-block ml-1 h-3 w-3 transition-transform ${catDropdown ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
+            </button>
+            {catDropdown && (
+              <div className="absolute top-full left-0 mt-2 w-56 bg-white rounded-lg border border-stone-200 py-2 z-50 shadow-sm">
+                <button
+                  onClick={() => { navigate('/marketplace'); setCatDropdown(false); }}
+                  className="w-full px-4 py-2 text-sm font-medium text-stone-900 hover:bg-stone-50 text-left transition-colors"
+                >
+                  All Categories
+                </button>
+                <div className="border-t border-stone-100 my-1" />
+                {categories.map((cat) => (
+                  <button
+                    key={cat.id}
+                    onClick={() => { navigate(`/marketplace?category=${cat.id}`); setCatDropdown(false); }}
+                    className="w-full px-4 py-2 text-sm text-stone-600 hover:bg-stone-50 hover:text-stone-900 text-left transition-colors"
+                  >
+                    {cat.name}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+          <Link to="/commissions/landing" className={navLinkClass('/commissions/landing')}>Commissions</Link>
         </nav>
         <div ref={searchWrapperRef} className="relative flex-1 max-w-md hidden md:block">
           <form onSubmit={handleSearchSubmit} className="relative">

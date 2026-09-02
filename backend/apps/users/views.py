@@ -1,4 +1,5 @@
 from django.contrib.auth.tokens import default_token_generator
+from django.db.models import Q
 from django.utils import timezone
 from django.utils.encoding import force_str
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
@@ -204,6 +205,46 @@ def public_artist_profile(request, username):
         return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def artists_list(request):
+    """GET /api/auth/artists/ — public list of all approved artists."""
+    from django.db.models import Count
+    artists = User.objects.filter(
+        artist_profile__status=ArtistProfile.Status.APPROVED
+    ).select_related('artist_profile').annotate(
+        artwork_count=Count('artworks', filter=Q(artworks__status='published'))
+    ).order_by('-date_joined')
+
+    page = int(request.query_params.get('page', 1))
+    page_size = 12
+    total = artists.count()
+    start = (page - 1) * page_size
+    artists = artists[start:start + page_size]
+
+    results = []
+    for artist in artists:
+        profile = artist.artist_profile
+        results.append({
+            'id': artist.id,
+            'username': artist.username,
+            'first_name': artist.first_name,
+            'last_name': artist.last_name,
+            'avatar': artist.avatar.url if artist.avatar else None,
+            'bio': profile.bio[:120] if profile.bio else '',
+            'cover_image': profile.cover_image.url if profile.cover_image else None,
+            'verified_badge': profile.verified_badge,
+            'artwork_count': artist.artwork_count,
+        })
+
+    return Response({
+        'results': results,
+        'total': total,
+        'page': page,
+        'pages': (total + page_size - 1) // page_size,
+    })
 
 
 @api_view(['GET', 'POST'])

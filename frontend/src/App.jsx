@@ -12,6 +12,8 @@ import ProfileEditor from './pages/ProfileEditor'
 import CreateArtwork from './pages/CreateArtwork'
 import MyArtworks from './pages/MyArtworks'
 import Marketplace from './pages/Marketplace'
+import Artists from './pages/Artists'
+import CommissionLanding from './pages/CommissionLanding'
 import Home from './pages/Home'
 import ArtworkDetail from './pages/ArtworkDetail'
 import Wishlist from './pages/Wishlist'
@@ -49,6 +51,8 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/marketplace" element={<Marketplace />} />
+          <Route path="/artists" element={<Artists />} />
+          <Route path="/commissions/landing" element={<CommissionLanding />} />
           <Route path="/artworks/:id" element={<ArtworkDetail />} />
           <Route
             path="/dashboard"
