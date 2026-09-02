@@ -51,9 +51,11 @@ h3 { font-size: 1.25rem; font-weight: 600; line-height: 1.3; }
 }
 
 /* ── Global link styling ── */
-a {
-  color: inherit;
-  text-decoration: none;
+@layer base {
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
 }
 
 /* ── Custom scrollbar ── */
