@@ -107,15 +107,6 @@ const Register = () => {
           <h1 className="text-3xl font-bold text-center mb-2 text-stone-900 font-heading">Create an account</h1>
           <p className="text-stone-500 text-center mb-6">Join Artisa today</p>
 
-          <div className="flex items-start gap-3 p-3.5 bg-amber-50 border border-amber-200 rounded-lg mb-6">
-            <svg className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <p className="text-xs text-amber-800 leading-relaxed">
-              You&apos;ll start as a <span className="font-semibold">Collector</span> — able to browse, purchase artworks, and request <span className="font-semibold">Commissions</span> from artists. Once registered, you can apply to become a <span className="font-semibold">Verified Artist</span> to list, sell your own work, and accept commissions.
-            </p>
-          </div>
-
           {error && (
             <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
               {error}
@@ -200,6 +191,22 @@ const Register = () => {
               Sign in
             </Link>
           </p>
+        </div>
+
+        {/* Info card below the form */}
+        <div className="mt-4 rounded-lg border border-stone-200 bg-white p-5 page-enter">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="h-6 w-6 rounded-full bg-stone-100 flex items-center justify-center">
+              <svg className="h-3.5 w-3.5 text-stone-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <span className="text-xs font-semibold text-stone-700 uppercase tracking-wider">How it works</span>
+          </div>
+          <div className="space-y-1.5 text-xs text-stone-500 leading-relaxed">
+            <p>Start as a <span className="font-semibold text-stone-700">Collector</span> — browse, buy artworks, and request commissions.</p>
+            <p>Apply anytime to become a <span className="font-semibold text-stone-700">Verified Artist</span> — list your work and accept commissions.</p>
+          </div>
         </div>
       </div>
     </div>
