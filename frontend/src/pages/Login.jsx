@@ -2,6 +2,29 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
+const UnderlineInput = ({ label, id, name, type = 'text', value, onChange, required }) => (
+  <div className="relative">
+    <input
+      type={type}
+      id={id}
+      name={name}
+      value={value}
+      onChange={onChange}
+      placeholder=" "
+      className="peer w-full px-0 pt-5 pb-2 bg-transparent border-b-2 border-stone-200 text-sm text-stone-900 placeholder-transparent focus:outline-none focus:border-stone-900 transition-colors"
+      required={required}
+    />
+    <label
+      htmlFor={id}
+      className="absolute left-0 top-3.5 text-sm text-stone-400 transition-all duration-200 pointer-events-none
+        peer-focus:-top-0.5 peer-focus:text-xs peer-focus:text-stone-500
+        peer-[:not(:placeholder-shown)]:-top-0.5 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:text-stone-500"
+    >
+      {label}
+    </label>
+  </div>
+);
+
 const Login = () => {
   const [formData, setFormData] = useState({
     username: '',
@@ -51,39 +74,27 @@ const Login = () => {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label htmlFor="username" className="block text-sm font-medium text-stone-700 mb-1">
-                Email or username
-              </label>
-              <input
-                type="text"
-                id="username"
-                name="username"
-                value={formData.username}
-                onChange={handleChange}
-                placeholder="Enter your email or username"
-                className="w-full px-4 py-2.5 border border-stone-200 bg-white rounded-lg text-sm focus:ring-1 focus:ring-stone-400 focus:border-stone-400 outline-none transition"
-                required
-              />
-            </div>
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <UnderlineInput
+              label="Email or username"
+              id="username"
+              name="username"
+              value={formData.username}
+              onChange={handleChange}
+              required
+            />
 
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-stone-700 mb-1">
-                Password
-              </label>
-              <input
-                type="password"
-                id="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                className="w-full px-4 py-2.5 border border-stone-200 bg-white rounded-lg text-sm focus:ring-1 focus:ring-stone-400 focus:border-stone-400 outline-none transition"
-                required
-              />
-            </div>
+            <UnderlineInput
+              label="Password"
+              id="password"
+              name="password"
+              type="password"
+              value={formData.password}
+              onChange={handleChange}
+              required
+            />
 
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between pt-1">
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="checkbox"
