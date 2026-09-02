@@ -43,6 +43,11 @@ class Command(BaseCommand):
         interaction_count = self.create_interactions(artists, artworks)
         self.stdout.write(f'Created {interaction_count} interactions')
 
+        # Generate placeholder images for artworks
+        from django.core.management import call_command
+        self.stdout.write('Generating artwork images...')
+        call_command('seed_artwork_images')
+
         self.stdout.write(self.style.SUCCESS('Demo data seeded successfully!'))
 
     def create_admin_user(self):
