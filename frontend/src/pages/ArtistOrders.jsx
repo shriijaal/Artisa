@@ -98,7 +98,7 @@ const ArtistOrders = () => {
   const isApprovedArtist = user?.artist_profile?.status === 'approved';
 
   return (
-    <div className="min-h-screen bg-stone-50 flex flex-col">
+    <div className="min-h-screen bg-[#faf9f7] flex flex-col">
       <Header />
 
       {isApprovedArtist && <ArtistSideNav />}
@@ -106,7 +106,7 @@ const ArtistOrders = () => {
       <main className={`mx-auto w-full max-w-5xl px-6 py-10 page-enter flex-1 ${isApprovedArtist ? 'md:pl-60 xl:pl-72' : ''}`}>
         <div className="mb-8">
           <div className="flex items-center gap-2 text-sm text-stone-500 mb-3">
-            <button onClick={() => navigate(`/artists/${user?.username}`)} className="hover:text-amber-600 transition-colors">
+            <button onClick={() => navigate(`/artists/${user?.username}`)} className="hover:text-[#9c4327] transition-colors">
               Artist Studio
             </button>
             <span>/</span>
@@ -114,12 +114,12 @@ const ArtistOrders = () => {
           </div>
           <div className="flex flex-col sm:flex-row justify-between sm:items-end gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-stone-900" style={{ fontFamily: "'Playfair Display', serif" }}>Manage Sales</h1>
+              <h1 className="text-3xl font-bold text-stone-900">Manage Sales</h1>
               <p className="text-stone-500 mt-1">Track and fulfill orders for your artworks.</p>
             </div>
             <button
               onClick={() => navigate('/artist/earnings')}
-              className="rounded-lg border border-stone-200 bg-white px-4 py-2 text-sm font-semibold text-stone-600 hover:bg-stone-50 transition shadow-sm"
+              className="rounded-lg border border-stone-200 bg-white px-4 py-2 text-sm font-semibold text-stone-600 hover:bg-stone-50 transition"
             >
               View Earnings Summary
             </button>
@@ -127,7 +127,7 @@ const ArtistOrders = () => {
         </div>
 
         {items.length === 0 ? (
-          <div className="rounded-2xl border border-stone-200 bg-white p-12 text-center shadow-sm">
+          <div className="rounded-lg border border-stone-200 bg-white p-12 text-center">
             <p className="text-stone-600">No customers have purchased your artworks yet.</p>
           </div>
         ) : (
@@ -135,7 +135,7 @@ const ArtistOrders = () => {
             {items.map((item) => {
               const isPaid = item.order_payment_status === 'paid';
               return (
-                <div key={item.id} className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm flex flex-col md:flex-row justify-between gap-6">
+                <div key={item.id} className="rounded-lg border border-stone-200 bg-white p-6 flex flex-col md:flex-row justify-between gap-6">
                   {/* Artwork & Order Details */}
                   <div className="flex-1 space-y-3">
                     <div className="flex flex-wrap items-center gap-3">
@@ -178,7 +178,7 @@ const ArtistOrders = () => {
                     </div>
 
                     {item.artwork.type === 'physical' && item.shipment ? (
-                      <div className="w-full space-y-3 bg-stone-50 border border-stone-200 p-4 rounded-xl">
+                      <div className="w-full space-y-3 bg-stone-50 border border-stone-200 p-4 rounded-lg">
                         <div className="flex items-center justify-between text-xs font-bold text-stone-600 mb-1">
                           <span>SHIPMENT STATUS</span>
                           <span className="text-stone-900">{item.shipment.status.toUpperCase()}</span>
@@ -203,7 +203,7 @@ const ArtistOrders = () => {
                                     <button
                                       onClick={() => updateShipmentStatus(item.shipment.id, 'shipped')}
                                       disabled={updatingShipmentId === item.shipment.id}
-                                      className="flex-1 rounded-lg bg-stone-900 hover:bg-stone-800 text-white font-medium py-1.5 text-xs transition disabled:opacity-50 shadow-sm"
+                                      className="flex-1 rounded-lg bg-[#000] hover:bg-stone-800 text-white font-medium py-1.5 text-xs transition disabled:opacity-50"
                                     >
                                       Mark Shipped
                                     </button>
@@ -233,7 +233,7 @@ const ArtistOrders = () => {
                         )}
                       </div>
                     ) : (
-                      <div className="rounded-xl bg-stone-50 border border-stone-200 p-4 w-full text-center text-xs text-stone-600 font-medium">
+                      <div className="rounded-lg bg-stone-50 border border-stone-200 p-4 w-full text-center text-xs text-stone-600 font-medium">
                         Digital Artwork — Delivery is handled automatically upon payment.
                       </div>
                     )}

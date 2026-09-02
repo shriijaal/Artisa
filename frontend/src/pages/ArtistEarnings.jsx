@@ -49,7 +49,7 @@ const ArtistEarnings = () => {
   const isApprovedArtist = user?.artist_profile?.status === 'approved';
 
   return (
-    <div className="min-h-screen bg-stone-50 flex flex-col">
+    <div className="min-h-screen bg-[#faf9f7] flex flex-col">
       <Header />
 
       {isApprovedArtist && <ArtistSideNav />}
@@ -57,7 +57,7 @@ const ArtistEarnings = () => {
       <main className={`mx-auto w-full max-w-5xl px-6 py-10 page-enter flex-1 ${isApprovedArtist ? 'md:pl-60 xl:pl-72' : ''}`}>
         <div className="mb-8">
           <div className="flex items-center gap-2 text-sm text-stone-500 mb-3">
-            <button onClick={() => navigate(`/artists/${user?.username}`)} className="hover:text-amber-600 transition-colors">
+            <button onClick={() => navigate(`/artists/${user?.username}`)} className="hover:text-[#9c4327] transition-colors">
               Artist Studio
             </button>
             <span>/</span>
@@ -65,12 +65,12 @@ const ArtistEarnings = () => {
           </div>
           <div className="flex flex-col sm:flex-row justify-between sm:items-end gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-stone-900" style={{ fontFamily: "'Playfair Display', serif" }}>Earnings Summary</h1>
+              <h1 className="text-3xl font-bold text-stone-900">Earnings Summary</h1>
               <p className="text-stone-500 mt-1">Your revenue metrics and sales transactions.</p>
             </div>
             <button
               onClick={() => navigate('/artist/orders')}
-              className="rounded-lg border border-stone-200 bg-white px-4 py-2 text-sm font-semibold text-stone-600 hover:bg-stone-50 transition shadow-sm"
+              className="rounded-lg border border-stone-200 bg-white px-4 py-2 text-sm font-semibold text-stone-600 hover:bg-stone-50 transition"
             >
               Manage Fulfillment
             </button>
@@ -79,7 +79,7 @@ const ArtistEarnings = () => {
 
         {/* Premium Dashboard Metrics Cards */}
         <div className="grid gap-6 sm:grid-cols-2 mb-10">
-          <div className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm flex items-center gap-4">
+          <div className="rounded-lg border border-stone-200 bg-white p-6 flex items-center gap-4">
             <div className="h-12 w-12 rounded-full bg-stone-100 flex items-center justify-center text-stone-700">
               <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -91,7 +91,7 @@ const ArtistEarnings = () => {
             </div>
           </div>
 
-          <div className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm flex items-center gap-4">
+          <div className="rounded-lg border border-stone-200 bg-white p-6 flex items-center gap-4">
             <div className="h-12 w-12 rounded-full bg-stone-100 flex items-center justify-center text-stone-700">
               <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
@@ -108,11 +108,11 @@ const ArtistEarnings = () => {
         <h3 className="text-lg font-semibold text-stone-900 mb-4">Transaction History</h3>
 
         {earningsData.orders.length === 0 ? (
-          <div className="rounded-2xl border border-stone-200 bg-white p-12 text-center shadow-sm">
+          <div className="rounded-lg border border-stone-200 bg-white p-12 text-center">
             <p className="text-stone-600">No completed transactions found. Earnings accrue after customer payment.</p>
           </div>
         ) : (
-          <div className="rounded-2xl border border-stone-200 bg-white overflow-hidden shadow-sm">
+          <div className="rounded-lg border border-stone-200 bg-white overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm text-stone-600">
                 <thead className="bg-stone-50 border-b border-stone-200 text-xs font-semibold uppercase text-stone-500">

@@ -79,7 +79,7 @@ const PaymentVerify = () => {
 
   if (status === 'verifying') {
     return (
-      <div className="min-h-screen bg-stone-50">
+      <div className="min-h-screen bg-[#faf9f7]">
         <Header />
         <LoadingSpinner label="Verifying your payment with Khalti..." />
       </div>
@@ -87,7 +87,7 @@ const PaymentVerify = () => {
   }
 
   return (
-    <div className="min-h-screen bg-stone-50">
+    <div className="min-h-screen bg-[#faf9f7]">
       <Header />
       <main className="max-w-lg mx-auto px-6 py-20 text-center page-enter">
         {status === 'success' ? (
@@ -97,7 +97,7 @@ const PaymentVerify = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
               </svg>
             </div>
-            <h1 className="text-3xl font-bold text-stone-900 mb-3" style={{ fontFamily: "'Playfair Display', serif" }}>
+            <h1 className="text-3xl font-bold text-stone-900 mb-3">
               Payment Successful!
             </h1>
             <p className="text-stone-500 mb-8">
@@ -107,13 +107,13 @@ const PaymentVerify = () => {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
                 to="/orders/history"
-                className="rounded-xl bg-amber-600 px-6 py-3 text-sm font-semibold text-white hover:bg-amber-500 transition"
+                className="rounded-lg bg-[#000] px-6 py-3 text-sm font-semibold text-white hover:bg-stone-800 transition"
               >
                 View Order History
               </Link>
               <Link
                 to="/"
-                className="rounded-xl border border-stone-200 px-6 py-3 text-sm font-semibold text-stone-600 hover:bg-stone-50 transition shadow-sm"
+                className="rounded-lg border border-stone-200 px-6 py-3 text-sm font-semibold text-stone-600 hover:bg-stone-50 transition"
               >
                 Continue Shopping
               </Link>
@@ -126,7 +126,7 @@ const PaymentVerify = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
               </svg>
             </div>
-            <h1 className="text-3xl font-bold text-stone-900 mb-3" style={{ fontFamily: "'Playfair Display', serif" }}>
+            <h1 className="text-3xl font-bold text-stone-900 mb-3">
               Payment Canceled
             </h1>
             <p className="text-stone-500 mb-8">
@@ -136,14 +136,14 @@ const PaymentVerify = () => {
               {orderId && (
                 <Link
                   to="/orders/history"
-                  className="rounded-xl bg-amber-600 px-6 py-3 text-sm font-semibold text-white hover:bg-amber-500 transition"
+                  className="rounded-lg bg-[#000] px-6 py-3 text-sm font-semibold text-white hover:bg-stone-800 transition"
                 >
                   View My Orders
                 </Link>
               )}
               <Link
                 to="/marketplace"
-                className="rounded-xl border border-stone-200 px-6 py-3 text-sm font-semibold text-stone-600 hover:bg-stone-50 transition shadow-sm"
+                className="rounded-lg border border-stone-200 px-6 py-3 text-sm font-semibold text-stone-600 hover:bg-stone-50 transition"
               >
                 Return to Marketplace
               </Link>
@@ -156,7 +156,7 @@ const PaymentVerify = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
               </svg>
             </div>
-            <h1 className="text-3xl font-bold text-stone-900 mb-3" style={{ fontFamily: "'Playfair Display', serif" }}>
+            <h1 className="text-3xl font-bold text-stone-900 mb-3">
               Payment Failed
             </h1>
             <p className="text-stone-500 mb-8">
@@ -165,13 +165,13 @@ const PaymentVerify = () => {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
                 to="/orders/history"
-                className="rounded-xl bg-amber-600 px-6 py-3 text-sm font-semibold text-white hover:bg-amber-500 transition"
+                className="rounded-lg bg-[#000] px-6 py-3 text-sm font-semibold text-white hover:bg-stone-800 transition"
               >
                 View My Orders
               </Link>
               <Link
                 to="/marketplace"
-                className="rounded-xl border border-stone-200 px-6 py-3 text-sm font-semibold text-stone-600 hover:bg-stone-50 transition shadow-sm"
+                className="rounded-lg border border-stone-200 px-6 py-3 text-sm font-semibold text-stone-600 hover:bg-stone-50 transition"
               >
                 Return to Marketplace
               </Link>

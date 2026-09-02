@@ -4,7 +4,7 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 
 const CATEGORY_COLORS = [
-  { bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-200', hoverBg: 'hover:bg-amber-100' },
+  { bg: 'bg-stone-100', text: 'text-stone-700', border: 'border-stone-200', hoverBg: 'hover:bg-stone-200' },
   { bg: 'bg-rose-50', text: 'text-rose-700', border: 'border-rose-200', hoverBg: 'hover:bg-rose-100' },
   { bg: 'bg-sky-50', text: 'text-sky-700', border: 'border-sky-200', hoverBg: 'hover:bg-sky-100' },
   { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200', hoverBg: 'hover:bg-emerald-100' },
@@ -90,7 +90,7 @@ const Home = () => {
 
   if (loading || (!data && !error)) {
     return (
-      <div className="min-h-screen bg-stone-50">
+      <div className="min-h-screen bg-[#faf9f7]">
         <Header />
         <div className="pb-16">
           {/* Hero skeleton */}
@@ -101,7 +101,7 @@ const Home = () => {
             <div className="skeleton h-4 w-80 mb-8" />
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {[...Array(4)].map((_, i) => (
-                <div key={i} className="rounded-2xl overflow-hidden border border-stone-200 bg-white">
+                <div key={i} className="rounded-lg overflow-hidden border border-stone-200 bg-white">
                   <div className="skeleton aspect-[4/3] w-full rounded-none" />
                   <div className="p-4 space-y-2">
                     <div className="skeleton h-5 w-3/4" />
@@ -117,7 +117,7 @@ const Home = () => {
             <div className="skeleton h-7 w-48 mb-8" />
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
               {[...Array(6)].map((_, i) => (
-                <div key={i} className="skeleton aspect-square rounded-2xl" />
+                <div key={i} className="skeleton aspect-square rounded-lg" />
               ))}
             </div>
           </div>
@@ -128,10 +128,10 @@ const Home = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-stone-50">
+      <div className="min-h-screen bg-[#faf9f7]">
         <Header />
         <div className="flex flex-col items-center justify-center min-h-[60vh] px-6 text-center">
-          <div className="bg-white rounded-2xl shadow-sm border border-stone-200 p-10 max-w-md">
+          <div className="bg-white rounded-lg border border-stone-200 p-10 max-w-md">
             <div className="w-14 h-14 rounded-full bg-rose-50 flex items-center justify-center mx-auto mb-5">
               <svg className="w-7 h-7 text-rose-500" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
@@ -141,7 +141,7 @@ const Home = () => {
             <p className="text-sm text-stone-500 mb-6">{error}</p>
             <button
               onClick={() => { setError(null); setLoading(true); fetchHomepageData(); }}
-              className="rounded-xl bg-stone-900 px-5 py-2.5 text-sm font-semibold text-white hover:bg-stone-800 transition"
+              className="rounded-lg bg-[#000] px-5 py-2.5 text-sm font-semibold text-white hover:bg-stone-800 transition"
             >
               Try Again
             </button>
@@ -153,7 +153,7 @@ const Home = () => {
   }
 
   return (
-    <div className="min-h-screen bg-stone-50">
+    <div className="min-h-screen bg-[#faf9f7]">
       <Header />
 
       <main className="pb-0 page-enter">
@@ -169,7 +169,7 @@ const Home = () => {
             </div>
             <div className="relative z-10 max-w-7xl mx-auto px-6 py-24 sm:py-32 lg:py-40">
               <div className="max-w-2xl">
-                <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl" style={{ fontFamily: "'Playfair Display', serif" }}>
+                <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl">
                   Discover Extraordinary Original Art
                 </h1>
                 <p className="mt-6 text-lg leading-8 text-stone-300 max-w-xl">
@@ -178,7 +178,7 @@ const Home = () => {
                 <div className="mt-10 flex items-center gap-x-6">
                   <Link
                     to="/marketplace"
-                    className="rounded-xl bg-amber-600 px-7 py-3.5 text-sm font-semibold text-white shadow-sm hover:bg-amber-500 transition"
+                    className="rounded-lg bg-[#000] px-7 py-3.5 text-sm font-semibold text-white shadow-sm hover:bg-stone-800 transition"
                   >
                     Explore Marketplace
                   </Link>
@@ -211,7 +211,7 @@ const Home = () => {
         <section ref={addRevealRef} className="reveal max-w-7xl mx-auto px-6 pt-20">
           <div className="flex justify-between items-end mb-8">
             <div>
-              <h2 className="text-3xl font-bold text-stone-900" style={{ fontFamily: "'Playfair Display', serif" }}>
+              <h2 className="text-3xl font-bold text-stone-900">
                 {data.recommendation_type === 'personalized' ? 'Recommended For You' : 'Trending Now'}
               </h2>
               <p className="mt-2 text-stone-500">
@@ -220,14 +220,14 @@ const Home = () => {
                   : 'The most popular artworks handpicked for you.'}
               </p>
             </div>
-            <Link to="/marketplace" className="text-sm font-semibold text-amber-600 hover:text-amber-700 transition hidden sm:block">
+            <Link to="/marketplace" className="text-sm font-semibold text-[#9c4327] hover:text-[#7a3520] transition hidden sm:block">
               View all &rarr;
             </Link>
           </div>
 
           <div className="relative group/carousel">
             {/* Left Arrow */}
-            <button onClick={() => scrollCarousel('left')} className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 z-20 h-12 w-12 rounded-full bg-white shadow-lg border border-stone-200 flex items-center justify-center text-stone-600 hover:text-stone-900 hover:shadow-xl transition-all opacity-0 group-hover/carousel:opacity-100 cursor-pointer">
+            <button onClick={() => scrollCarousel('left')} className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 z-20 h-12 w-12 rounded-full bg-white border border-stone-200 flex items-center justify-center text-stone-600 hover:text-stone-900 transition-all opacity-0 group-hover/carousel:opacity-100 cursor-pointer">
               <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
             </button>
 
@@ -235,7 +235,7 @@ const Home = () => {
             <div ref={carouselRef} className="flex gap-5 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-4 -mx-2 px-2 scrollbar-hide" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
               {data.recommended_artworks?.map((artwork) => (
                 <Link key={artwork.id} to={`/artworks/${artwork.id}`} className="group flex-shrink-0 w-64 snap-start">
-                  <div className="aspect-[4/5] overflow-hidden bg-stone-100 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 relative">
+                  <div className="aspect-[4/5] overflow-hidden bg-stone-100 rounded-lg border border-stone-200 hover:border-stone-300 transition-all duration-300 hover:-translate-y-1 relative">
                     {artwork.images && artwork.images.length > 0 ? (
                       <img
                         src={artwork.images[0].image}
@@ -309,7 +309,7 @@ const Home = () => {
                           <span className="font-medium">{artwork.avg_rating}</span>
                         </span>
                       )}
-                      <span className="text-xs font-medium text-amber-600 whitespace-nowrap">
+                      <span className="text-xs font-medium text-[#9c4327] whitespace-nowrap">
                         View
                       </span>
                     </div>
@@ -327,12 +327,12 @@ const Home = () => {
             </div>
 
             {/* Right Arrow */}
-            <button onClick={() => scrollCarousel('right')} className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 z-20 h-12 w-12 rounded-full bg-white shadow-lg border border-stone-200 flex items-center justify-center text-stone-600 hover:text-stone-900 hover:shadow-xl transition-all opacity-0 group-hover/carousel:opacity-100 cursor-pointer">
+            <button onClick={() => scrollCarousel('right')} className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 z-20 h-12 w-12 rounded-full bg-white border border-stone-200 flex items-center justify-center text-stone-600 hover:text-stone-900 transition-all opacity-0 group-hover/carousel:opacity-100 cursor-pointer">
               <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
             </button>
           </div>
           <div className="mt-8 text-center sm:hidden">
-            <Link to="/marketplace" className="text-sm font-semibold text-amber-600 hover:text-amber-700 transition">
+            <Link to="/marketplace" className="text-sm font-semibold text-[#9c4327] hover:text-[#7a3520] transition">
               View all artworks &rarr;
             </Link>
           </div>
@@ -343,18 +343,18 @@ const Home = () => {
           <section ref={addRevealRef} className="reveal max-w-7xl mx-auto px-6 pt-24">
             <div className="flex justify-between items-end mb-8">
               <div>
-                <p className="text-xs font-bold uppercase tracking-widest text-amber-600 mb-2">Hand-Picked</p>
-                <h2 className="text-3xl font-bold text-stone-900" style={{ fontFamily: "'Playfair Display', serif" }}>Editor's Picks</h2>
+                <p className="text-xs font-bold uppercase tracking-widest text-[#9c4327] mb-2">Hand-Picked</p>
+                <h2 className="text-3xl font-bold text-stone-900">Editor's Picks</h2>
                 <p className="mt-2 text-stone-500">A curated selection of standout artworks from our community.</p>
               </div>
-              <Link to="/marketplace" className="text-sm font-semibold text-amber-600 hover:text-amber-700 transition hidden sm:block">
+              <Link to="/marketplace" className="text-sm font-semibold text-[#9c4327] hover:text-[#7a3520] transition hidden sm:block">
                 View all &rarr;
               </Link>
             </div>
 
             <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-[200px] sm:auto-rows-[240px]">
               {/* Hero — large */}
-              <Link to={`/artworks/${data.recommended_artworks[0].id}`} className="group relative col-span-2 row-span-2 rounded-2xl overflow-hidden bg-stone-100 border border-stone-200 hover:shadow-xl transition-all duration-300">
+              <Link to={`/artworks/${data.recommended_artworks[0].id}`} className="group relative col-span-2 row-span-2 rounded-lg overflow-hidden bg-stone-100 border border-stone-200 hover:border-stone-300 transition-all duration-300">
                 {data.recommended_artworks[0].images?.[0]?.image ? (
                   <img src={data.recommended_artworks[0].images[0].image} alt={data.recommended_artworks[0].title} className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-700" loading="lazy" />
                 ) : (
@@ -365,7 +365,7 @@ const Home = () => {
                   <span className="inline-flex items-center gap-1 rounded-lg bg-white/15 backdrop-blur-md px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-white/90 border border-white/10 mb-3">
                     Editor&apos;s Pick
                   </span>
-                  <h3 className="text-xl sm:text-2xl font-bold text-white leading-tight" style={{ fontFamily: "'Playfair Display', serif" }}>{data.recommended_artworks[0].title}</h3>
+                  <h3 className="text-xl sm:text-2xl font-bold text-white leading-tight">{data.recommended_artworks[0].title}</h3>
                   <p className="text-sm text-white/70 mt-1">by {data.recommended_artworks[0].artist.username}</p>
                   <div className="flex items-center justify-between mt-3">
                     <span className="font-semibold text-amber-400">NPR {data.recommended_artworks[0].price}</span>
@@ -376,7 +376,7 @@ const Home = () => {
 
               {/* Rest — 4 smaller cards */}
               {data.recommended_artworks.slice(1, 5).map((art) => (
-                <Link key={art.id} to={`/artworks/${art.id}`} className="group relative col-span-1 row-span-1 rounded-2xl overflow-hidden bg-stone-100 border border-stone-200 hover:shadow-lg transition-all duration-300">
+                <Link key={art.id} to={`/artworks/${art.id}`} className="group relative col-span-1 row-span-1 rounded-lg overflow-hidden bg-stone-100 border border-stone-200 hover:border-stone-300 transition-all duration-300">
                   {art.images?.[0]?.image ? (
                     <img src={art.images[0].image} alt={art.title} className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
                   ) : (
@@ -384,7 +384,7 @@ const Home = () => {
                   )}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
-                    <h3 className="text-sm font-semibold text-white truncate" style={{ fontFamily: "'Playfair Display', serif" }}>{art.title}</h3>
+                    <h3 className="text-sm font-semibold text-white truncate">{art.title}</h3>
                     <div className="flex items-center justify-between mt-1">
                       <span className="text-xs text-amber-400 font-semibold">NPR {art.price}</span>
                       <span className="text-[10px] text-white/50">{art.artist.username}</span>
@@ -399,7 +399,7 @@ const Home = () => {
         {/* ── CATEGORIES ── */}
         {data.categories && data.categories.length > 0 && (
           <section ref={addRevealRef} className="reveal max-w-7xl mx-auto px-6 pt-24">
-            <h2 className="text-2xl font-bold text-stone-900 mb-8" style={{ fontFamily: "'Playfair Display', serif" }}>Browse by Medium</h2>
+            <h2 className="text-2xl font-bold text-stone-900 mb-8">Browse by Medium</h2>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
               {data.categories.map((category, idx) => {
                 const colors = CATEGORY_COLORS[idx % CATEGORY_COLORS.length];
@@ -407,7 +407,7 @@ const Home = () => {
                   <button
                     key={category.id}
                     onClick={() => navigate(`/marketplace?category=${category.id}`)}
-                    className={`group relative rounded-2xl overflow-hidden aspect-square border ${colors.border} ${colors.bg} ${colors.hoverBg} transition-all duration-200 flex flex-col items-center justify-center gap-2`}
+                    className={`group relative rounded-lg overflow-hidden aspect-square border ${colors.border} ${colors.bg} ${colors.hoverBg} transition-all duration-200 flex flex-col items-center justify-center gap-2`}
                   >
                     <span className={`text-4xl font-bold ${colors.text} opacity-20 group-hover:opacity-40 transition-opacity select-none`}>
                       {category.name.charAt(0)}
@@ -426,13 +426,13 @@ const Home = () => {
         {data.featured_artists && data.featured_artists.length > 0 && (
           <section ref={addRevealRef} className="reveal bg-white border-y border-stone-200 mt-24 py-16">
             <div className="max-w-7xl mx-auto px-6">
-              <h2 className="text-3xl font-bold text-stone-900 text-center mb-12" style={{ fontFamily: "'Playfair Display', serif" }}>
+              <h2 className="text-3xl font-bold text-stone-900 text-center mb-12">
                 Featured Artists
               </h2>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
                 {data.featured_artists.map((artist) => (
                   <Link key={artist.id} to={`/artists/${artist.username}`} className="flex flex-col items-center group">
-                    <div className="w-28 h-28 md:w-32 md:h-32 rounded-full overflow-hidden mb-4 border-4 border-stone-100 group-hover:border-amber-200 transition-colors shadow-sm">
+                    <div className="w-28 h-28 md:w-32 md:h-32 rounded-full overflow-hidden mb-4 border-4 border-stone-100 group-hover:border-stone-300 transition-colors">
                       {artist.avatar ? (
                         <img src={artist.avatar} alt={artist.username} className="w-full h-full object-cover" />
                       ) : (
@@ -457,9 +457,9 @@ const Home = () => {
 
         {/* ── COMMISSION CTA ── */}
         <section ref={addRevealRef} className="reveal max-w-7xl mx-auto px-6 pt-24 pb-4">
-          <div className="relative rounded-3xl overflow-hidden bg-stone-900 px-6 py-16 sm:px-12 sm:py-20 lg:px-16 shadow-xl flex flex-col lg:flex-row items-center justify-between gap-10">
+          <div className="relative rounded-lg overflow-hidden bg-stone-900 px-6 py-16 sm:px-12 sm:py-20 lg:px-16 flex flex-col lg:flex-row items-center justify-between gap-10">
             <div className="relative z-10 max-w-xl text-center lg:text-left">
-              <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl" style={{ fontFamily: "'Playfair Display', serif" }}>
+              <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
                 Looking for Custom Art?
               </h2>
               <p className="mt-4 text-lg text-stone-300">
@@ -468,7 +468,7 @@ const Home = () => {
               <div className="mt-8 flex flex-wrap gap-4 justify-center lg:justify-start">
                 <Link
                   to="/marketplace"
-                  className="rounded-xl bg-amber-600 px-6 py-3.5 text-sm font-semibold text-white shadow-sm hover:bg-amber-500 transition"
+                  className="rounded-lg bg-[#000] px-6 py-3.5 text-sm font-semibold text-white shadow-sm hover:bg-stone-800 transition"
                 >
                   Browse Custom Art
                 </Link>
@@ -479,7 +479,7 @@ const Home = () => {
               <img
                 src="https://images.unsplash.com/photo-1513364776144-60967b0f800f?auto=format&fit=crop&q=80"
                 alt=""
-                className="absolute inset-0 w-full h-full object-cover rounded-2xl rotate-3 shadow-2xl border-4 border-stone-800"
+                className="absolute inset-0 w-full h-full object-cover rounded-lg rotate-3 border-4 border-stone-800"
               />
             </div>
           </div>

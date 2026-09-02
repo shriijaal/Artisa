@@ -257,7 +257,7 @@ const ArtworkDetail = () => {
 
   if (!artwork) {
     return (
-      <div className="min-h-screen bg-stone-50 flex items-center justify-center">
+      <div className="min-h-screen bg-[#faf9f7] flex items-center justify-center">
         <div className="text-stone-600">Artwork not found</div>
       </div>
     );
@@ -266,14 +266,14 @@ const ArtworkDetail = () => {
   const primaryImage = artwork.images?.find(img => img.is_primary) || artwork.images?.[0];
 
   return (
-    <div className="min-h-screen bg-stone-50">
+    <div className="min-h-screen bg-[#faf9f7]">
       <Header />
 
       <main className="mx-auto max-w-7xl px-6 py-12">
         <div className="grid gap-12 lg:grid-cols-2">
           {/* Image Gallery */}
           <div>
-            <div className="aspect-square overflow-hidden rounded-2xl bg-stone-100">
+            <div className="aspect-square overflow-hidden rounded-lg bg-stone-100">
               {primaryImage ? (
                 <img
                   src={primaryImage.image}
@@ -417,7 +417,7 @@ const ArtworkDetail = () => {
               </p>
             </div>
 
-            <div className="mt-8 rounded-xl bg-stone-100 p-6">
+            <div className="mt-8 rounded-lg border border-stone-200 p-6">
               <h3 className="font-semibold text-stone-900">About the Artist</h3>
               <p className="mt-2 text-sm text-stone-600">
                 {artwork.artist.artist_profile?.bio || 'No bio available.'}
@@ -449,7 +449,7 @@ const ArtworkDetail = () => {
 
           {/* Review Form */}
           {user && purchasedItemId && !hasReviewed && (
-            <form onSubmit={handleSubmitReview} className="mt-6 rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
+            <form onSubmit={handleSubmitReview} className="mt-6 rounded-lg border border-stone-200 bg-white p-6">
               <h3 className="text-sm font-semibold text-stone-700 mb-3">Write a Review</h3>
               <div className="mb-4">
                 <label className="text-xs font-medium text-stone-500 mb-2 block">Your Rating</label>
@@ -460,12 +460,12 @@ const ArtworkDetail = () => {
                 onChange={(e) => setReviewComment(e.target.value)}
                 placeholder="Share your experience with this artwork..."
                 rows={3}
-                className="w-full rounded-xl border border-stone-200 bg-stone-50/50 px-4 py-3 text-sm text-stone-900 placeholder-stone-400 focus:border-stone-400 focus:bg-white focus:outline-none focus:ring-1 focus:ring-stone-400 mb-4"
+                className="w-full rounded-lg border border-stone-200 bg-stone-50/50 px-4 py-3 text-sm text-stone-900 placeholder-stone-400 focus:border-stone-400 focus:bg-white focus:outline-none focus:ring-1 focus:ring-stone-400 mb-4"
               />
               <button
                 type="submit"
                 disabled={!reviewRating || !reviewComment.trim() || submittingReview}
-                className="rounded-xl bg-amber-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-amber-700 transition disabled:opacity-40 disabled:cursor-not-allowed shadow-sm"
+                className="rounded-lg bg-[#000] px-5 py-2.5 text-sm font-semibold text-white hover:bg-stone-800 transition disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 {submittingReview ? 'Submitting...' : 'Submit Review'}
               </button>
@@ -478,7 +478,7 @@ const ArtworkDetail = () => {
               <p className="text-stone-500 text-sm">No reviews yet. Be the first to review this artwork!</p>
             ) : (
               reviews.map((review) => (
-                <div key={review.id} className="rounded-2xl border border-stone-200 bg-white p-5 shadow-sm">
+                <div key={review.id} className="rounded-lg border border-stone-200 bg-white p-5">
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-3">
                       <div className="h-9 w-9 rounded-full bg-stone-200 flex items-center justify-center flex-shrink-0">

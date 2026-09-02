@@ -96,21 +96,21 @@ const ArtistApplication = () => {
   }
 
   return (
-    <div className="min-h-screen bg-stone-50">
+    <div className="min-h-screen bg-[#faf9f7]">
       <Header />
 
       <main className="mx-auto max-w-3xl px-6 py-10 page-enter">
         <div className="mb-8">
           <div className="flex items-center gap-2 text-sm text-stone-500 mb-3">
-            <button onClick={() => navigate('/profile/edit')} className="hover:text-amber-600 transition-colors">Profile Settings</button>
+            <button onClick={() => navigate('/profile/edit')} className="hover:text-[#9c4327] transition-colors">Profile Settings</button>
             <span>/</span>
             <span className="font-medium text-stone-800">Artist Application</span>
           </div>
-          <h1 className="text-3xl font-bold text-stone-900" style={{ fontFamily: "'Playfair Display', serif" }}>Artist Application</h1>
+          <h1 className="text-3xl font-bold text-stone-900">Artist Application</h1>
         </div>
 
         {application ? (
-          <div className="rounded-2xl border border-stone-200 bg-white p-8 shadow-sm">
+          <div className="rounded-lg border border-stone-200 bg-white p-8">
             <h2 className="text-xl font-semibold">Application Status</h2>
             
             <div className="mt-6 space-y-4">
@@ -158,7 +158,7 @@ const ArtistApplication = () => {
             </div>
           </div>
         ) : (
-          <div className="rounded-2xl border border-stone-200 bg-white p-8 shadow-sm">
+          <div className="rounded-lg border border-stone-200 bg-white p-8">
             <h2 className="text-xl font-semibold">Submit Portfolio</h2>
             <p className="mt-2 text-stone-600">
               Share your portfolio and tell us why you'd like to join Artisa as a verified artist.
@@ -228,7 +228,7 @@ const ArtistApplication = () => {
               <button
                 type="submit"
                 disabled={submitting}
-                className="w-full rounded-lg bg-amber-600 px-4 py-3 text-sm font-semibold text-white hover:bg-amber-700 transition-colors shadow-sm disabled:opacity-50"
+                className="w-full rounded-lg bg-[#000] px-4 py-3 text-sm font-semibold text-white hover:bg-stone-800 transition-colors disabled:opacity-50"
               >
                 {submitting ? 'Submitting...' : 'Submit Application →'}
               </button>

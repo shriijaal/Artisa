@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 
 const SkeletonCard = () => (
   <div className="flex-shrink-0 w-64">
-    <div className="aspect-[4/5] rounded-2xl bg-stone-100 animate-pulse" />
+    <div className="aspect-[4/5] rounded-lg bg-stone-100 animate-pulse" />
     <div className="mt-3 px-1 space-y-2">
       <div className="h-4 w-3/4 rounded bg-stone-100 animate-pulse" />
       <div className="h-3 w-1/2 rounded bg-stone-100 animate-pulse" />
@@ -56,7 +56,7 @@ const RecommendedCarousel = ({ title, subtitle, endpoint, limit = 8 }) => {
       <section className="relative">
         <div className="flex items-end justify-between mb-6">
           <div>
-            <h2 className="text-2xl font-bold text-stone-900" style={{ fontFamily: "'Playfair Display', serif" }}>
+            <h2 className="text-2xl font-bold text-stone-900 font-serif">
               {title}
             </h2>
             {subtitle && <p className="mt-1 text-sm text-stone-500">{subtitle}</p>}
@@ -77,7 +77,7 @@ const RecommendedCarousel = ({ title, subtitle, endpoint, limit = 8 }) => {
     <section className="relative">
       <div className="flex items-end justify-between mb-6">
         <div>
-          <h2 className="text-2xl font-bold text-stone-900" style={{ fontFamily: "'Playfair Display', serif" }}>
+          <h2 className="text-2xl font-bold text-stone-900 font-serif">
             {title}
           </h2>
           {subtitle && <p className="mt-1 text-sm text-stone-500">{subtitle}</p>}
@@ -88,7 +88,7 @@ const RecommendedCarousel = ({ title, subtitle, endpoint, limit = 8 }) => {
         {/* Left Arrow */}
         <button
           onClick={() => scroll('left')}
-          className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 z-20 h-12 w-12 rounded-full bg-white shadow-lg border border-stone-200 flex items-center justify-center text-stone-600 hover:text-stone-900 hover:shadow-xl transition-all opacity-0 group-hover/carousel:opacity-100 cursor-pointer"
+          className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 z-20 h-12 w-12 rounded-full bg-white border border-stone-200 flex items-center justify-center text-stone-600 hover:text-stone-900 transition-all opacity-0 group-hover/carousel:opacity-100 cursor-pointer"
         >
           <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
@@ -125,7 +125,7 @@ const RecommendedCarousel = ({ title, subtitle, endpoint, limit = 8 }) => {
               to={`/artworks/${artwork.id}`}
               className="group flex-shrink-0 w-64 snap-start"
             >
-              <div className="aspect-[4/5] overflow-hidden bg-stone-100 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 relative">
+              <div className="aspect-[4/5] overflow-hidden bg-stone-100 rounded-lg border border-stone-200 transition-all duration-300 hover:-translate-y-1 relative">
                   {primaryImage ? (
                     <img
                       src={`http://127.0.0.1:8000${primaryImage.image}`}
@@ -144,7 +144,7 @@ const RecommendedCarousel = ({ title, subtitle, endpoint, limit = 8 }) => {
                   {/* Single Badge (priority-based) */}
                   {badge && (
                     <div className="absolute top-3 left-3">
-                      <span className={`inline-flex items-center rounded-full ${badge.color} px-2 py-1 text-[10px] font-semibold text-white shadow-lg backdrop-blur-sm`}>
+                      <span className={`inline-flex items-center rounded-full ${badge.color} px-2 py-1 text-[10px] font-semibold text-white backdrop-blur-sm`}>
                         {badge.text}
                       </span>
                     </div>
@@ -215,7 +215,7 @@ const RecommendedCarousel = ({ title, subtitle, endpoint, limit = 8 }) => {
                     <span className="text-base font-bold text-stone-900">
                       NPR {Math.round(Number(artwork.price)).toLocaleString()}
                     </span>
-                    <span className="text-xs font-medium text-amber-600 whitespace-nowrap">
+                    <span className="text-xs font-medium text-[#9c4327] whitespace-nowrap">
                       View
                     </span>
                   </div>
@@ -235,7 +235,7 @@ const RecommendedCarousel = ({ title, subtitle, endpoint, limit = 8 }) => {
       {/* Right Arrow */}
       <button
         onClick={() => scroll('right')}
-        className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 z-20 h-12 w-12 rounded-full bg-white shadow-lg border border-stone-200 flex items-center justify-center text-stone-600 hover:text-stone-900 hover:shadow-xl transition-all opacity-0 group-hover/carousel:opacity-100 cursor-pointer"
+        className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 z-20 h-12 w-12 rounded-full bg-white border border-stone-200 flex items-center justify-center text-stone-600 hover:text-stone-900 transition-all opacity-0 group-hover/carousel:opacity-100 cursor-pointer"
       >
         <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />

@@ -150,7 +150,7 @@ const ProfileEditor = () => {
   const isRejectedArtist = profile?.status === 'rejected' || user?.artist_profile?.status === 'rejected';
 
   return (
-    <div className="min-h-screen bg-stone-50 flex flex-col">
+    <div className="min-h-screen bg-[#faf9f7] flex flex-col">
       <Header />
 
       {isApprovedArtist && <ArtistSideNav />}
@@ -158,8 +158,8 @@ const ProfileEditor = () => {
       <main className={`mx-auto w-full max-w-3xl px-6 py-10 page-enter flex-1 ${isApprovedArtist ? 'md:pl-60 xl:pl-72' : ''}`}>
         {/* Application Status Banners */}
         {isPendingArtist && (
-          <div className="mb-8 rounded-2xl bg-yellow-50/90 border border-yellow-200 p-5 flex items-start gap-4 text-yellow-900 shadow-sm">
-            <div className="h-9 w-9 rounded-xl bg-yellow-200/70 flex items-center justify-center text-lg flex-shrink-0">
+          <div className="mb-8 rounded-lg bg-yellow-50/90 border border-yellow-200 p-5 flex items-start gap-4 text-yellow-900">
+            <div className="h-9 w-9 rounded-lg bg-yellow-200/70 flex items-center justify-center text-lg flex-shrink-0">
               ⏳
             </div>
             <div>
@@ -175,9 +175,9 @@ const ProfileEditor = () => {
         )}
 
         {isRejectedArtist && (
-          <div className="mb-8 rounded-2xl bg-red-50 border border-red-200 p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-red-900 shadow-sm">
+          <div className="mb-8 rounded-lg bg-red-50 border border-red-200 p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-red-900">
             <div className="flex items-start gap-3">
-              <div className="h-9 w-9 rounded-xl bg-red-200/70 flex items-center justify-center text-lg flex-shrink-0">
+              <div className="h-9 w-9 rounded-lg bg-red-200/70 flex items-center justify-center text-lg flex-shrink-0">
                 ⚠️
               </div>
               <div>
@@ -189,7 +189,7 @@ const ProfileEditor = () => {
             </div>
             <button
               onClick={() => navigate('/artist-application')}
-              className="rounded-xl bg-red-600 px-4 py-2 text-xs font-semibold text-white hover:bg-red-700 transition flex-shrink-0 shadow-sm"
+              className="rounded-lg bg-red-600 px-4 py-2 text-xs font-semibold text-white hover:bg-red-700 transition flex-shrink-0"
             >
               Re-apply Now
             </button>
@@ -197,9 +197,9 @@ const ProfileEditor = () => {
         )}
 
         {!isApprovedArtist && !isPendingArtist && !isRejectedArtist && (
-          <div className="mb-8 rounded-2xl bg-gradient-to-r from-amber-50/90 to-orange-50/90 border border-amber-200/80 p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
+          <div className="mb-8 rounded-lg bg-gradient-to-r from-amber-50/90 to-orange-50/90 border border-amber-200/80 p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex items-center gap-3.5">
-              <div className="h-10 w-10 rounded-xl bg-amber-500 text-white flex items-center justify-center shadow-sm flex-shrink-0">
+              <div className="h-10 w-10 rounded-lg bg-amber-500 text-white flex items-center justify-center flex-shrink-0">
                 <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
                 </svg>
@@ -211,7 +211,7 @@ const ProfileEditor = () => {
             </div>
             <button
               onClick={() => navigate('/artist-application')}
-              className="rounded-xl bg-amber-600 px-4 py-2 text-xs font-bold text-white hover:bg-amber-700 transition flex-shrink-0 shadow-sm whitespace-nowrap"
+              className="rounded-lg bg-[#000] px-4 py-2 text-xs font-bold text-white hover:bg-stone-800 transition flex-shrink-0 whitespace-nowrap"
             >
               Become an Artist →
             </button>
@@ -221,18 +221,18 @@ const ProfileEditor = () => {
         <div className="mb-8">
           <div className="flex items-center gap-2 text-sm text-stone-500 mb-3">
             {isApprovedArtist ? (
-              <button onClick={() => navigate(`/artists/${user?.username}`)} className="hover:text-amber-600 transition-colors">
+              <button onClick={() => navigate(`/artists/${user?.username}`)} className="hover:text-[#9c4327] transition-colors">
                 Artist Studio
               </button>
             ) : (
-              <button onClick={() => navigate('/orders')} className="hover:text-amber-600 transition-colors">
+              <button onClick={() => navigate('/orders')} className="hover:text-[#9c4327] transition-colors">
                 My Purchases
               </button>
             )}
             <span>/</span>
             <span className="font-medium text-stone-800">Edit Profile</span>
           </div>
-          <h1 className="text-3xl font-bold text-stone-900" style={{ fontFamily: "'Playfair Display', serif" }}>Edit Profile</h1>
+          <h1 className="text-3xl font-bold text-stone-900">Edit Profile</h1>
           <p className="mt-2 text-stone-600">
             {isApprovedArtist ? (
               <span className="inline-flex items-center rounded-full bg-emerald-100 px-3 py-1 text-sm font-medium text-emerald-800 border border-emerald-200">
@@ -245,7 +245,7 @@ const ProfileEditor = () => {
         </div>
 
         {/* Avatar Upload */}
-        <div className="mb-8 rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
+        <div className="mb-8 rounded-lg border border-stone-200 bg-white p-6">
           <h3 className="text-lg font-semibold mb-4">Profile Picture</h3>
           <div className="flex flex-col sm:flex-row sm:items-center gap-6">
             <div className="h-24 w-24 rounded-full border-2 border-stone-200 bg-stone-100 overflow-hidden">
@@ -274,7 +274,7 @@ const ProfileEditor = () => {
                 <button
                   onClick={handleSaveAvatar}
                   disabled={saving}
-                  className="rounded-lg bg-amber-600 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-700 disabled:opacity-50 transition-colors shadow-sm"
+                  className="rounded-lg bg-[#000] px-4 py-2 text-sm font-semibold text-white hover:bg-stone-800 disabled:opacity-50 transition-colors"
                 >
                   {saving ? 'Saving...' : 'Upload Avatar'}
                 </button>
@@ -285,7 +285,7 @@ const ProfileEditor = () => {
         </div>
 
         {/* Profile Form */}
-        <div className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
+        <div className="rounded-lg border border-stone-200 bg-white p-6">
           <form onSubmit={handleSaveProfile} className="space-y-6">
             <div>
               <label htmlFor="bio" className="block text-sm font-medium text-stone-700 mb-2">
@@ -387,7 +387,7 @@ const ProfileEditor = () => {
             <button
               type="submit"
               disabled={saving}
-              className="w-full rounded-lg bg-amber-600 px-4 py-3 text-sm font-semibold text-white hover:bg-amber-700 disabled:opacity-50 transition-colors shadow-sm"
+              className="w-full rounded-lg bg-[#000] px-4 py-3 text-sm font-semibold text-white hover:bg-stone-800 disabled:opacity-50 transition-colors"
             >
               {saving ? 'Saving...' : 'Save Profile →'}
             </button>

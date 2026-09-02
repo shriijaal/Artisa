@@ -73,7 +73,7 @@ const Toast = ({ toast, onRemove }) => {
   return (
     <div
       role="alert"
-      className={`flex items-start gap-3 rounded-xl border border-stone-200 bg-white px-4 py-3 shadow-lg max-w-sm w-full
+      className={`flex items-start gap-3 rounded-lg border border-stone-200 bg-white px-4 py-3 max-w-sm w-full
         ${toast.exiting ? 'toast-exit' : 'toast-enter'}`}
     >
       <div className="flex-shrink-0 mt-0.5">{icons[toast.type]}</div>

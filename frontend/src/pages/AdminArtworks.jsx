@@ -87,7 +87,7 @@ const AdminArtworks = () => {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {artworks.map((artwork) => (
-            <div key={artwork.id} className="bg-white rounded-xl border border-stone-200 overflow-hidden group">
+            <div key={artwork.id} className="bg-white rounded-lg border border-stone-200 overflow-hidden group">
               <div className="aspect-square bg-stone-100 relative overflow-hidden">
                 {artwork.primary_image ? (
                   <img src={artwork.primary_image} alt={artwork.title} className="w-full h-full object-cover" />

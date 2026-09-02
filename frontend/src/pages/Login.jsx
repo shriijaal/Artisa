@@ -39,10 +39,10 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-stone-50">
+    <div className="min-h-screen flex items-center justify-center bg-[#faf9f7]">
       <div className="max-w-md w-full">
-        <div className="bg-white rounded-3xl shadow-lg shadow-stone-200/50 border border-stone-200 p-10 page-enter">
-          <h1 className="text-3xl font-bold text-center mb-2 text-stone-900" style={{ fontFamily: "'Playfair Display', serif" }}>Welcome back</h1>
+        <div className="bg-white rounded-lg border border-stone-200 p-10 page-enter">
+          <h1 className="text-3xl font-bold text-center mb-2 text-stone-900 font-heading">Welcome back</h1>
           <p className="text-stone-500 text-center mb-8">Sign in to your Artisa account</p>
 
           {error && (
@@ -93,7 +93,7 @@ const Login = () => {
                 />
                 <span className="text-sm text-stone-600">Remember me</span>
               </label>
-              <Link to="/forgot-password" className="text-sm font-medium text-amber-600 hover:text-amber-700 transition">
+              <Link to="/forgot-password" className="text-sm font-medium text-[#9c4327] hover:text-[#7a3520] transition">
                 Forgot password?
               </Link>
             </div>
@@ -101,7 +101,7 @@ const Login = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-amber-600 text-white py-3 rounded-xl font-semibold hover:bg-amber-700 transition shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-[#000] text-white py-3 rounded-lg font-semibold hover:bg-stone-800 transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Signing in...' : 'Sign in →'}
             </button>
@@ -109,7 +109,7 @@ const Login = () => {
 
           <p className="mt-6 text-center text-sm text-stone-600">
             Don't have an account?{' '}
-            <Link to="/register" className="font-semibold text-amber-600 hover:text-amber-700">
+            <Link to="/register" className="font-semibold text-[#9c4327] hover:text-[#7a3520]">
               Sign up
             </Link>
           </p>

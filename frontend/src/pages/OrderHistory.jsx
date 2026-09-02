@@ -163,24 +163,24 @@ const OrderHistory = () => {
   }
 
   return (
-    <div className="min-h-screen bg-stone-50">
+    <div className="min-h-screen bg-[#faf9f7]">
       <Header />
       <main className="mx-auto max-w-5xl px-6 py-10 page-enter">
         <div className="mb-8">
           <div className="flex items-center gap-2 text-sm text-stone-500 mb-3">
-            <button onClick={() => navigate('/marketplace')} className="hover:text-amber-600 transition-colors">Marketplace</button>
+            <button onClick={() => navigate('/marketplace')} className="hover:text-[#9c4327] transition-colors">Marketplace</button>
             <span>/</span>
             <span className="font-medium text-stone-800">Order History</span>
           </div>
-          <h1 className="text-3xl font-bold text-stone-900" style={{ fontFamily: "'Playfair Display', serif" }}>Your Orders</h1>
+          <h1 className="text-3xl font-bold text-stone-900">Your Orders</h1>
         </div>
 
         {orders.length === 0 ? (
-          <div className="rounded-2xl border border-stone-200 bg-white p-12 text-center shadow-sm">
+          <div className="rounded-lg border border-stone-200 bg-white p-12 text-center">
             <p className="text-stone-600 mb-4">You have not placed any orders yet.</p>
             <button
               onClick={() => navigate('/marketplace')}
-              className="rounded-lg bg-amber-600 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-700 transition shadow-sm"
+              className="rounded-lg bg-[#000] px-4 py-2 text-sm font-semibold text-white hover:bg-stone-800 transition"
             >
               Browse Marketplace
             </button>
@@ -190,7 +190,7 @@ const OrderHistory = () => {
             {orders.map((order) => {
               const isExpanded = expandedOrderId === order.id;
               return (
-                <div key={order.id} className="rounded-2xl border border-stone-200 bg-white shadow-sm overflow-hidden">
+                <div key={order.id} className="rounded-lg border border-stone-200 bg-white overflow-hidden">
                   <div 
                     onClick={() => toggleExpand(order.id)}
                     className="p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 cursor-pointer hover:bg-stone-50/50 transition"
@@ -255,7 +255,7 @@ const OrderHistory = () => {
                             }
                           }}
                           disabled={payingOrderId === order.id}
-                          className="rounded-lg bg-amber-600 px-4 py-2 text-xs font-semibold text-white hover:bg-amber-500 transition disabled:opacity-50"
+                          className="rounded-lg bg-[#000] px-4 py-2 text-xs font-semibold text-white hover:bg-stone-800 transition disabled:opacity-50"
                         >
                           {payingOrderId === order.id ? 'Redirecting...' : 'Pay with Khalti'}
                         </button>
@@ -289,7 +289,7 @@ const OrderHistory = () => {
 
                       <div>
                         <h4 className="text-xs font-semibold text-stone-600 uppercase tracking-wide mb-3">Items</h4>
-                        <div className="divide-y divide-stone-100 bg-white border border-stone-200 rounded-xl overflow-hidden shadow-sm">
+                        <div className="divide-y divide-stone-100 bg-white border border-stone-200 rounded-lg overflow-hidden">
                           {order.items.map((item) => (
                             <div key={item.id} className="p-4 flex flex-col sm:flex-row justify-between sm:items-center gap-4">
                               <div>
@@ -351,7 +351,7 @@ const OrderHistory = () => {
                                         addToast('Download failed.', 'error');
                                       }
                                     }}
-                                    className="text-xs font-semibold text-white bg-amber-600 hover:bg-amber-500 px-3 py-1.5 rounded-lg transition cursor-pointer"
+                                    className="text-xs font-semibold text-white bg-[#000] hover:bg-stone-800 px-3 py-1.5 rounded-lg transition cursor-pointer"
                                   >
                                     Download
                                   </button>
@@ -365,7 +365,7 @@ const OrderHistory = () => {
                                       setReviewRating(0);
                                       setReviewComment('');
                                     }}
-                                    className="text-xs font-semibold text-amber-600 border border-amber-300 bg-amber-50 hover:bg-amber-100 px-3 py-1.5 rounded-lg transition cursor-pointer"
+                                    className="text-xs font-semibold text-[#9c4327] border border-[#9c4327]/30 bg-[#9c4327]/5 hover:bg-[#9c4327]/10 px-3 py-1.5 rounded-lg transition cursor-pointer"
                                   >
                                     {reviewingItemId === item.id ? 'Cancel' : 'Write Review'}
                                   </button>
@@ -378,7 +378,7 @@ const OrderHistory = () => {
                               </div>
 
                               {reviewingItemId === item.id && (
-                                <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50/50 p-4">
+                                <div className="mt-4 rounded-lg border border-stone-200 bg-white p-4">
                                   <p className="text-xs font-semibold text-stone-700 mb-2">Your Rating</p>
                                   <StarRatingInput rating={reviewRating} onChange={setReviewRating} />
                                   <textarea
@@ -386,7 +386,7 @@ const OrderHistory = () => {
                                     onChange={(e) => setReviewComment(e.target.value)}
                                     placeholder="Share your experience with this artwork..."
                                     rows={3}
-                                    className="w-full mt-3 rounded-xl border border-stone-200 bg-white px-4 py-3 text-sm text-stone-900 placeholder-stone-400 focus:border-stone-400 focus:outline-none focus:ring-1 focus:ring-stone-400"
+                                    className="w-full mt-3 rounded-lg border border-stone-200 bg-white px-4 py-3 text-sm text-stone-900 placeholder-stone-400 focus:border-stone-400 focus:outline-none focus:ring-1 focus:ring-stone-400"
                                   />
                                   <button
                                     onClick={(e) => {
@@ -394,7 +394,7 @@ const OrderHistory = () => {
                                       handleSubmitReview(item.id, item.artwork.id);
                                     }}
                                     disabled={!reviewRating || !reviewComment.trim() || submittingReview}
-                                    className="mt-3 rounded-xl bg-amber-600 px-5 py-2 text-sm font-semibold text-white hover:bg-amber-700 transition disabled:opacity-40 disabled:cursor-not-allowed shadow-sm"
+                                    className="mt-3 rounded-lg bg-[#000] px-5 py-2 text-sm font-semibold text-white hover:bg-stone-800 transition disabled:opacity-40 disabled:cursor-not-allowed"
                                   >
                                     {submittingReview ? 'Submitting...' : 'Submit Review'}
                                   </button>

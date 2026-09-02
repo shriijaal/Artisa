@@ -162,16 +162,16 @@ const Checkout = () => {
   const total = subtotal + shipping;
 
   return (
-    <div className="min-h-screen bg-stone-50">
+    <div className="min-h-screen bg-[#faf9f7]">
       <Header />
       <main className="mx-auto max-w-5xl px-6 py-10 page-enter">
         <div className="mb-8">
           <div className="flex items-center gap-2 text-sm text-stone-500 mb-3">
-            <button onClick={() => navigate('/cart')} className="hover:text-amber-600 transition-colors">Shopping Cart</button>
+            <button onClick={() => navigate('/cart')} className="hover:text-[#9c4327] transition-colors">Shopping Cart</button>
             <span>/</span>
             <span className="font-medium text-stone-800">Checkout</span>
           </div>
-          <h1 className="text-3xl font-bold text-stone-900" style={{ fontFamily: "'Playfair Display', serif" }}>Checkout</h1>
+          <h1 className="text-3xl font-bold text-stone-900">Checkout</h1>
         </div>
 
         {error && (
@@ -184,7 +184,7 @@ const Checkout = () => {
           {/* Address Details Form */}
           <div className="lg:col-span-2 space-y-6">
             {hasPhysicalItems() ? (
-              <div className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
+              <div className="rounded-lg border border-stone-200 bg-white p-6">
                 <h3 className="text-lg font-semibold text-stone-900 mb-4">Shipping Address (Nepal)</h3>
                 
                 {addresses.length > 0 && (
@@ -205,7 +205,7 @@ const Checkout = () => {
                         {addresses.map(addr => (
                           <label
                             key={addr.id}
-                            className={`flex flex-col rounded-xl border p-4 cursor-pointer transition ${
+                            className={`flex flex-col rounded-lg border p-4 cursor-pointer transition ${
                               selectedAddressId === addr.id
                                 ? 'border-stone-950 bg-stone-50/50'
                                 : 'border-stone-200 hover:bg-stone-50/30'
@@ -328,13 +328,13 @@ const Checkout = () => {
                 )}
               </div>
             ) : (
-              <div className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm text-center">
+              <div className="rounded-lg border border-stone-200 bg-white p-6 text-center">
                 <p className="text-stone-600">Your cart contains only digital artworks. No shipping address is required!</p>
               </div>
             )}
 
             {/* Cart items review */}
-            <div className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
+            <div className="rounded-lg border border-stone-200 bg-white p-6">
               <h3 className="text-lg font-semibold text-stone-900 mb-4">Review Items</h3>
               <div className="divide-y divide-stone-100">
                 {cartItems.map((item) => (
@@ -355,7 +355,7 @@ const Checkout = () => {
 
           {/* Order Summary Sidebar */}
           <div className="lg:col-span-1">
-            <div className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sticky top-8">
+            <div className="rounded-lg border border-stone-200 bg-white p-6 sticky top-8">
               <h3 className="font-semibold text-stone-900 mb-4">Summary</h3>
               <div className="space-y-3">
                 <div className="flex justify-between text-stone-600">
@@ -375,7 +375,7 @@ const Checkout = () => {
               <button
                 onClick={handlePlaceOrder}
                 disabled={submitting}
-                className="mt-6 w-full rounded-lg bg-amber-600 px-4 py-3 text-sm font-semibold text-white hover:bg-amber-700 transition-colors shadow-sm disabled:opacity-50"
+                className="mt-6 w-full rounded-lg bg-[#000] px-4 py-3 text-sm font-semibold text-white hover:bg-stone-800 transition-colors disabled:opacity-50"
               >
                 {submitting ? 'Processing...' : 'Place Order →'}
               </button>

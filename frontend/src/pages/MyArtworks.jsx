@@ -115,7 +115,7 @@ const MyArtworks = () => {
   const isApprovedArtist = user?.artist_profile?.status === 'approved';
 
   return (
-    <div className="min-h-screen bg-stone-50 flex flex-col">
+    <div className="min-h-screen bg-[#faf9f7] flex flex-col">
       <Header />
 
       {isApprovedArtist && <ArtistSideNav artworkCount={artworks.length} />}
@@ -123,7 +123,7 @@ const MyArtworks = () => {
       <main className={`mx-auto w-full max-w-5xl px-6 py-10 page-enter flex-1 ${isApprovedArtist ? 'md:pl-60 xl:pl-72' : ''}`}>
         <div className="mb-8">
           <div className="flex items-center gap-2 text-sm text-stone-500 mb-3">
-            <button onClick={() => navigate(`/artists/${user?.username}`)} className="hover:text-amber-600 transition-colors">
+            <button onClick={() => navigate(`/artists/${user?.username}`)} className="hover:text-[#9c4327] transition-colors">
               Artist Studio
             </button>
             <span>/</span>
@@ -131,12 +131,12 @@ const MyArtworks = () => {
           </div>
           <div className="flex flex-col sm:flex-row justify-between sm:items-end gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-stone-900" style={{ fontFamily: "'Playfair Display', serif" }}>My Artworks</h1>
+              <h1 className="text-3xl font-bold text-stone-900">My Artworks</h1>
               <p className="mt-1 text-stone-500">Manage your artwork portfolio and track review status.</p>
             </div>
             <button
               onClick={() => navigate('/artworks/create')}
-              className="rounded-lg bg-amber-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-amber-700 transition-colors shadow-sm"
+              className="rounded-lg bg-[#000] px-5 py-2.5 text-sm font-semibold text-white hover:bg-stone-800 transition-colors"
             >
               + Create Artwork
             </button>
@@ -144,11 +144,11 @@ const MyArtworks = () => {
         </div>
 
         {artworks.length === 0 ? (
-          <div className="rounded-2xl border border-stone-200 bg-white p-8 text-center shadow-sm">
+          <div className="rounded-lg border border-stone-200 bg-white p-8 text-center">
             <p className="text-stone-600 mb-4">You haven't created any artworks yet.</p>
             <button
               onClick={() => navigate('/artworks/create')}
-              className="rounded-lg bg-amber-600 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-700 transition-colors shadow-sm"
+              className="rounded-lg bg-[#000] px-4 py-2 text-sm font-semibold text-white hover:bg-stone-800 transition-colors"
             >
               Create Your First Artwork
             </button>
@@ -156,7 +156,7 @@ const MyArtworks = () => {
         ) : (
           <div className="grid gap-4">
             {artworks.map((artwork) => (
-              <div key={artwork.id} className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
+              <div key={artwork.id} className="rounded-lg border border-stone-200 bg-white p-6">
                 <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
                   {artwork.images && artwork.images.length > 0 && (
                     <div className="h-40 w-full sm:h-32 sm:w-32 flex-shrink-0 overflow-hidden rounded-lg bg-stone-100">
@@ -197,7 +197,7 @@ const MyArtworks = () => {
                           <button
                             onClick={() => handleSubmitForReview(artwork.id)}
                             disabled={submitting}
-                            className="rounded-lg bg-amber-600 px-4 py-1.5 text-xs font-semibold text-white hover:bg-amber-700 disabled:opacity-50 transition-colors shadow-sm"
+                            className="rounded-lg bg-[#000] px-4 py-1.5 text-xs font-semibold text-white hover:bg-stone-800 disabled:opacity-50 transition-colors"
                           >
                             Submit for Review
                           </button>

@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import authFetch from '../utils/authFetch';
 
 const StatCard = ({ label, value, icon, color }) => (
-  <div className="bg-white rounded-xl border border-stone-200 p-6">
+  <div className="bg-white rounded-lg border border-stone-200 p-6">
     <div className="flex items-center justify-between">
       <div>
         <p className="text-sm font-medium text-stone-500">{label}</p>
@@ -77,7 +77,7 @@ const AdminDashboard = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Link
           to="/admin/applications"
-          className="bg-white rounded-xl border border-stone-200 p-6 hover:border-amber-300 transition-colors group"
+          className="bg-white rounded-lg border border-stone-200 p-6 hover:border-amber-300 transition-colors group"
         >
           <div className="flex items-center justify-between">
             <div>
@@ -94,7 +94,7 @@ const AdminDashboard = () => {
         </Link>
         <Link
           to="/admin/artworks"
-          className="bg-white rounded-xl border border-stone-200 p-6 hover:border-amber-300 transition-colors group"
+          className="bg-white rounded-lg border border-stone-200 p-6 hover:border-amber-300 transition-colors group"
         >
           <div className="flex items-center justify-between">
             <div>
@@ -113,7 +113,7 @@ const AdminDashboard = () => {
 
       {/* Recent Orders */}
       {stats?.recent_orders?.length > 0 && (
-        <div className="bg-white rounded-xl border border-stone-200">
+        <div className="bg-white rounded-lg border border-stone-200">
           <div className="px-6 py-4 border-b border-stone-200">
             <h2 className="text-sm font-semibold text-stone-900">Recent Orders</h2>
           </div>

@@ -126,7 +126,7 @@ const Cart = () => {
           </div>
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-stone-900" style={{ fontFamily: "'Playfair Display', serif" }}>Shopping Cart</h1>
+              <h1 className="text-3xl font-bold text-stone-900">Shopping Cart</h1>
               <p className="mt-1 text-stone-500">
                 {cartItems.length} item{cartItems.length !== 1 ? 's' : ''}
               </p>
@@ -144,7 +144,7 @@ const Cart = () => {
         </div>
 
         {cartItems.length === 0 ? (
-          <div className="rounded-2xl border border-stone-200 bg-white p-12 text-center shadow-sm">
+          <div className="rounded-lg border border-stone-200 bg-white p-12 text-center">
             <p className="text-stone-600 mb-4">Your cart is empty.</p>
             <button
               onClick={() => navigate('/marketplace')}
@@ -160,7 +160,7 @@ const Cart = () => {
                 const primaryImage = item.artwork.images?.find(img => img.is_primary) || item.artwork.images?.[0];
 
                 return (
-                  <div key={item.id} className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
+                  <div key={item.id} className="rounded-lg border border-stone-200 bg-white p-6">
                     <div className="flex gap-6">
                       {primaryImage && (
                         <div className="h-32 w-32 flex-shrink-0 overflow-hidden rounded-lg bg-stone-100">
@@ -223,7 +223,7 @@ const Cart = () => {
             </div>
 
             <div className="lg:col-span-1">
-              <div className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sticky top-8">
+              <div className="rounded-lg border border-stone-200 bg-white p-6 sticky top-8">
                 <h3 className="font-semibold text-stone-900 mb-4">Order Summary</h3>
                 
                 <div className="space-y-3">
@@ -243,7 +243,7 @@ const Cart = () => {
                 
                 <button
                   onClick={() => navigate('/checkout')}
-                  className="mt-6 w-full rounded-lg bg-amber-600 px-4 py-3 text-sm font-semibold text-white hover:bg-amber-700 transition-colors shadow-sm"
+                  className="mt-6 w-full rounded-lg bg-[#000] px-4 py-3 text-sm font-semibold text-white hover:bg-stone-800 transition-colors"
                 >
                   Proceed to Checkout →
                 </button>

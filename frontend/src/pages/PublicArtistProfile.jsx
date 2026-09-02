@@ -8,7 +8,7 @@ import RecommendedCarousel from '../components/RecommendedCarousel';
 import { trackInteraction } from '../services/api';
 
 const ArtworkSkeleton = () => (
-  <div className="rounded-2xl overflow-hidden bg-stone-100 animate-pulse aspect-[3/4]" />
+  <div className="rounded-lg overflow-hidden bg-stone-100 animate-pulse aspect-[3/4]" />
 );
 
 const ProfileSkeleton = () => (
@@ -24,11 +24,11 @@ const ProfileSkeleton = () => (
         </div>
       </div>
       <div className="mt-6 grid grid-cols-3 gap-3 sm:gap-4">
-        <div className="rounded-2xl border border-stone-200 bg-white p-4 sm:p-5 animate-pulse h-24" />
-        <div className="rounded-2xl border border-stone-200 bg-white p-4 sm:p-5 animate-pulse h-24" />
-        <div className="rounded-2xl border border-stone-200 bg-white p-4 sm:p-5 animate-pulse h-24" />
+        <div className="rounded-lg border border-stone-200 bg-white p-4 sm:p-5 animate-pulse h-24" />
+        <div className="rounded-lg border border-stone-200 bg-white p-4 sm:p-5 animate-pulse h-24" />
+        <div className="rounded-lg border border-stone-200 bg-white p-4 sm:p-5 animate-pulse h-24" />
       </div>
-      <div className="mt-6 h-32 rounded-2xl bg-stone-200 animate-pulse" />
+      <div className="mt-6 h-32 rounded-lg bg-stone-200 animate-pulse" />
       <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
         {Array.from({ length: 4 }).map((_, i) => (
           <ArtworkSkeleton key={i} />
@@ -116,7 +116,7 @@ const PublicArtistProfile = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-stone-50">
+  <div className="min-h-screen bg-[#faf9f7]">
         <Header />
         <div className="flex flex-col items-center justify-center py-32 gap-6 px-4">
           <div className="h-20 w-20 rounded-full bg-stone-100 flex items-center justify-center">
@@ -125,7 +125,7 @@ const PublicArtistProfile = () => {
             </svg>
           </div>
           <div className="text-center">
-            <h2 className="text-xl font-bold text-stone-900 mb-1" style={{ fontFamily: "'Playfair Display', serif" }}>
+            <h2 className="text-xl font-bold text-stone-900 mb-1">
               {error === 'Artist profile not found' ? 'Artist Not Found' : 'Something Went Wrong'}
             </h2>
             <p className="text-stone-500 text-sm max-w-xs mx-auto">
@@ -137,13 +137,13 @@ const PublicArtistProfile = () => {
           <div className="flex gap-3">
             <button
               onClick={() => window.location.reload()}
-              className="rounded-xl border border-stone-200 bg-white px-5 py-2.5 text-sm font-medium text-stone-700 hover:bg-stone-50 transition shadow-sm"
+              className="rounded-lg border border-stone-200 bg-white px-5 py-2.5 text-sm font-medium text-stone-700 hover:bg-stone-50 transition"
             >
               Try Again
             </button>
             <button
               onClick={() => navigate('/marketplace')}
-              className="rounded-xl bg-amber-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-amber-700 transition shadow-sm"
+                    className="rounded-lg bg-[#000] px-5 py-2.5 text-sm font-semibold text-white hover:bg-stone-800 transition"
             >
               Back to Marketplace
             </button>
@@ -160,7 +160,7 @@ const PublicArtistProfile = () => {
   const isOwnProfile = user?.id === profile.user?.id;
 
   return (
-    <div className="min-h-screen bg-stone-50 flex flex-col">
+      <div className="min-h-screen bg-[#faf9f7] flex flex-col">
       <Header />
 
       {/* Instagram / Facebook-Style Fixed Side Navigation (Only for profile owner) */}
@@ -197,7 +197,7 @@ const PublicArtistProfile = () => {
                   />
                 ) : (
                   <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-amber-400 to-amber-600">
-                    <span className="text-4xl font-bold text-white" style={{ fontFamily: "'Playfair Display', serif" }}>
+                    <span className="text-4xl font-bold text-white">
                       {profile.user.username.charAt(0).toUpperCase()}
                     </span>
                   </div>
@@ -233,7 +233,6 @@ const PublicArtistProfile = () => {
               <div className="min-w-0">
                 <h1
                   className="text-3xl sm:text-4xl font-bold text-stone-900 truncate leading-tight"
-                  style={{ fontFamily: "'Playfair Display', serif" }}
                 >
                   {profile.user.first_name || profile.user.username}
                   {profile.user.last_name ? ` ${profile.user.last_name}` : ''}
@@ -305,7 +304,7 @@ const PublicArtistProfile = () => {
                 {isOwnProfile ? (
                   <button
                     onClick={() => navigate('/profile/edit')}
-                    className="rounded-xl bg-amber-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-amber-700 active:bg-amber-800 transition shadow-sm whitespace-nowrap flex items-center gap-2"
+                    className="rounded-lg bg-[#000] px-4 py-2.5 text-sm font-semibold text-white hover:bg-stone-800 active:bg-stone-900 transition whitespace-nowrap flex items-center gap-2"
                   >
                     <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -315,7 +314,7 @@ const PublicArtistProfile = () => {
                 ) : (
                   <button
                     onClick={handleCommissionClick}
-                    className="rounded-xl bg-amber-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-amber-700 active:bg-amber-800 transition shadow-sm whitespace-nowrap flex items-center gap-2"
+                    className="rounded-lg bg-[#000] px-5 py-2.5 text-sm font-semibold text-white hover:bg-stone-800 active:bg-stone-900 transition whitespace-nowrap flex items-center gap-2"
                   >
                     <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
@@ -329,7 +328,7 @@ const PublicArtistProfile = () => {
 
           {/* Stats Section */}
           <div className="mt-8 grid grid-cols-3 gap-3 sm:gap-4">
-            <div className="rounded-2xl border border-stone-200 bg-white p-4 sm:p-5 text-center hover:shadow-md transition-shadow duration-300">
+            <div className="rounded-lg border border-stone-200 bg-white p-4 sm:p-5 text-center hover:border-stone-300 transition-colors duration-300">
               <div className="mx-auto mb-2 h-10 w-10 rounded-full bg-amber-100 flex items-center justify-center">
                 <svg className="h-5 w-5 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -339,7 +338,7 @@ const PublicArtistProfile = () => {
               <p className="text-xs text-stone-500 mt-0.5">Artworks</p>
             </div>
 
-            <div className="rounded-2xl border border-stone-200 bg-white p-4 sm:p-5 text-center hover:shadow-md transition-shadow duration-300">
+            <div className="rounded-lg border border-stone-200 bg-white p-4 sm:p-5 text-center hover:border-stone-300 transition-colors duration-300">
               <div className="mx-auto mb-2 h-10 w-10 rounded-full bg-stone-100 flex items-center justify-center">
                 <svg className="h-5 w-5 text-stone-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -353,7 +352,7 @@ const PublicArtistProfile = () => {
               <p className="text-xs text-stone-500 mt-0.5">Joined</p>
             </div>
 
-            <div className="rounded-2xl border border-stone-200 bg-white p-4 sm:p-5 text-center hover:shadow-md transition-shadow duration-300">
+            <div className="rounded-lg border border-stone-200 bg-white p-4 sm:p-5 text-center hover:border-stone-300 transition-colors duration-300">
               <div className="mx-auto mb-2 h-10 w-10 rounded-full bg-emerald-100 flex items-center justify-center">
                 <svg className="h-5 w-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -368,7 +367,7 @@ const PublicArtistProfile = () => {
 
           {/* Bio Section */}
           {profile.bio && (
-            <div className="mt-6 rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
+            <div className="mt-6 rounded-lg border border-stone-200 bg-white p-6">
               <div className="flex items-center gap-2 mb-3">
                 <svg className="h-4 w-4 text-stone-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -381,7 +380,7 @@ const PublicArtistProfile = () => {
 
           {/* Social Links Section (Mobile & Desktop details) */}
           {Object.keys(socialLinks).length > 0 && (
-            <div className="mt-6 rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
+            <div className="mt-6 rounded-lg border border-stone-200 bg-white p-6">
               <div className="flex items-center gap-2 mb-3">
                 <svg className="h-4 w-4 text-stone-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
@@ -394,7 +393,7 @@ const PublicArtistProfile = () => {
                     href={socialLinks.instagram}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 rounded-xl bg-stone-50 border border-stone-200 px-4 py-2.5 text-sm font-medium text-stone-700 hover:bg-pink-50 hover:text-pink-600 hover:border-pink-200 transition-all duration-200 shadow-sm"
+                    className="inline-flex items-center gap-2 rounded-lg bg-stone-50 border border-stone-200 px-4 py-2.5 text-sm font-medium text-stone-700 hover:bg-pink-50 hover:text-pink-600 hover:border-pink-200 transition-all duration-200"
                   >
                     <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z" />
@@ -407,7 +406,7 @@ const PublicArtistProfile = () => {
                     href={socialLinks.facebook}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 rounded-xl bg-stone-50 border border-stone-200 px-4 py-2.5 text-sm font-medium text-stone-700 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition-all duration-200 shadow-sm"
+                    className="inline-flex items-center gap-2 rounded-lg bg-stone-50 border border-stone-200 px-4 py-2.5 text-sm font-medium text-stone-700 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition-all duration-200"
                   >
                     <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
@@ -420,7 +419,7 @@ const PublicArtistProfile = () => {
                     href={socialLinks.website}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 rounded-xl bg-stone-50 border border-stone-200 px-4 py-2.5 text-sm font-medium text-stone-700 hover:bg-stone-100 hover:text-stone-900 hover:border-stone-300 transition-all duration-200 shadow-sm"
+                    className="inline-flex items-center gap-2 rounded-lg bg-stone-50 border border-stone-200 px-4 py-2.5 text-sm font-medium text-stone-700 hover:bg-stone-100 hover:text-stone-900 hover:border-stone-300 transition-all duration-200"
                   >
                     <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
@@ -438,7 +437,6 @@ const PublicArtistProfile = () => {
               <div className="flex items-center gap-3">
                 <h2
                   className="text-2xl font-bold text-stone-900"
-                  style={{ fontFamily: "'Playfair Display', serif" }}
                 >
                   Artworks
                 </h2>
@@ -453,19 +451,19 @@ const PublicArtistProfile = () => {
             {artworksLoading ? (
               <div className="columns-2 sm:columns-3 gap-3 space-y-3">
                 {Array.from({ length: 6 }).map((_, i) => (
-                  <div key={i} className="break-inside-avoid rounded-2xl overflow-hidden bg-stone-100 animate-pulse">
+                  <div key={i} className="break-inside-avoid rounded-lg overflow-hidden bg-stone-100 animate-pulse">
                     <div className={`${i % 3 === 0 ? 'aspect-[3/4]' : i % 3 === 1 ? 'aspect-square' : 'aspect-[4/3]'} w-full bg-stone-200`} />
                   </div>
                 ))}
               </div>
             ) : artworks.length === 0 ? (
-              <div className="rounded-2xl border border-dashed border-stone-300 bg-white p-16 text-center">
+              <div className="rounded-lg border border-dashed border-stone-300 bg-white p-16 text-center">
                 <div className="mx-auto mb-4 h-16 w-16 rounded-full bg-stone-100 flex items-center justify-center">
                   <svg className="h-8 w-8 text-stone-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
                 </div>
-                <h3 className="text-lg font-semibold text-stone-700 mb-1" style={{ fontFamily: "'Playfair Display', serif" }}>
+                <h3 className="text-lg font-semibold text-stone-700 mb-1">
                   {isOwnProfile ? 'Your Gallery is Empty' : 'No Artworks Yet'}
                 </h3>
                 <p className="text-stone-500 text-sm max-w-xs mx-auto mb-4">
@@ -476,7 +474,7 @@ const PublicArtistProfile = () => {
                 {isOwnProfile && (
                   <button
                     onClick={() => navigate('/artworks/create')}
-                    className="rounded-xl bg-amber-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-amber-700 transition shadow-sm"
+              className="rounded-lg bg-[#000] px-5 py-2.5 text-sm font-semibold text-white hover:bg-stone-800 transition"
                   >
                     + Create First Artwork
                   </button>
@@ -494,7 +492,7 @@ const PublicArtistProfile = () => {
                     <div
                       key={artwork.id}
                       onClick={() => navigate(`/artworks/${artwork.id}`)}
-                      className="group cursor-pointer break-inside-avoid rounded-2xl overflow-hidden relative bg-stone-100 shadow-sm"
+                      className="group cursor-pointer break-inside-avoid rounded-lg overflow-hidden relative bg-stone-100"
                     >
                       {primaryImage ? (
                         <img

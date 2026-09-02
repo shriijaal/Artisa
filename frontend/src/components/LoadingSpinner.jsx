@@ -12,7 +12,7 @@ const LoadingSpinner = ({ size = 'md', fullPage = true, label = 'Loading...' }) 
   const spinner = (
     <div className="flex flex-col items-center gap-3">
       <div
-        className={`${sizeClasses[size]} rounded-full border-stone-200 border-t-amber-600 animate-spin`}
+        className={`${sizeClasses[size]} rounded-full border-stone-200 border-t-stone-900 animate-spin`}
         role="status"
         aria-label={label}
       />
@@ -25,7 +25,7 @@ const LoadingSpinner = ({ size = 'md', fullPage = true, label = 'Loading...' }) 
   if (!fullPage) return spinner;
 
   return (
-    <div className="min-h-screen bg-stone-50 flex items-center justify-center">
+    <div className="min-h-screen bg-[#faf9f7] flex items-center justify-center">
       {spinner}
     </div>
   );

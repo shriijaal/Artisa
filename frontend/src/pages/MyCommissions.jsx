@@ -91,17 +91,14 @@ const MyCommissions = () => {
   if (loading) return <LoadingSpinner label="Loading your commissions..." />;
 
   return (
-    <div className="min-h-screen bg-stone-50">
+    <div className="min-h-screen bg-[#faf9f7]">
       <Header />
       <main className="mx-auto max-w-5xl px-4 sm:px-6 py-10">
 
         {/* Page Header */}
         <div className="flex items-start justify-between mb-8">
           <div>
-            <h1
-              className="text-2xl font-bold text-stone-900"
-              style={{ fontFamily: "'Playfair Display', serif" }}
-            >
+            <h1 className="text-2xl font-bold text-stone-900">
               My Commissions
             </h1>
             <p className="text-sm text-stone-500 mt-1">
@@ -109,7 +106,7 @@ const MyCommissions = () => {
             </p>
           </div>
           {needsAttention > 0 && (
-            <div className="rounded-xl bg-orange-50 border border-orange-200 px-4 py-3 text-sm text-orange-700 font-medium flex items-center gap-2">
+            <div className="rounded-lg bg-[#9c4327]/10 border border-[#9c4327]/20 px-4 py-3 text-sm text-[#9c4327] font-medium flex items-center gap-2">
               <span className="text-base">📦</span>
               {needsAttention} {needsAttention === 1 ? 'delivery' : 'deliveries'} awaiting your review
             </div>
@@ -142,7 +139,7 @@ const MyCommissions = () => {
 
         {/* Commission List */}
         {filtered.length === 0 ? (
-          <div className="rounded-2xl border border-stone-200 bg-white p-12 text-center">
+          <div className="rounded-lg border border-stone-200 bg-white p-12 text-center">
             <p className="text-3xl mb-3">🎨</p>
             <p className="font-semibold text-stone-700 mb-1">
               {filter === 'all' ? 'No commissions yet' : `No ${STATUS_CONFIG[filter]?.label || filter} commissions`}
@@ -155,7 +152,7 @@ const MyCommissions = () => {
             {filter === 'all' && (
               <button
                 onClick={() => navigate('/marketplace')}
-                className="rounded-xl bg-amber-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-amber-700 transition shadow-sm"
+                className="rounded-lg bg-[#000] px-5 py-2.5 text-sm font-semibold text-white hover:bg-stone-800 transition"
               >
                 Browse Artists
               </button>
@@ -172,7 +169,7 @@ const MyCommissions = () => {
                 <div
                   key={c.id}
                   onClick={() => navigate(`/commissions/${c.id}`)}
-                  className={`cursor-pointer rounded-xl border bg-white p-5 hover:shadow-md transition group ${
+                  className={`cursor-pointer rounded-lg border bg-white p-5 hover:border-stone-300 transition group ${
                     needsReview ? 'border-orange-200' : 'border-stone-200'
                   }`}
                 >

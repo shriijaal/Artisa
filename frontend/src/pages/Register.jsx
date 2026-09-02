@@ -53,13 +53,13 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-stone-50 py-12">
+    <div className="min-h-screen flex items-center justify-center bg-[#faf9f7] py-12">
       <div className="max-w-md w-full">
-        <div className="bg-white rounded-3xl shadow-lg shadow-stone-200/50 border border-stone-200 p-10 page-enter">
-          <h1 className="text-3xl font-bold text-center mb-2 text-stone-900" style={{ fontFamily: "'Playfair Display', serif" }}>Create an account</h1>
+        <div className="bg-white rounded-lg border border-stone-200 p-10 page-enter">
+          <h1 className="text-3xl font-bold text-center mb-2 text-stone-900 font-heading">Create an account</h1>
           <p className="text-stone-500 text-center mb-6">Join Artisa today</p>
 
-          <div className="flex items-start gap-3 p-3.5 bg-amber-50 border border-amber-200 rounded-xl mb-6">
+          <div className="flex items-start gap-3 p-3.5 bg-amber-50 border border-amber-200 rounded-lg mb-6">
             <svg className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
@@ -170,7 +170,7 @@ const Register = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-amber-600 text-white py-3 rounded-xl font-semibold hover:bg-amber-700 transition shadow-sm disabled:opacity-50 disabled:cursor-not-allowed mt-2"
+              className="w-full bg-[#000] text-white py-3 rounded-lg font-semibold hover:bg-stone-800 transition disabled:opacity-50 disabled:cursor-not-allowed mt-2"
             >
               {loading ? 'Creating account...' : 'Create account →'}
             </button>
@@ -178,7 +178,7 @@ const Register = () => {
 
           <p className="mt-6 text-center text-sm text-stone-600">
             Already have an account?{' '}
-            <Link to="/login" className="font-semibold text-amber-600 hover:text-amber-700">
+            <Link to="/login" className="font-semibold text-[#9c4327] hover:text-[#7a3520]">
               Sign in
             </Link>
           </p>

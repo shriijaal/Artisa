@@ -96,20 +96,20 @@ const Wishlist = () => {
   }
 
   return (
-    <div className="min-h-screen bg-stone-50">
+    <div className="min-h-screen bg-[#faf9f7]">
       <Header />
 
       <main className="mx-auto max-w-4xl px-6 py-10 page-enter">
         {/* Page Header */}
         <div className="mb-8">
           <div className="flex items-center gap-2 text-sm text-stone-500 mb-3">
-            <button onClick={() => navigate('/marketplace')} className="hover:text-amber-600 transition-colors">
+            <button onClick={() => navigate('/marketplace')} className="hover:text-[#9c4327] transition-colors">
               Marketplace
             </button>
             <span>/</span>
             <span className="font-medium text-stone-800">My Wishlist</span>
           </div>
-          <h1 className="text-3xl font-bold text-stone-900" style={{ fontFamily: "'Playfair Display', serif" }}>
+          <h1 className="text-3xl font-bold text-stone-900">
             My Wishlist
           </h1>
           <p className="mt-2 text-stone-500">
@@ -118,7 +118,7 @@ const Wishlist = () => {
         </div>
 
         {favorites.length === 0 ? (
-          <div className="rounded-2xl border border-stone-200 bg-white p-16 text-center shadow-sm">
+          <div className="rounded-lg border border-stone-200 bg-white p-16 text-center">
             <div className="mx-auto mb-4 h-16 w-16 rounded-full bg-stone-100 flex items-center justify-center">
               <svg className="h-8 w-8 text-stone-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
@@ -128,7 +128,7 @@ const Wishlist = () => {
             <p className="text-stone-500 text-sm mb-6">Browse the marketplace and save artworks you love.</p>
             <button
               onClick={() => navigate('/marketplace')}
-              className="rounded-lg bg-amber-600 px-6 py-2.5 text-sm font-semibold text-white hover:bg-amber-700 transition-colors shadow-sm"
+              className="rounded-lg bg-[#000] px-6 py-2.5 text-sm font-semibold text-white hover:bg-stone-800 transition-colors"
             >
               Browse Artworks
             </button>
@@ -138,9 +138,9 @@ const Wishlist = () => {
             {favorites.map((favorite) => {
               const artwork = artworks[favorite.artwork_id];
               if (!artwork) return (
-                <div key={favorite.id} className="rounded-2xl border border-stone-200 bg-white p-6 animate-pulse">
+                <div key={favorite.id} className="rounded-lg border border-stone-200 bg-white p-6 animate-pulse">
                   <div className="flex gap-6">
-                    <div className="h-28 w-28 rounded-xl bg-stone-200 flex-shrink-0" />
+                    <div className="h-28 w-28 rounded-lg bg-stone-200 flex-shrink-0" />
                     <div className="flex-1 space-y-3 pt-2">
                       <div className="h-4 bg-stone-200 rounded w-3/4" />
                       <div className="h-3 bg-stone-100 rounded w-1/2" />
@@ -152,11 +152,11 @@ const Wishlist = () => {
               const primaryImage = artwork.images?.find(img => img.is_primary) || artwork.images?.[0];
 
               return (
-                <div key={favorite.id} className="group rounded-2xl border border-stone-200 bg-white p-4 sm:p-5 shadow-sm hover:shadow-md transition-shadow">
+                <div key={favorite.id} className="group rounded-lg border border-stone-200 bg-white p-4 sm:p-5 hover:border-stone-300 transition-colors">
                   <div className="flex flex-col sm:flex-row gap-4 sm:gap-5">
                     {/* Thumbnail */}
                     <div
-                      className="h-40 w-full sm:h-28 sm:w-28 flex-shrink-0 overflow-hidden rounded-xl bg-stone-100 cursor-pointer"
+                      className="h-40 w-full sm:h-28 sm:w-28 flex-shrink-0 overflow-hidden rounded-lg bg-stone-100 cursor-pointer"
                       onClick={() => navigate(`/artworks/${artwork.id}`)}
                     >
                       {primaryImage ? (
@@ -179,7 +179,7 @@ const Wishlist = () => {
                       <div className="flex items-start justify-between gap-4">
                         <div className="min-w-0">
                           <h3
-                            className="text-base font-semibold text-stone-900 truncate cursor-pointer hover:text-amber-600 transition-colors"
+                            className="text-base font-semibold text-stone-900 truncate cursor-pointer hover:text-[#9c4327] transition-colors"
                             onClick={() => navigate(`/artworks/${artwork.id}`)}
                           >
                             {artwork.title}
@@ -208,7 +208,7 @@ const Wishlist = () => {
                         </button>
                         <button
                           onClick={() => addToCart(artwork.id)}
-                          className="rounded-lg bg-amber-600 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-700 transition-colors shadow-sm"
+                          className="rounded-lg bg-[#000] px-4 py-2 text-sm font-semibold text-white hover:bg-stone-800 transition-colors"
                         >
                           Add to Cart
                         </button>

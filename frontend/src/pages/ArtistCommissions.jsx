@@ -92,7 +92,7 @@ const ArtistCommissions = () => {
   if (loading) return <LoadingSpinner label="Loading commission requests..." />;
 
   return (
-    <div className="min-h-screen bg-stone-50">
+    <div className="min-h-screen bg-[#faf9f7]">
       <Header />
       <main className="mx-auto max-w-5xl px-4 sm:px-6 py-10">
 
@@ -101,7 +101,6 @@ const ArtistCommissions = () => {
           <div>
             <h1
               className="text-2xl font-bold text-stone-900"
-              style={{ fontFamily: "'Playfair Display', serif" }}
             >
               Commission Requests
             </h1>
@@ -111,13 +110,13 @@ const ArtistCommissions = () => {
           </div>
           <div className="flex gap-3 flex-wrap">
             {pendingCount > 0 && (
-              <div className="rounded-xl bg-yellow-50 border border-yellow-200 px-4 py-3 text-sm text-yellow-800 font-medium flex items-center gap-2">
+              <div className="rounded-lg bg-yellow-50 border border-yellow-200 px-4 py-3 text-sm text-yellow-800 font-medium flex items-center gap-2">
                 <span>⏳</span>
                 {pendingCount} new {pendingCount === 1 ? 'request' : 'requests'} pending response
               </div>
             )}
             {urgentCount > 0 && (
-              <div className="rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700 font-medium flex items-center gap-2">
+              <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700 font-medium flex items-center gap-2">
                 <span>⚠</span>
                 {urgentCount} deadline{urgentCount !== 1 ? 's' : ''} approaching
               </div>
@@ -151,7 +150,7 @@ const ArtistCommissions = () => {
 
         {/* Commission List */}
         {filtered.length === 0 ? (
-          <div className="rounded-2xl border border-stone-200 bg-white p-12 text-center">
+          <div className="rounded-lg border border-stone-200 bg-white p-12 text-center">
             <p className="text-3xl mb-3">📭</p>
             <p className="font-semibold text-stone-700 mb-1">
               {filter === 'all' ? 'No commissions yet' : `No ${STATUS_CONFIG[filter]?.label || filter} commissions`}
@@ -173,7 +172,7 @@ const ArtistCommissions = () => {
                 <div
                   key={c.id}
                   onClick={() => navigate(`/commissions/${c.id}`)}
-                  className={`cursor-pointer rounded-xl border bg-white p-5 hover:shadow-md transition group ${
+                  className={`cursor-pointer rounded-lg border bg-white p-5 hover:border-stone-300 transition group ${
                     isNewRequest ? 'border-yellow-200' : 'border-stone-200'
                   }`}
                 >

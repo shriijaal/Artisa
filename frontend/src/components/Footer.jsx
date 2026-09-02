@@ -8,10 +8,7 @@ const Footer = () => {
           {/* Brand */}
           <div>
             <Link to="/" className="inline-block">
-              <span
-                style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
-                className="text-xl font-bold text-white tracking-tight"
-              >
+              <span className="text-xl font-bold text-white tracking-tight font-serif">
                 Artisa
               </span>
             </Link>
@@ -25,13 +22,13 @@ const Footer = () => {
             <h4 className="text-sm font-semibold text-white uppercase tracking-wider mb-4">Quick Links</h4>
             <ul className="space-y-2.5">
               <li>
-                <Link to="/marketplace" className="text-sm hover:text-amber-400 transition-colors">Marketplace</Link>
+                <Link to="/marketplace" className="text-sm hover:text-[#9c4327] transition-colors">Marketplace</Link>
               </li>
               <li>
-                <Link to="/register" className="text-sm hover:text-amber-400 transition-colors">Join as Artist</Link>
+                <Link to="/register" className="text-sm hover:text-[#9c4327] transition-colors">Join as Artist</Link>
               </li>
               <li>
-                <Link to="/login" className="text-sm hover:text-amber-400 transition-colors">Sign In</Link>
+                <Link to="/login" className="text-sm hover:text-[#9c4327] transition-colors">Sign In</Link>
               </li>
             </ul>
           </div>

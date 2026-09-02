@@ -66,7 +66,7 @@ const AdminCategories = () => {
         </div>
         <button
           onClick={() => { setShowForm(!showForm); setEditCategory(null); setForm({ name: '', slug: '', description: '', parent: '' }); }}
-          className="px-4 py-2.5 text-sm font-medium text-white bg-amber-600 rounded-lg hover:bg-amber-700 transition-colors"
+          className="px-4 py-2.5 text-sm font-medium text-white bg-[#000] rounded-lg hover:bg-stone-800 transition-colors"
         >
           {showForm ? 'Cancel' : 'Add Category'}
         </button>
@@ -74,7 +74,7 @@ const AdminCategories = () => {
 
       {/* Form */}
       {showForm && (
-        <form onSubmit={handleSubmit} className="bg-white rounded-xl border border-stone-200 p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="bg-white rounded-lg border border-stone-200 p-6 space-y-4">
           <h3 className="text-sm font-semibold text-stone-900">{editCategory ? 'Edit Category' : 'New Category'}</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
@@ -121,7 +121,7 @@ const AdminCategories = () => {
           </div>
           <button
             type="submit"
-            className="px-4 py-2 text-sm font-medium text-white bg-amber-600 rounded-lg hover:bg-amber-700"
+            className="px-4 py-2 text-sm font-medium text-white bg-[#000] rounded-lg hover:bg-stone-800"
           >
             {editCategory ? 'Save Changes' : 'Create Category'}
           </button>
@@ -143,7 +143,7 @@ const AdminCategories = () => {
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-xl border border-stone-200 overflow-hidden">
+      <div className="bg-white rounded-lg border border-stone-200 overflow-hidden">
         {loading ? (
           <div className="flex items-center justify-center h-48">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-600" />

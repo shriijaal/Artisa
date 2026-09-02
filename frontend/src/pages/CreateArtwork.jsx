@@ -171,7 +171,7 @@ const CreateArtwork = () => {
   const isApprovedArtist = user?.artist_profile?.status === 'approved';
 
   return (
-    <div className="min-h-screen bg-stone-50 flex flex-col">
+    <div className="min-h-screen bg-[#faf9f7] flex flex-col">
       <Header />
 
       {isApprovedArtist && <ArtistSideNav />}
@@ -179,13 +179,13 @@ const CreateArtwork = () => {
       <main className={`mx-auto w-full max-w-3xl px-6 py-10 page-enter flex-1 ${isApprovedArtist ? 'md:pl-60 xl:pl-72' : ''}`}>
         <div className="mb-8">
           <div className="flex items-center gap-2 text-sm text-stone-500 mb-3">
-            <button onClick={() => navigate('/my-artworks')} className="hover:text-amber-600 transition-colors">
+            <button onClick={() => navigate('/my-artworks')} className="hover:text-[#9c4327] transition-colors">
               My Artworks
             </button>
             <span>/</span>
             <span className="font-medium text-stone-800">Create Artwork</span>
           </div>
-          <h1 className="text-3xl font-bold text-stone-900" style={{ fontFamily: "'Playfair Display', serif" }}>Create New Artwork</h1>
+          <h1 className="text-3xl font-bold text-stone-900">Create New Artwork</h1>
           <p className="mt-2 text-stone-500">
             Add your artwork to the marketplace. It will be saved as a draft for review.
           </p>
@@ -380,14 +380,14 @@ const CreateArtwork = () => {
             <button
               onClick={() => navigate('/my-artworks')}
               type="button"
-              className="w-full sm:w-auto rounded-lg border border-stone-200 bg-white px-6 py-3 text-sm font-semibold text-stone-600 hover:bg-stone-50 transition-colors shadow-sm"
+              className="w-full sm:w-auto rounded-lg border border-stone-200 bg-white px-6 py-3 text-sm font-semibold text-stone-600 hover:bg-stone-50 transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={submitting}
-              className="w-full sm:w-auto rounded-lg bg-amber-600 px-8 py-3 text-sm font-semibold text-white hover:bg-amber-700 transition-colors shadow-sm disabled:opacity-50"
+              className="w-full sm:w-auto rounded-lg bg-[#000] px-8 py-3 text-sm font-semibold text-white hover:bg-stone-800 transition-colors disabled:opacity-50"
             >
               {submitting ? 'Submitting...' : 'Create Artwork →'}
             </button>

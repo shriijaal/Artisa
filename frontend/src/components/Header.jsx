@@ -80,7 +80,7 @@ const Header = () => {
   const hasQuery = searchQuery.trim().length > 0;
 
   const SearchDropdown = () => (
-    <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-2xl border border-stone-200 overflow-hidden z-[60] max-h-[70vh] overflow-y-auto">
+    <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg border border-stone-200 overflow-hidden z-[60] max-h-[70vh] overflow-y-auto">
       {hasQuery ? (
         <div className="py-2">
           {searching ? <div className="py-8 text-center text-sm text-stone-400">Searching...</div> : (
@@ -200,7 +200,7 @@ const Header = () => {
     <header className="sticky top-0 z-50 border-b border-stone-200 bg-white/95 backdrop-blur-sm">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3.5 gap-4">
         <Link to="/" className="group flex-shrink-0">
-          <span style={{ fontFamily: "'Playfair Display', Georgia, serif" }} className="text-xl font-bold text-stone-900 tracking-tight group-hover:text-amber-600 transition-colors">Artisa</span>
+          <span className="font-heading text-xl font-bold text-stone-900 tracking-tight group-hover:text-amber-600 transition-colors">Artisa</span>
         </Link>
         <nav className="hidden md:flex items-center gap-7 flex-shrink-0">
           <Link to="/marketplace" className={navLinkClass('/marketplace')}>Marketplace</Link>
@@ -208,7 +208,7 @@ const Header = () => {
         <div ref={searchWrapperRef} className="relative flex-1 max-w-md hidden md:block">
           <form onSubmit={handleSearchSubmit} className="relative">
             <svg className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-stone-400 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-            <input ref={searchInputRef} type="text" placeholder="Search artworks, artists, tags..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} onFocus={() => setSearchFocused(true)} className="w-full pl-9 pr-16 py-2 text-sm bg-stone-50 border border-stone-200 rounded-xl text-stone-900 placeholder:text-stone-400 outline-none focus:border-stone-400 focus:ring-1 focus:ring-stone-400 transition" />
+            <input ref={searchInputRef} type="text" placeholder="Search artworks, artists, tags..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} onFocus={() => setSearchFocused(true)} className="w-full pl-9 pr-16 py-2 text-sm bg-stone-50 border border-stone-200 rounded-lg text-stone-900 placeholder:text-stone-400 outline-none focus:border-stone-400 focus:ring-1 focus:ring-stone-400 transition" />
             <kbd className="absolute right-2.5 top-1/2 -translate-y-1/2 hidden lg:inline-flex items-center gap-0.5 rounded-md border border-stone-200 bg-white px-1.5 py-0.5 text-[10px] font-medium text-stone-400 pointer-events-none">Ctrl K</kbd>
           </form>
           {searchFocused && <SearchDropdown />}
@@ -236,7 +236,7 @@ const Header = () => {
                   <svg className={`h-4 w-4 text-stone-500 transition-transform ${menuOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
                 </button>
                 {menuOpen && (
-                  <div className="absolute right-0 mt-2 w-52 rounded-xl border border-stone-200 bg-white shadow-xl py-1.5 z-50">
+                  <div className="absolute right-0 mt-2 w-52 rounded-lg border border-stone-200 bg-white py-1.5 z-50">
                     <div className="px-4 py-2 border-b border-stone-100">
                       <p className="text-sm font-semibold text-stone-900 truncate">@{user.username}</p>
                       {user.role === 'admin' && <span className="text-[10px] font-medium text-violet-600">Admin</span>}
@@ -272,7 +272,7 @@ const Header = () => {
                       <Link
                         to={!user?.artist_profile ? '/artist-application' : user.artist_profile.status === 'rejected' ? '/artist-application' : '/profile/edit'}
                         onClick={() => setMenuOpen(false)}
-                        className="flex items-center gap-2.5 px-4 py-2 text-sm text-amber-700 hover:bg-amber-50"
+                        className="flex items-center gap-2.5 px-4 py-2 text-sm text-[#9c4327] hover:bg-stone-50"
                       >
                         <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
                         {!user?.artist_profile ? 'Apply as Artist' : user.artist_profile.status === 'pending' ? 'Application Pending' : 'Re-apply as Artist'}
@@ -311,7 +311,7 @@ const Header = () => {
           ) : (
             <div className="flex items-center gap-3">
               <Link to="/login" className="text-sm font-medium text-stone-600 hover:text-stone-900 transition-colors">Sign in</Link>
-              <Link to="/register" className="rounded-lg bg-amber-600 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-700 transition-colors shadow-sm">Get started</Link>
+              <Link to="/register" className="rounded-lg bg-[#000] px-4 py-2 text-sm font-semibold text-white hover:bg-stone-800 transition-colors">Get started</Link>
             </div>
           )}
         </div>
@@ -323,7 +323,7 @@ const Header = () => {
             <button onClick={() => { setSearchFocused(false); setSearchQuery(''); }} className="p-1 text-stone-500"><svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg></button>
             <form onSubmit={handleSearchSubmit} className="flex-1 relative">
               <svg className="absolute left-0 top-1/2 -translate-y-1/2 h-4 w-4 text-stone-400 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-              <input ref={searchInputRef} type="text" placeholder="Search artworks, artists, tags..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="w-full pl-7 pr-4 py-2 text-sm bg-stone-50 border border-stone-200 rounded-xl text-stone-900 placeholder:text-stone-400 outline-none focus:border-stone-400 focus:ring-1 focus:ring-stone-400 transition" />
+              <input ref={searchInputRef} type="text" placeholder="Search artworks, artists, tags..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="w-full pl-7 pr-4 py-2 text-sm bg-stone-50 border border-stone-200 rounded-lg text-stone-900 placeholder:text-stone-400 outline-none focus:border-stone-400 focus:ring-1 focus:ring-stone-400 transition" />
             </form>
           </div>
           <div className="flex-1 overflow-y-auto">

@@ -215,7 +215,7 @@ const Marketplace = () => {
   );
 
   return (
-    <div className="min-h-screen bg-stone-50">
+    <div className="min-h-screen bg-[#faf9f7]">
       <Header />
 
       <main className="mx-auto max-w-7xl px-4 sm:px-6 py-6 sm:py-8">
@@ -276,14 +276,14 @@ const Marketplace = () => {
                 <LoadingSpinner fullPage={false} label="Loading masterworks..." />
               </div>
             ) : artworks.length === 0 ? (
-              <div className="rounded-2xl border border-dashed border-stone-300 bg-white p-12 text-center">
+              <div className="rounded-lg border border-dashed border-stone-200 bg-white p-12 text-center">
                 <svg className="mx-auto h-12 w-12 text-stone-300 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
                 <p className="text-stone-500 text-sm">No artworks found matching your filters.</p>
                 <button
                   onClick={clearFilters}
-                  className="mt-4 rounded-lg bg-amber-600 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-700 transition shadow-sm"
+                  className="mt-4 rounded-lg bg-[#000] px-4 py-2 text-sm font-semibold text-white hover:bg-stone-800 transition"
                 >
                   Clear Filters
                 </button>
@@ -315,7 +315,7 @@ const Marketplace = () => {
                       onClick={() => navigate(`/artworks/${artwork.id}`)}
                       className="group cursor-pointer"
                     >
-                      <div className="aspect-[4/5] overflow-hidden bg-stone-100 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 relative">
+                      <div className="aspect-[4/5] overflow-hidden bg-stone-100 rounded-lg border border-stone-200 hover:border-stone-300 transition-all duration-300 hover:-translate-y-1 relative">
                         {primaryImage ? (
                           <img
                             src={`http://127.0.0.1:8000${primaryImage.image}`}
@@ -429,7 +429,7 @@ const Marketplace = () => {
                                 <span className="font-medium">{artwork.avg_rating}</span>
                               </span>
                             )}
-                            <span className="text-xs font-medium text-amber-600 whitespace-nowrap">
+                            <span className="text-xs font-medium text-[#9c4327] whitespace-nowrap">
                               View
                             </span>
                           </div>

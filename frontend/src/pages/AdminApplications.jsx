@@ -88,7 +88,7 @@ const AdminApplications = () => {
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-xl border border-stone-200 overflow-hidden">
+      <div className="bg-white rounded-lg border border-stone-200 overflow-hidden">
         {loading ? (
           <div className="flex items-center justify-center h-48">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-600" />
@@ -152,7 +152,7 @@ const AdminApplications = () => {
       {/* Reject Modal */}
       {actionModal && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl">
+          <div className="bg-white rounded-lg max-w-md w-full p-6">
             <h3 className="text-lg font-bold text-stone-900">Reject Application</h3>
             <p className="text-sm text-stone-500 mt-1">Provide a reason for rejecting {actionModal.username}'s application.</p>
             <textarea

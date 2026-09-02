@@ -162,15 +162,15 @@ const CommissionRequest = () => {
   if (!artist) return null;
 
   return (
-    <div className="min-h-screen bg-stone-50">
+    <div className="min-h-screen bg-[#faf9f7]">
       <Header />
       <main className="mx-auto max-w-3xl px-6 py-12">
-        <h1 className="text-3xl font-bold text-stone-900 mb-8" style={{ fontFamily: "'Playfair Display', serif" }}>
+        <h1 className="text-3xl font-bold text-stone-900 mb-8">
           Request a Commission
         </h1>
 
         {/* Artist Card (read-only) */}
-        <div className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm mb-8">
+        <div className="rounded-lg border border-stone-200 bg-white p-6 mb-8">
           <div className="flex items-center gap-4">
             <div className="h-16 w-16 rounded-full bg-white shadow overflow-hidden flex-shrink-0">
               {artist.user?.avatar ? (
@@ -304,7 +304,7 @@ const CommissionRequest = () => {
           <button
             type="submit"
             disabled={submitting}
-            className="w-full rounded-lg bg-amber-600 px-6 py-4 text-sm font-semibold text-white hover:bg-amber-700 transition disabled:opacity-50 shadow-sm"
+            className="w-full rounded-lg bg-[#000] px-6 py-4 text-sm font-semibold text-white hover:bg-stone-800 transition disabled:opacity-50"
           >
             {submitting ? 'Sending Request...' : 'Send Commission Request'}
           </button>
