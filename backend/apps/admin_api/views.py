@@ -175,6 +175,19 @@ def admin_artwork_remove(request, artwork_id):
     return Response({'message': 'Artwork removed'})
 
 
+@api_view(['PUT'])
+@permission_classes([IsAuthenticated, IsAdmin])
+def admin_artwork_restore(request, artwork_id):
+    try:
+        artwork = Artwork.objects.get(id=artwork_id)
+    except Artwork.DoesNotExist:
+        return Response({'error': 'Artwork not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    artwork.status = Artwork.Status.PUBLISHED
+    artwork.save()
+    return Response({'message': 'Artwork restored'})
+
+
 # ─── Categories ──────────────────────────────────────────────────────────
 
 @api_view(['GET', 'POST'])

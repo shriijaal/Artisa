@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import authFetch from '../utils/authFetch';
 
 const statusColors = {
@@ -14,8 +14,10 @@ const AdminArtworks = () => {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [typeFilter, setTypeFilter] = useState('');
+  const [toast, setToast] = useState(null);
+  const [undoTimeout, setUndoTimeout] = useState(null);
 
-  const fetchArtworks = () => {
+  const fetchArtworks = useCallback(() => {
     const params = new URLSearchParams();
     if (search) params.set('q', search);
     if (statusFilter) params.set('status', statusFilter);
@@ -25,13 +27,48 @@ const AdminArtworks = () => {
       .then(setArtworks)
       .catch(() => {})
       .finally(() => setLoading(false));
+  }, [search, statusFilter, typeFilter]);
+
+  useEffect(() => { fetchArtworks(); }, [fetchArtworks]);
+
+  useEffect(() => {
+    if (!toast) return;
+    const t = setTimeout(() => setToast(null), 6000);
+    return () => clearTimeout(t);
+  }, [toast]);
+
+  const showToast = (message, artworkId, action) => {
+    setToast({ message, artworkId, action });
   };
 
-  useEffect(() => { fetchArtworks(); }, [search, statusFilter, typeFilter]);
-
   const handleAction = async (artworkId, action) => {
-    const res = await authFetch(`/api/admin/artworks/${artworkId}/${action}/`, { method: 'PUT' });
-    if (res.ok) fetchArtworks();
+    if (action === 'remove') {
+      const res = await authFetch(`/api/admin/artworks/${artworkId}/remove/`, { method: 'PUT' });
+      if (res.ok) {
+        setArtworks((prev) => prev.filter((a) => a.id !== artworkId));
+        showToast('Artwork removed', artworkId, 'remove');
+      }
+    } else if (action === 'restore') {
+      const res = await authFetch(`/api/admin/artworks/${artworkId}/restore/`, { method: 'PUT' });
+      if (res.ok) {
+        setArtworks((prev) => prev.filter((a) => a.id !== artworkId));
+        showToast('Artwork restored', artworkId, 'restore');
+      }
+    } else {
+      const res = await authFetch(`/api/admin/artworks/${artworkId}/${action}/`, { method: 'PUT' });
+      if (res.ok) fetchArtworks();
+    }
+  };
+
+  const handleUndo = async () => {
+    if (!toast) return;
+    const { artworkId, action } = toast;
+    const reverseAction = action === 'remove' ? 'restore' : 'remove';
+    const res = await authFetch(`/api/admin/artworks/${artworkId}/${reverseAction}/`, { method: 'PUT' });
+    if (res.ok) {
+      setToast(null);
+      fetchArtworks();
+    }
   };
 
   return (
@@ -40,6 +77,22 @@ const AdminArtworks = () => {
         <h1 className="text-2xl font-bold text-stone-900 tracking-tight">Artworks</h1>
         <p className="text-sm text-stone-500 mt-1">Moderate artwork submissions</p>
       </div>
+
+      {/* Toast */}
+      {toast && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 bg-stone-900 text-white px-5 py-3 rounded-lg shadow-lg animate-[slideUp_0.2s_ease-out]">
+          <span className="text-sm">{toast.message}</span>
+          <button
+            onClick={handleUndo}
+            className="text-sm font-semibold text-amber-400 hover:text-amber-300 transition-colors"
+          >
+            Undo
+          </button>
+          <button onClick={() => setToast(null)} className="ml-1 text-stone-400 hover:text-white transition-colors">
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+          </button>
+        </div>
+      )}
 
       {/* Search + Filters */}
       <div className="flex flex-col sm:flex-row gap-3">
@@ -131,6 +184,14 @@ const AdminArtworks = () => {
                     className="w-full mt-3 px-3 py-1.5 text-xs font-medium text-red-700 bg-red-50 rounded-lg hover:bg-red-100 transition-colors"
                   >
                     Remove
+                  </button>
+                )}
+                {artwork.status === 'removed' && (
+                  <button
+                    onClick={() => handleAction(artwork.id, 'restore')}
+                    className="w-full mt-3 px-3 py-1.5 text-xs font-medium text-amber-700 bg-amber-50 rounded-lg hover:bg-amber-100 transition-colors"
+                  >
+                    Restore
                   </button>
                 )}
               </div>

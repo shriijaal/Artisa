@@ -207,24 +207,6 @@ const Home = () => {
           </section>
         )}
 
-        {/* ── MARQUEE ── */}
-        <div className="bg-white border-y border-stone-200 py-4 overflow-hidden">
-          <div className="marquee-track flex items-center gap-6 whitespace-nowrap">
-            {['Nepali Art','Digital Art','Paintings','Photography','Illustrations','Handmade','Mixed Media','Sculptures','Prints','Commissions Open','Original Art','Support Local Artists'].map((item) => (
-              <span key={item} className="flex items-center gap-6 text-sm uppercase tracking-[0.2em] text-stone-300 font-medium">
-                {item}
-                <span className="text-amber-400 text-xs">&#9670;</span>
-              </span>
-            ))}
-            {['Nepali Art','Digital Art','Paintings','Photography','Illustrations','Handmade','Mixed Media','Sculptures','Prints','Commissions Open','Original Art','Support Local Artists'].map((item) => (
-              <span key={`dup-${item}`} className="flex items-center gap-6 text-sm uppercase tracking-[0.2em] text-stone-300 font-medium">
-                {item}
-                <span className="text-amber-400 text-xs">&#9670;</span>
-              </span>
-            ))}
-          </div>
-        </div>
-
         {/* ── RECOMMENDATIONS ── */}
         <section ref={addRevealRef} className="reveal max-w-7xl mx-auto px-6 pt-20">
           <div className="flex justify-between items-end mb-8">
