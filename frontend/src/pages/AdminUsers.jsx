@@ -3,6 +3,7 @@ import authFetch from '../utils/authFetch';
 
 const roleColors = {
   admin: 'bg-violet-50 text-violet-700',
+  artist: 'bg-amber-50 text-amber-700',
   customer: 'bg-stone-100 text-stone-600',
 };
 
@@ -63,6 +64,7 @@ const AdminUsers = () => {
         >
           <option value="">All Roles</option>
           <option value="admin">Admin</option>
+          <option value="artist">Artist</option>
           <option value="customer">Customer</option>
         </select>
       </div>
@@ -102,8 +104,12 @@ const AdminUsers = () => {
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <span className={`inline-block text-xs px-2.5 py-1 rounded-full font-medium ${roleColors[user.role] || 'bg-stone-100 text-stone-600'}`}>
-                      {user.role}
+                    <span className={`inline-block text-xs px-2.5 py-1 rounded-full font-medium ${
+                      user.role === 'admin' ? roleColors.admin
+                        : user.is_artist ? roleColors.artist
+                        : roleColors.customer
+                    }`}>
+                      {user.role === 'admin' ? 'admin' : user.is_artist ? 'artist' : 'customer'}
                     </span>
                   </td>
                   <td className="px-6 py-4 text-sm text-stone-500">{user.artwork_count}</td>

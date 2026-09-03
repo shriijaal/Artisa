@@ -6,13 +6,17 @@ from apps.orders.models import Order
 
 class AdminUserSerializer(serializers.ModelSerializer):
     artwork_count = serializers.SerializerMethodField()
+    is_artist = serializers.SerializerMethodField()
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'role', 'is_active', 'date_joined', 'artwork_count']
+        fields = ['id', 'username', 'email', 'role', 'is_active', 'date_joined', 'artwork_count', 'is_artist']
 
     def get_artwork_count(self, obj):
         return getattr(obj, 'artwork_count', obj.artworks.count()) if hasattr(obj, 'artworks') else 0
+
+    def get_is_artist(self, obj):
+        return hasattr(obj, 'artist_profile') and obj.artist_profile.status == 'approved'
 
 
 class AdminArtistProfileSerializer(serializers.ModelSerializer):
