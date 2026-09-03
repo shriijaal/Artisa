@@ -15,7 +15,7 @@ const AdminArtworks = () => {
   const [statusFilter, setStatusFilter] = useState('');
   const [typeFilter, setTypeFilter] = useState('');
   const [toast, setToast] = useState(null);
-  const [undoTimeout, setUndoTimeout] = useState(null);
+  const [countdown, setCountdown] = useState(0);
 
   const fetchArtworks = useCallback(() => {
     const params = new URLSearchParams();
@@ -32,9 +32,19 @@ const AdminArtworks = () => {
   useEffect(() => { fetchArtworks(); }, [fetchArtworks]);
 
   useEffect(() => {
-    if (!toast) return;
-    const t = setTimeout(() => setToast(null), 6000);
-    return () => clearTimeout(t);
+    if (!toast) { setCountdown(0); return; }
+    setCountdown(6);
+    const interval = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          setToast(null);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
   }, [toast]);
 
   const showToast = (message, artworkId, action) => {
@@ -80,17 +90,25 @@ const AdminArtworks = () => {
 
       {/* Toast */}
       {toast && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 bg-stone-900 text-white px-5 py-3 rounded-lg shadow-lg animate-[slideUp_0.2s_ease-out]">
-          <span className="text-sm">{toast.message}</span>
-          <button
-            onClick={handleUndo}
-            className="text-sm font-semibold text-amber-400 hover:text-amber-300 transition-colors"
-          >
-            Undo
-          </button>
-          <button onClick={() => setToast(null)} className="ml-1 text-stone-400 hover:text-white transition-colors">
-            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-          </button>
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-80 bg-stone-900 text-white rounded-lg shadow-lg overflow-hidden animate-[slideUp_0.2s_ease-out]">
+          <div className="flex items-center gap-3 px-5 py-3">
+            <span className="text-sm flex-1">{toast.message}</span>
+            <button
+              onClick={handleUndo}
+              className="text-sm font-semibold text-amber-400 hover:text-amber-300 transition-colors"
+            >
+              Undo ({countdown}s)
+            </button>
+            <button onClick={() => setToast(null)} className="text-stone-400 hover:text-white transition-colors">
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+          </div>
+          <div className="h-0.5 bg-stone-700">
+            <div
+              className="h-full bg-amber-500 transition-all duration-1000 ease-linear"
+              style={{ width: `${(countdown / 6) * 100}%` }}
+            />
+          </div>
         </div>
       )}
 
