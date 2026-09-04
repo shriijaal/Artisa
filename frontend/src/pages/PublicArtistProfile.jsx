@@ -205,100 +205,40 @@ const PublicArtistProfile = () => {
                   </div>
                 )}
               </div>
-              {/* Verified Badge — emerald per design system */}
-              {profile.verified_badge && (
-                <div className="absolute -bottom-0.5 -right-0.5 z-30 group/badge">
-                  <div className="relative flex items-center justify-center h-8 w-8 rounded-full bg-emerald-500 border-[3px] border-white shadow-lg cursor-pointer hover:bg-emerald-600 transition-colors">
-                    <svg className="h-4 w-4 text-white" viewBox="0 0 24 24" fill="currentColor">
-                      <path fillRule="evenodd" clipRule="evenodd" d="M8.603 3.799A4.49 4.49 0 0112 2.25c1.357 0 2.573.6 3.397 1.549a4.49 4.49 0 013.498 1.307 4.491 4.491 0 011.307 3.497A4.49 4.49 0 0121.75 12a4.49 4.49 0 01-1.549 3.397 4.491 4.491 0 01-1.307 3.497 4.491 4.491 0 01-3.497 1.307A4.49 4.49 0 0112 21.75a4.49 4.49 0 01-3.397-1.549 4.49 4.49 0 01-3.498-1.306 4.491 4.491 0 01-1.307-3.498A4.49 4.49 0 012.25 12c0-1.357.6-2.573 1.549-3.397a4.49 4.49 0 011.307-3.497 4.49 4.49 0 013.497-1.307zm7.007 6.387a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z" />
-                    </svg>
-                  </div>
-                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 w-52 pointer-events-none opacity-0 group-hover/badge:opacity-100 transition-opacity duration-200 z-40">
-                    <div className="rounded-lg bg-stone-900 px-4 py-3 shadow-xl">
-                      <div className="flex items-center gap-2 mb-1">
-                        <svg className="h-4 w-4 text-emerald-400 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
-                          <path fillRule="evenodd" clipRule="evenodd" d="M8.603 3.799A4.49 4.49 0 0112 2.25c1.357 0 2.573.6 3.397 1.549a4.49 4.49 0 013.498 1.307 4.491 4.491 0 011.307 3.497A4.49 4.49 0 0121.75 12a4.49 4.49 0 01-1.549 3.397 4.491 4.491 0 01-1.307 3.497 4.491 4.491 0 01-3.497 1.307A4.49 4.49 0 0112 21.75a4.49 4.49 0 01-3.397-1.549 4.49 4.49 0 01-3.498-1.306 4.491 4.491 0 01-1.307-3.498A4.49 4.49 0 012.25 12c0-1.357.6-2.573 1.549-3.397a4.49 4.49 0 011.307-3.497 4.49 4.49 0 013.497-1.307zm7.007 6.387a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z" />
-                        </svg>
-                        <span className="text-sm font-semibold text-white">Verified Artist</span>
-                      </div>
-                      <p className="text-xs text-stone-400 leading-relaxed">This artist has been reviewed and approved by Artisa. Their identity and portfolio have been verified.</p>
-                      <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-stone-900 rotate-45" />
-                    </div>
-                  </div>
-                </div>
-              )}
             </div>
 
             {/* Name + Actions */}
             <div className="flex-1 flex flex-col sm:flex-row items-center sm:items-end justify-between min-w-0 text-center sm:text-left">
               <div className="min-w-0">
-                <h1 className="text-3xl sm:text-4xl font-bold text-stone-900 truncate leading-tight font-heading">
-                  {profile.user.first_name || profile.user.username}
-                  {profile.user.last_name ? ` ${profile.user.last_name}` : ''}
-                </h1>
-                <p className="text-sm text-stone-500 mt-0.5">@{profile.user.username}</p>
-                {artistRating.review_count > 0 && (
-                  <div className="flex items-center gap-1.5 mt-1.5">
-                    <div className="flex items-center gap-0.5">
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <svg
-                          key={star}
-                          className={`h-4 w-4 ${star <= Math.round(artistRating.avg_rating) ? 'text-amber-500' : 'text-stone-200'}`}
-                          fill="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                        </svg>
-                      ))}
+                <div className="flex items-center gap-2.5 flex-wrap justify-center sm:justify-start">
+                  <h1 className="text-3xl sm:text-4xl font-bold text-stone-900 truncate leading-tight font-heading">
+                    {profile.user.first_name || profile.user.username}
+                    {profile.user.last_name ? ` ${profile.user.last_name}` : ''}
+                  </h1>
+                  {profile.verified_badge && (
+                    <div className="group/badge relative flex-shrink-0">
+                      <svg className="h-5 w-5 text-emerald-500 cursor-pointer" viewBox="0 0 24 24" fill="currentColor">
+                        <path fillRule="evenodd" clipRule="evenodd" d="M8.603 3.799A4.49 4.49 0 0112 2.25c1.357 0 2.573.6 3.397 1.549a4.49 4.49 0 013.498 1.307 4.491 4.491 0 011.307 3.497A4.49 4.49 0 0121.75 12a4.49 4.49 0 01-1.549 3.397 4.491 4.491 0 01-1.307 3.497 4.491 4.491 0 01-3.497 1.307A4.49 4.49 0 0112 21.75a4.49 4.49 0 01-3.397-1.549 4.49 4.49 0 01-3.498-1.306 4.491 4.491 0 01-1.307-3.498A4.49 4.49 0 012.25 12c0-1.357.6-2.573 1.549-3.397a4.49 4.49 0 011.307-3.497 4.49 4.49 0 013.497-1.307zm7.007 6.387a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z" />
+                      </svg>
+                      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 w-52 pointer-events-none opacity-0 group-hover/badge:opacity-100 transition-opacity duration-200 z-40">
+                        <div className="rounded-lg bg-stone-900 px-4 py-3 shadow-xl">
+                          <div className="flex items-center gap-2 mb-1">
+                            <svg className="h-4 w-4 text-emerald-400 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                              <path fillRule="evenodd" clipRule="evenodd" d="M8.603 3.799A4.49 4.49 0 0112 2.25c1.357 0 2.573.6 3.397 1.549a4.49 4.49 0 013.498 1.307 4.491 4.491 0 011.307 3.497A4.49 4.49 0 0121.75 12a4.49 4.49 0 01-1.549 3.397 4.491 4.491 0 01-1.307 3.497 4.491 4.491 0 01-3.497 1.307A4.49 4.49 0 0112 21.75a4.49 4.49 0 01-3.397-1.549 4.49 4.49 0 01-3.498-1.306 4.491 4.491 0 01-1.307-3.498A4.49 4.49 0 012.25 12c0-1.357.6-2.573 1.549-3.397a4.49 4.49 0 011.307-3.497 4.49 4.49 0 013.497-1.307zm7.007 6.387a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z" />
+                            </svg>
+                            <span className="text-sm font-semibold text-white">Verified Artist</span>
+                          </div>
+                          <p className="text-xs text-stone-400 leading-relaxed">This artist has been reviewed and approved by Artisa. Their identity and portfolio have been verified.</p>
+                          <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-stone-900 rotate-45" />
+                        </div>
+                      </div>
                     </div>
-                    <span className="text-sm font-semibold text-stone-900">{artistRating.avg_rating}</span>
-                    <span className="text-xs text-stone-500">({artistRating.review_count} review{artistRating.review_count !== 1 ? 's' : ''})</span>
-                  </div>
-                )}
+                  )}
+                </div>
+                <p className="text-sm text-stone-500 mt-0.5">@{profile.user.username}</p>
               </div>
 
               <div className="flex items-center gap-3 flex-shrink-0 mt-4 sm:mt-0">
-                {Object.keys(socialLinks).length > 0 && (
-                  <div className="hidden sm:flex items-center gap-2">
-                    {socialLinks.instagram && (
-                      <a
-                        href={socialLinks.instagram}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="h-10 w-10 rounded-full bg-white border border-stone-200 flex items-center justify-center hover:bg-pink-50 hover:border-pink-200 transition-all duration-200 group"
-                      >
-                        <svg className="h-4 w-4 text-stone-500 group-hover:text-pink-500 transition-colors" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z" />
-                        </svg>
-                      </a>
-                    )}
-                    {socialLinks.facebook && (
-                      <a
-                        href={socialLinks.facebook}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="h-10 w-10 rounded-full bg-white border border-stone-200 flex items-center justify-center hover:bg-blue-50 hover:border-blue-200 transition-all duration-200 group"
-                      >
-                        <svg className="h-4 w-4 text-stone-500 group-hover:text-blue-600 transition-colors" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-                        </svg>
-                      </a>
-                    )}
-                    {socialLinks.website && (
-                      <a
-                        href={socialLinks.website}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="h-10 w-10 rounded-full bg-white border border-stone-200 flex items-center justify-center hover:bg-stone-50 hover:border-stone-300 transition-all duration-200 group"
-                      >
-                        <svg className="h-4 w-4 text-stone-500 group-hover:text-stone-700 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
-                        </svg>
-                      </a>
-                    )}
-                  </div>
-                )}
-
                 {isOwnProfile ? (
                   <button
                     onClick={() => navigate('/profile/edit')}
@@ -327,6 +267,17 @@ const PublicArtistProfile = () => {
           {/* Stats — compact inline row */}
           <div className="mt-6 flex items-center justify-center gap-3 text-sm flex-wrap">
             <span className="font-heading font-bold text-stone-900">{artworks.length} artworks</span>
+            {artistRating.review_count > 0 && (
+              <>
+                <span className="text-stone-300">·</span>
+                <span className="flex items-center gap-1 font-medium text-stone-900">
+                  <svg className="h-3.5 w-3.5 text-amber-500" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                  </svg>
+                  {artistRating.avg_rating} <span className="text-stone-500 font-normal">({artistRating.review_count})</span>
+                </span>
+              </>
+            )}
             <span className="text-stone-300">·</span>
             <span className="text-stone-500">Member since {formatMemberSince(profile.created_at || profile.user?.date_joined || new Date())}</span>
             <span className="text-stone-300">·</span>
