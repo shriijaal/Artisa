@@ -48,6 +48,7 @@ const ArtworkDetail = () => {
   const [loading, setLoading] = useState(true);
   const [favoriteLoading, setFavoriteLoading] = useState(false);
   const [addingToCart, setAddingToCart] = useState(false);
+  const [isInCart, setIsInCart] = useState(false);
   const [reviews, setReviews] = useState([]);
   const [reviewRating, setReviewRating] = useState(0);
   const [reviewComment, setReviewComment] = useState('');
@@ -59,6 +60,7 @@ const ArtworkDetail = () => {
     fetchArtwork();
     if (user) {
       checkFavorite();
+      checkInCart();
     }
   }, [id, user]);
 
@@ -178,6 +180,19 @@ const ArtworkDetail = () => {
     }
   };
 
+  const checkInCart = async () => {
+    try {
+      const token = localStorage.getItem('access_token');
+      const response = await fetch('/api/orders/cart/', {
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+      if (response.ok) {
+        const cartItems = await response.json();
+        setIsInCart(cartItems.some(item => item.artwork?.id === parseInt(id)));
+      }
+    } catch {}
+  };
+
   const toggleFavorite = async () => {
     if (!user) {
       navigate('/login');
@@ -237,6 +252,7 @@ const ArtworkDetail = () => {
       });
 
       if (response.ok) {
+        setIsInCart(true);
         addToast('Added to cart!', 'success');
         trackInteraction('artwork', id, 'cart_add');
       } else {
@@ -404,11 +420,15 @@ const ArtworkDetail = () => {
 
             <div className="mt-8">
               <button
-                onClick={addToCart}
+                onClick={isInCart ? () => navigate('/cart') : addToCart}
                 disabled={addingToCart}
-                className="w-full rounded-lg bg-stone-900 px-6 py-4 text-sm font-medium text-white hover:bg-stone-800 transition disabled:opacity-50"
+                className={`w-full rounded-lg px-6 py-4 text-sm font-medium transition ${
+                  isInCart
+                    ? 'bg-stone-200 text-stone-500 cursor-default'
+                    : 'bg-stone-900 text-white hover:bg-stone-800 disabled:opacity-50'
+                }`}
               >
-                {addingToCart ? 'Adding...' : 'Add to Cart'}
+                {addingToCart ? 'Adding...' : isInCart ? 'In Cart' : 'Add to Cart'}
               </button>
               <p className="mt-2 text-center text-sm text-stone-500">
                 {artwork.type === 'physical'
