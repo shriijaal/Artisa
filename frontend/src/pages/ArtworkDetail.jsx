@@ -369,24 +369,43 @@ const ArtworkDetail = () => {
 
           {/* ─── Right: Details Panel ─── */}
           <div className="flex flex-col">
-            {/* Title + Favorite */}
+            {/* Title + Favorite + Share */}
             <div className="flex items-start justify-between gap-4">
               <h1 className="text-2xl sm:text-3xl font-bold text-stone-900 leading-tight font-heading">
                 {artwork.title}
               </h1>
-              <button
-                onClick={toggleFavorite}
-                disabled={favoriteLoading}
-                className={`flex-shrink-0 rounded-full p-2.5 transition ${
-                  isFavorite
-                    ? 'bg-red-100 text-red-600 hover:bg-red-200'
-                    : 'bg-stone-100 text-stone-400 hover:bg-stone-200 hover:text-stone-600'
-                }`}
-              >
-                <svg className="h-5 w-5" fill={isFavorite ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                </svg>
-              </button>
+              <div className="flex items-center gap-2 flex-shrink-0">
+                <button
+                  onClick={() => {
+                    const url = window.location.href;
+                    if (navigator.share) {
+                      navigator.share({ title: artwork.title, url });
+                    } else {
+                      navigator.clipboard.writeText(url);
+                      addToast('Link copied to clipboard', 'success');
+                    }
+                  }}
+                  className="rounded-full p-2.5 bg-stone-100 text-stone-400 hover:bg-stone-200 hover:text-stone-600 transition"
+                  title="Share"
+                >
+                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                  </svg>
+                </button>
+                <button
+                  onClick={toggleFavorite}
+                  disabled={favoriteLoading}
+                  className={`rounded-full p-2.5 transition ${
+                    isFavorite
+                      ? 'bg-red-100 text-red-600 hover:bg-red-200'
+                      : 'bg-stone-100 text-stone-400 hover:bg-stone-200 hover:text-stone-600'
+                  }`}
+                >
+                  <svg className="h-5 w-5" fill={isFavorite ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                  </svg>
+                </button>
+              </div>
             </div>
 
             {/* Artist */}
@@ -412,10 +431,19 @@ const ArtworkDetail = () => {
                 NPR {artwork.price?.toLocaleString()}
               </p>
               {artwork.review_count > 0 && (
-                <div className="flex items-center gap-1.5">
-                  <svg className="h-4 w-4 text-amber-500" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                  </svg>
+                <div className="flex items-center gap-1.5 rounded-full bg-amber-50 border border-amber-200 px-3 py-1">
+                  <div className="flex items-center gap-0.5">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <svg
+                        key={star}
+                        className={`h-3.5 w-3.5 ${star <= Math.round(artwork.avg_rating) ? 'text-amber-500' : 'text-stone-300'}`}
+                        fill="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                      </svg>
+                    ))}
+                  </div>
                   <span className="text-sm font-semibold text-stone-900">{artwork.avg_rating}</span>
                   <span className="text-xs text-stone-500">({artwork.review_count})</span>
                 </div>
