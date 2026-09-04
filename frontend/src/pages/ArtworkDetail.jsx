@@ -188,7 +188,7 @@ const ArtworkDetail = () => {
       });
       if (response.ok) {
         const cartItems = await response.json();
-        setIsInCart(cartItems.some(item => item.artwork?.id === parseInt(id)));
+        setIsInCart(cartItems.some(item => String(item.artwork?.id) === String(id)));
       }
     } catch {}
   };
