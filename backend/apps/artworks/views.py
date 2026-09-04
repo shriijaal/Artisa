@@ -2,6 +2,7 @@ from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
+from django.db.models import Q
 from django.http import FileResponse, Http404
 
 from apps.artworks.models import Artwork, ArtworkImage, Category, DigitalFile
@@ -259,7 +260,7 @@ def published_artworks(request):
     artist_param = request.query_params.get('artist')
     if artist_param:
         artworks = artworks.filter(
-            models.Q(artist__username__iexact=artist_param) | models.Q(artist__id__iexact=artist_param)
+            Q(artist__username__iexact=artist_param) | Q(artist__id__iexact=artist_param)
         )
     
     # Filter by verified artist
