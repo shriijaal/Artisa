@@ -242,79 +242,109 @@ const MyArtworks = () => {
             })}
           </div>
         ) : (
-          /* List View — bordered cards with actions */
-          <div className="grid gap-4">
-            {artworks.map((artwork) => (
-              <div key={artwork.id} className="rounded-lg border border-stone-200 bg-white p-6">
-                <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
-                  {artwork.images && artwork.images.length > 0 && (
-                    <div className="h-40 w-full sm:h-32 sm:w-32 flex-shrink-0 overflow-hidden rounded-lg bg-stone-100">
-                      <img
-                        src={artwork.images[0].image}
-                        alt={artwork.title}
-                        className="h-full w-full object-cover"
-                      />
-                    </div>
-                  )}
-
-                  <div className="flex-1 min-w-0">
-                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
-                      <div>
-                        <h3 className="text-lg font-semibold text-stone-900 font-heading">{artwork.title}</h3>
-                        <p className="text-sm text-stone-500 mt-0.5">
-                          {artwork.type === 'physical' ? 'Physical' : 'Digital'} · NPR {artwork.price.toLocaleString()}
-                        </p>
+          /* List View — compact editorial rows */
+          <div className="grid gap-px bg-stone-200 rounded-lg overflow-hidden border border-stone-200">
+            {artworks.map((artwork) => {
+              const primaryImage = artwork.images?.find((img) => img.is_primary) || artwork.images?.[0];
+              return (
+                <div
+                  key={artwork.id}
+                  className="group bg-white flex items-center gap-4 px-4 py-3 hover:bg-stone-50 transition-colors focus:outline-none focus:ring-2 focus:ring-inset focus:ring-stone-400"
+                  tabIndex={0}
+                  onKeyDown={(e) => { if (e.key === 'Enter') navigate(`/artworks/${artwork.id}`); }}
+                >
+                  {/* Thumbnail */}
+                  <div className="h-14 w-14 flex-shrink-0 rounded-lg overflow-hidden bg-stone-100">
+                    {primaryImage ? (
+                      <img src={primaryImage.image} alt="" className="h-full w-full object-cover" loading="lazy" />
+                    ) : (
+                      <div className="h-full w-full flex items-center justify-center">
+                        <svg className="h-5 w-5 text-stone-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
                       </div>
-                      <span className={`inline-flex self-start rounded-full px-2.5 py-0.5 text-xs font-medium ${statusColor(artwork.status)}`}>
-                        {artwork.status.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                    )}
+                  </div>
+
+                  {/* Info */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <h3
+                        className="text-sm font-semibold text-stone-900 truncate cursor-pointer hover:text-[#9c4327] transition-colors"
+                        onClick={() => navigate(`/artworks/${artwork.id}`)}
+                      >
+                        {artwork.title}
+                      </h3>
+                      <span className="text-[10px] font-bold uppercase tracking-[0.05em] text-stone-400">
+                        {artwork.type === 'physical' ? 'Physical' : 'Digital'}
                       </span>
                     </div>
-
-                    <p className="mt-2 text-sm text-stone-600 line-clamp-2">{artwork.description}</p>
-
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      {artwork.status === 'draft' && (
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <span className="text-xs text-stone-500">NPR {artwork.price.toLocaleString()}</span>
+                      {artwork.status !== 'published' && (
                         <>
-                          <button
-                            onClick={() => handleSubmitForReview(artwork.id)}
-                            disabled={submitting}
-                            className="rounded-lg bg-[#000] px-4 py-1.5 text-xs font-semibold text-white hover:bg-stone-800 disabled:opacity-50 transition-colors"
-                          >
-                            Submit for Review
-                          </button>
-                          <button
-                            onClick={() => deleteArtwork(artwork.id)}
-                            className="rounded-lg border border-stone-200 px-4 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50 transition-colors"
-                          >
-                            Delete
-                          </button>
+                          <span className="text-stone-300">·</span>
+                          <span className={`inline-flex items-center rounded-full px-1.5 py-px text-[10px] font-semibold uppercase tracking-[0.03em] ${statusColor(artwork.status)}`}>
+                            {artwork.status === 'pending_review' ? 'Pending' : artwork.status}
+                          </span>
                         </>
                       )}
-                      {artwork.status === 'pending_review' && (
-                        <div className="flex gap-2">
-                          <span className="text-xs text-amber-600">Awaiting admin review</span>
-                          <button
-                            onClick={() => cancelSubmission(artwork.id)}
-                            className="rounded-lg border border-stone-200 px-3 py-1.5 text-xs font-medium text-stone-600 hover:bg-stone-50 transition-colors"
-                          >
-                            Cancel
-                          </button>
-                          <button
-                            onClick={() => deleteArtwork(artwork.id)}
-                            className="rounded-lg border border-stone-200 px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50 transition-colors"
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      )}
                       {artwork.status === 'published' && (
-                        <span className="text-xs text-emerald-600 font-medium">Published</span>
+                        <>
+                          <span className="text-stone-300">·</span>
+                          <span className="text-[10px] font-semibold uppercase tracking-[0.05em] text-emerald-600">Published</span>
+                        </>
                       )}
                     </div>
                   </div>
+
+                  {/* Actions */}
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    {artwork.status === 'draft' && (
+                      <>
+                        <button
+                          onClick={() => handleSubmitForReview(artwork.id)}
+                          disabled={submitting}
+                          className="rounded-lg bg-[#000] px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-stone-800 disabled:opacity-50 transition-colors"
+                        >
+                          Submit
+                        </button>
+                        <button
+                          onClick={() => deleteArtwork(artwork.id)}
+                          className="rounded-lg border border-stone-200 px-3 py-1.5 text-[11px] font-medium text-red-600 hover:bg-red-50 transition-colors"
+                        >
+                          Delete
+                        </button>
+                      </>
+                    )}
+                    {artwork.status === 'pending_review' && (
+                      <>
+                        <button
+                          onClick={() => cancelSubmission(artwork.id)}
+                          className="rounded-lg border border-stone-200 px-3 py-1.5 text-[11px] font-medium text-stone-600 hover:bg-stone-50 transition-colors"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          onClick={() => deleteArtwork(artwork.id)}
+                          className="rounded-lg border border-stone-200 px-3 py-1.5 text-[11px] font-medium text-red-600 hover:bg-red-50 transition-colors"
+                        >
+                          Delete
+                        </button>
+                      </>
+                    )}
+                    {artwork.status === 'published' && (
+                      <button
+                        onClick={() => navigate(`/artworks/${artwork.id}`)}
+                        className="rounded-lg border border-stone-200 px-3 py-1.5 text-[11px] font-medium text-stone-600 hover:bg-stone-50 transition-colors"
+                      >
+                        View
+                      </button>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </main>
