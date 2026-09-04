@@ -5,6 +5,7 @@ import Header from '../components/Header';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { useToast } from '../components/Toast';
 import { trackInteraction } from '../services/api';
+import authFetch from '../utils/authFetch';
 import RecommendedCarousel from '../components/RecommendedCarousel';
 
 const StarRating = ({ rating, size = 'sm', interactive = false, onChange }) => {
@@ -86,10 +87,7 @@ const ArtworkDetail = () => {
 
   const checkPurchased = async () => {
     try {
-      const token = localStorage.getItem('access_token');
-      const res = await fetch('/api/orders/', {
-        headers: { 'Authorization': `Bearer ${token}` },
-      });
+      const res = await authFetch('/api/orders/');
       if (res.ok) {
         const orders = await res.json();
         for (const order of orders) {
@@ -114,13 +112,9 @@ const ArtworkDetail = () => {
     if (!reviewRating || !reviewComment.trim() || !purchasedItemId) return;
     setSubmittingReview(true);
     try {
-      const token = localStorage.getItem('access_token');
-      const res = await fetch('/api/reviews/', {
+      const res = await authFetch('/api/reviews/', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           order_item_id: purchasedItemId,
           rating: reviewRating,
@@ -165,12 +159,7 @@ const ArtworkDetail = () => {
 
   const checkFavorite = async () => {
     try {
-      const token = localStorage.getItem('access_token');
-      const response = await fetch('/api/auth/favorites/', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
+      const response = await authFetch('/api/auth/favorites/');
       if (response.ok) {
         const favorites = await response.json();
         setIsFavorite(favorites.some(f => f.artwork_id === id));
@@ -182,10 +171,7 @@ const ArtworkDetail = () => {
 
   const checkInCart = async () => {
     try {
-      const token = localStorage.getItem('access_token');
-      const response = await fetch('/api/orders/cart/', {
-        headers: { 'Authorization': `Bearer ${token}` },
-      });
+      const response = await authFetch('/api/orders/cart/');
       if (response.ok) {
         const cartItems = await response.json();
         setIsInCart(cartItems.some(item => String(item.artwork?.id) === String(id)));
@@ -201,24 +187,16 @@ const ArtworkDetail = () => {
 
     setFavoriteLoading(true);
     try {
-      const token = localStorage.getItem('access_token');
-      
       if (isFavorite) {
-        await fetch(`/api/auth/favorites/artwork/${id}/`, {
+        await authFetch(`/api/auth/favorites/artwork/${id}/`, {
           method: 'DELETE',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
         });
         setIsFavorite(false);
         addToast('Removed from wishlist', 'info');
       } else {
-        await fetch('/api/auth/favorites/', {
+        await authFetch('/api/auth/favorites/', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ artwork_id: id }),
         });
         setIsFavorite(true);
@@ -241,13 +219,9 @@ const ArtworkDetail = () => {
 
     setAddingToCart(true);
     try {
-      const token = localStorage.getItem('access_token');
-      const response = await fetch('/api/orders/cart/', {
+      const response = await authFetch('/api/orders/cart/', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ artwork_id: id, quantity: 1 }),
       });
 
