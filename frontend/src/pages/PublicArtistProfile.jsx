@@ -324,41 +324,15 @@ const PublicArtistProfile = () => {
             </div>
           </div>
 
-          {/* Stats Section */}
-          <div className="mt-8 grid grid-cols-3 gap-3 sm:gap-4">
-            <div className="rounded-lg border border-stone-200 bg-white p-4 sm:p-5 text-center hover:border-stone-300 transition-colors duration-200">
-              <div className="mx-auto mb-2 h-10 w-10 rounded-full bg-stone-100 flex items-center justify-center">
-                <svg className="h-5 w-5 text-stone-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-              </div>
-              <p className="text-xl sm:text-2xl font-bold text-stone-900 font-heading">{artworks.length}</p>
-              <p className="text-xs text-stone-500 mt-0.5">Artworks</p>
-            </div>
-
-            <div className="rounded-lg border border-stone-200 bg-white p-4 sm:p-5 text-center hover:border-stone-300 transition-colors duration-200">
-              <div className="mx-auto mb-2 h-10 w-10 rounded-full bg-stone-100 flex items-center justify-center">
-                <svg className="h-5 w-5 text-stone-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-              </div>
-              <p className="text-sm font-semibold text-stone-900">
-                {formatMemberSince(profile.created_at || profile.user?.date_joined || new Date())}
-              </p>
-              <p className="text-xs text-stone-500 mt-0.5">Member Since</p>
-            </div>
-
-            <div className="rounded-lg border border-stone-200 bg-white p-4 sm:p-5 text-center hover:border-stone-300 transition-colors duration-200">
-              <div className="mx-auto mb-2 h-10 w-10 rounded-full bg-[#9c4327]/10 flex items-center justify-center">
-                <svg className="h-5 w-5 text-[#9c4327]" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                </svg>
-              </div>
-              <p className="text-sm font-semibold text-[#9c4327]">
-                {profile.verified_badge ? 'Verified' : 'Unverified'}
-              </p>
-              <p className="text-xs text-stone-500 mt-0.5">Artist Status</p>
-            </div>
+          {/* Stats — compact inline row */}
+          <div className="mt-6 flex items-center justify-center gap-3 text-sm flex-wrap">
+            <span className="font-heading font-bold text-stone-900">{artworks.length} artworks</span>
+            <span className="text-stone-300">·</span>
+            <span className="text-stone-500">Member since {formatMemberSince(profile.created_at || profile.user?.date_joined || new Date())}</span>
+            <span className="text-stone-300">·</span>
+            <span className={`font-medium ${profile.verified_badge ? 'text-emerald-600' : 'text-stone-400'}`}>
+              {profile.verified_badge ? '✓ Verified' : 'Unverified'}
+            </span>
           </div>
 
           {/* About Section — merged bio + social links */}
