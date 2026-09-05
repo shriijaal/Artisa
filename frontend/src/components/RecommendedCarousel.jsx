@@ -88,9 +88,9 @@ const RecommendedCarousel = ({ title, subtitle, endpoint, limit = 8 }) => {
         {/* Left Arrow */}
         <button
           onClick={() => scroll('left')}
-          className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 z-20 h-12 w-12 rounded-full bg-white border border-stone-200 flex items-center justify-center text-stone-600 hover:text-stone-900 transition-all opacity-0 group-hover/carousel:opacity-100 cursor-pointer"
+          className="absolute left-3 top-1/2 -translate-y-1/2 z-20 h-10 w-10 rounded-full bg-white/90 backdrop-blur-sm border border-stone-200 flex items-center justify-center text-stone-600 hover:text-stone-900 hover:bg-white shadow-sm transition-all opacity-0 group-hover/carousel:opacity-100 cursor-pointer"
         >
-          <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+          <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
           </svg>
         </button>
@@ -235,9 +235,9 @@ const RecommendedCarousel = ({ title, subtitle, endpoint, limit = 8 }) => {
       {/* Right Arrow */}
       <button
         onClick={() => scroll('right')}
-        className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 z-20 h-12 w-12 rounded-full bg-white border border-stone-200 flex items-center justify-center text-stone-600 hover:text-stone-900 transition-all opacity-0 group-hover/carousel:opacity-100 cursor-pointer"
+        className="absolute right-3 top-1/2 -translate-y-1/2 z-20 h-10 w-10 rounded-full bg-white/90 backdrop-blur-sm border border-stone-200 flex items-center justify-center text-stone-600 hover:text-stone-900 hover:bg-white shadow-sm transition-all opacity-0 group-hover/carousel:opacity-100 cursor-pointer"
       >
-        <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
         </svg>
       </button>
