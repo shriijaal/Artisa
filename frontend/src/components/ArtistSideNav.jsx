@@ -43,27 +43,51 @@ const ArtistSideNav = ({ artworkCount = 0 }) => {
             </div>
           </div>
         ) : (
-          <>
-            <h2 className="text-sm font-bold text-stone-900">Artist Studio Dashboard</h2>
-            <div className="flex items-center gap-2.5 mt-3">
-              <div className="h-9 w-9 rounded-full bg-stone-100 flex items-center justify-center text-stone-900 text-sm font-bold shrink-0 overflow-hidden">
-                {user?.avatar ? (
-                  <img src={user.avatar} alt={user.username} className="h-full w-full object-cover" />
-                ) : (
-                  user?.username?.charAt(0).toUpperCase()
-                )}
-              </div>
-              <div className="min-w-0">
-                <p className="text-sm font-semibold text-stone-900 truncate">{user?.username}</p>
-                <div className="flex items-center gap-1">
-                  <svg className="h-3.5 w-3.5 text-[#9c4327]" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                  <span className="text-[10px] font-semibold text-[#9c4327] uppercase tracking-wider">Verified</span>
+          <div className="flex items-start justify-between">
+            <div className="min-w-0 flex-1">
+              <h2 className="text-sm font-bold text-stone-900">Artist Studio Dashboard</h2>
+              <div className="flex items-center gap-2.5 mt-3">
+                <div className="h-9 w-9 rounded-full bg-stone-100 flex items-center justify-center text-stone-900 text-sm font-bold shrink-0 overflow-hidden">
+                  {user?.avatar ? (
+                    <img src={user.avatar} alt={user.username} className="h-full w-full object-cover" />
+                  ) : (
+                    user?.username?.charAt(0).toUpperCase()
+                  )}
+                </div>
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-stone-900 truncate">{user?.username}</p>
+                  <div className="flex items-center gap-1">
+                    <svg className="h-3.5 w-3.5 text-[#9c4327]" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                    <span className="text-[10px] font-semibold text-[#9c4327] uppercase tracking-wider">Verified</span>
+                  </div>
                 </div>
               </div>
             </div>
-          </>
+            {/* Compact toggle */}
+            <button
+              onClick={() => setCompact(!compact)}
+              title="Compact sidebar"
+              className="p-1.5 rounded-md text-stone-400 hover:bg-stone-100 hover:text-stone-600 transition-colors"
+            >
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M18 12H6" />
+              </svg>
+            </button>
+          </div>
+        )}
+        {/* Compact mode expand toggle */}
+        {compact && (
+          <button
+            onClick={() => setCompact(!compact)}
+            title="Expand sidebar"
+            className="absolute -right-3 top-1/2 -translate-y-1/2 h-6 w-6 rounded-full bg-white border border-stone-200 shadow-sm flex items-center justify-center text-stone-400 hover:bg-stone-50 hover:text-stone-600 transition-colors z-50"
+          >
+            <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+            </svg>
+          </button>
         )}
       </div>
 
@@ -102,8 +126,8 @@ const ArtistSideNav = ({ artworkCount = 0 }) => {
         })}
       </nav>
 
-      {/* Bottom: Back to Site + Toggle */}
-      <div className={`border-t border-stone-200 ${compact ? 'p-2 space-y-1' : 'p-3'}`}>
+      {/* Bottom: Back to Site */}
+      <div className={`border-t border-stone-200 ${compact ? 'p-2' : 'p-3'}`}>
         <NavLink
           to="/marketplace"
           title={compact ? 'Back to Site' : undefined}
@@ -121,33 +145,6 @@ const ArtistSideNav = ({ artworkCount = 0 }) => {
             </div>
           )}
         </NavLink>
-
-        {/* Toggle button */}
-        <button
-          onClick={() => setCompact(!compact)}
-          title={compact ? 'Expand sidebar' : 'Compact sidebar'}
-          className={`w-full flex items-center rounded-lg text-sm font-medium text-stone-400 hover:bg-stone-50 hover:text-stone-600 transition-colors group ${
-            compact ? 'justify-center p-2.5' : 'gap-3 px-3 py-2.5'
-          }`}
-        >
-          {compact ? (
-            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-            </svg>
-          ) : (
-            <>
-              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M18 12H6" />
-              </svg>
-              <span className="text-xs text-stone-400">Collapse</span>
-            </>
-          )}
-          {compact && (
-            <div className="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2.5 py-1.5 rounded-md bg-stone-900 text-white text-xs font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50">
-              Expand sidebar
-            </div>
-          )}
-        </button>
       </div>
     </aside>
   );
