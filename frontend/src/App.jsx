@@ -35,6 +35,14 @@ import AdminCategories from './pages/AdminCategories'
 import AdminUsers from './pages/AdminUsers'
 import AdminOrders from './pages/AdminOrders'
 import ArtistInbox from './pages/ArtistInbox'
+import SettingsLayout from './pages/settings/SettingsLayout'
+import SettingsAccount from './pages/settings/SettingsAccount'
+import SettingsSecurity from './pages/settings/SettingsSecurity'
+import SettingsPrivacy from './pages/settings/SettingsPrivacy'
+import SettingsMessaging from './pages/settings/SettingsMessaging'
+import SettingsNotifications from './pages/settings/SettingsNotifications'
+import SettingsBilling from './pages/settings/SettingsBilling'
+import SettingsAppearance from './pages/settings/SettingsAppearance'
 
 const DashboardRedirect = () => {
   const { user } = useAuth();
@@ -81,6 +89,23 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/settings"
+            element={
+              <ProtectedRoute>
+                <SettingsLayout />
+              </ProtectedRoute>
+            }
+          >
+            <Route index element={<Navigate to="/settings/account" replace />} />
+            <Route path="account" element={<SettingsAccount />} />
+            <Route path="security" element={<SettingsSecurity />} />
+            <Route path="privacy" element={<SettingsPrivacy />} />
+            <Route path="messaging" element={<SettingsMessaging />} />
+            <Route path="notifications" element={<SettingsNotifications />} />
+            <Route path="billing" element={<SettingsBilling />} />
+            <Route path="appearance" element={<SettingsAppearance />} />
+          </Route>
           <Route
             path="/artworks/create"
             element={
