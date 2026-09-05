@@ -13,6 +13,7 @@ class Message(models.Model):
     sender = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='sent_messages')
     receiver = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='received_messages')
     commission = models.ForeignKey('commissions.Commission', on_delete=models.CASCADE, null=True, blank=True, related_name='messages')
+    artwork = models.ForeignKey('artworks.Artwork', on_delete=models.SET_NULL, null=True, blank=True, related_name='inquiries')
     body = models.TextField()
     read_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)

@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from apps.commissions.models import Commission
+from apps.artworks.models import Artwork
 from apps.messaging.models import Message
 from apps.messaging.serializers import MessageCreateSerializer, MessageSerializer
 
@@ -25,22 +26,25 @@ def _get_participant_commission(user, commission_id):
 
 
 class MessageListCreateView(APIView):
-    """GET/POST /api/messages/ — commission-linked thread."""
+    """GET/POST /api/messages/ — commission-linked or artwork inquiry threads."""
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
         commission_id = request.query_params.get('commission_id')
-        if not commission_id:
-            return Response(
-                {'error': 'commission_id query parameter is required.'},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+        artwork_id = request.query_params.get('artwork_id')
 
-        commission, error = _get_participant_commission(request.user, commission_id)
-        if error:
-            return error
-
-        messages = Message.objects.filter(commission=commission).select_related('sender', 'receiver')
+        if commission_id:
+            commission, error = _get_participant_commission(request.user, commission_id)
+            if error:
+                return error
+            messages = Message.objects.filter(commission=commission).select_related('sender', 'receiver')
+        elif artwork_id:
+            messages = Message.objects.filter(artwork_id=artwork_id).select_related('sender', 'receiver')
+        else:
+            # Return all messages for the user (inquiries + commission messages)
+            messages = Message.objects.filter(
+                Q(sender=request.user) | Q(receiver=request.user)
+            ).select_related('sender', 'receiver', 'artwork')
 
         after = request.query_params.get('after')
         if after:
@@ -57,10 +61,31 @@ class MessageListCreateView(APIView):
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        commission, error = _get_participant_commission(
-            request.user,
-            serializer.validated_data['commission_id'],
-        )
+        data = serializer.validated_data
+
+        # Artwork inquiry
+        if data.get('artwork_id'):
+            try:
+                artwork = Artwork.objects.get(id=data['artwork_id'])
+            except Artwork.DoesNotExist:
+                return Response({'error': 'Artwork not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+            if artwork.artist_id == request.user.id:
+                return Response({'error': 'You cannot send an inquiry to yourself.'}, status=status.HTTP_400_BAD_REQUEST)
+
+            message = Message.objects.create(
+                sender=request.user,
+                receiver=artwork.artist,
+                artwork=artwork,
+                body=data['body'],
+            )
+            return Response(
+                MessageSerializer(message, context={'request': request}).data,
+                status=status.HTTP_201_CREATED,
+            )
+
+        # Commission message (existing)
+        commission, error = _get_participant_commission(request.user, data['commission_id'])
         if error:
             return error
 
@@ -75,7 +100,7 @@ class MessageListCreateView(APIView):
             sender=request.user,
             receiver=receiver,
             commission=commission,
-            body=serializer.validated_data['body'],
+            body=data['body'],
         )
         return Response(
             MessageSerializer(message, context={'request': request}).data,

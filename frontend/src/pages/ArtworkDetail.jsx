@@ -59,6 +59,11 @@ const ArtworkDetail = () => {
   const [hasReviewed, setHasReviewed] = useState(false);
   const [activeTab, setActiveTab] = useState('description');
 
+  // Inquiry modal state
+  const [showInquiryModal, setShowInquiryModal] = useState(false);
+  const [inquiryMessage, setInquiryMessage] = useState('');
+  const [submittingInquiry, setSubmittingInquiry] = useState(false);
+
   // Carousel state
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
@@ -178,6 +183,40 @@ const ArtworkDetail = () => {
       addToast('Network error', 'error');
     } finally {
       setSubmittingReview(false);
+    }
+  };
+
+  const handleSubmitInquiry = async (e) => {
+    e.preventDefault();
+    if (!inquiryMessage.trim()) return;
+
+    setSubmittingInquiry(true);
+    try {
+      const token = localStorage.getItem('access_token');
+      const res = await fetch('/api/messages/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          artwork_id: id,
+          body: inquiryMessage.trim()
+        })
+      });
+
+      if (res.ok) {
+        setInquiryMessage('');
+        setShowInquiryModal(false);
+        addToast('Inquiry sent! The artist will get back to you.', 'success');
+      } else {
+        const err = await res.json();
+        addToast(err.error || 'Failed to send inquiry', 'error');
+      }
+    } catch {
+      addToast('Network error', 'error');
+    } finally {
+      setSubmittingInquiry(false);
     }
   };
 
@@ -513,7 +552,7 @@ const ArtworkDetail = () => {
               <button
                 onClick={() => {
                   if (!user) { navigate('/login'); return; }
-                  navigate(`/messages?artist=${artwork.artist.id}&username=${artwork.artist.username}`);
+                  setShowInquiryModal(true);
                 }}
                 className="w-full text-center text-sm font-medium text-stone-500 hover:text-stone-900 transition py-1"
               >
@@ -797,6 +836,74 @@ const ArtworkDetail = () => {
         .scrollbar-hide::-webkit-scrollbar { display: none; }
         .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
       `}</style>
+
+      {/* Inquiry Modal */}
+      {showInquiryModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => setShowInquiryModal(false)}>
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+          <div
+            className="relative w-full max-w-md rounded-xl bg-white shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between border-b border-stone-100 px-6 py-4">
+              <h3 className="text-base font-semibold text-stone-900">Contact Artist</h3>
+              <button
+                onClick={() => setShowInquiryModal(false)}
+                className="text-stone-400 hover:text-stone-600 transition-colors"
+              >
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Artwork info */}
+            <div className="flex items-center gap-4 px-6 py-4 bg-stone-50/50">
+              <div className="h-14 w-14 flex-shrink-0 overflow-hidden rounded-lg bg-stone-100">
+                {artwork.images?.[0]?.image ? (
+                  <img src={artwork.images[0].image} alt="" className="h-full w-full object-cover" />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center text-stone-300 text-xs">?</div>
+                )}
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-stone-900 truncate">{artwork.title}</p>
+                <p className="text-xs text-stone-500">by {artwork.artist?.username}</p>
+              </div>
+            </div>
+
+            {/* Form */}
+            <form onSubmit={handleSubmitInquiry} className="px-6 py-4">
+              <label className="block text-xs font-semibold text-stone-600 uppercase mb-2">Your Message</label>
+              <textarea
+                value={inquiryMessage}
+                onChange={(e) => setInquiryMessage(e.target.value)}
+                placeholder="Hi, I'm interested in this artwork. Is it available for purchase? Can you tell me more about..."
+                rows={4}
+                className="w-full rounded-lg border border-stone-200 bg-white px-4 py-3 text-sm text-stone-900 placeholder-stone-400 focus:border-stone-400 focus:bg-white focus:outline-none focus:ring-1 focus:ring-stone-400 resize-none"
+                autoFocus
+              />
+              <div className="mt-4 flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => setShowInquiryModal(false)}
+                  className="flex-1 rounded-lg border border-stone-200 px-4 py-2.5 text-sm font-medium text-stone-700 hover:bg-stone-50 transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={!inquiryMessage.trim() || submittingInquiry}
+                  className="flex-1 rounded-lg bg-[#000] px-4 py-2.5 text-sm font-semibold text-white hover:bg-stone-800 transition disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  {submittingInquiry ? 'Sending...' : 'Send Inquiry'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
