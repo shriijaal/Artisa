@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import Header from '../components/Header';
@@ -30,12 +30,15 @@ const Checkout = () => {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const buyNowRun = useRef(false);
 
   useEffect(() => {
     if (!user) {
       navigate('/login');
       return;
     }
+    if (buyNowRun.current) return;
+    buyNowRun.current = true;
     handleBuyNow();
   }, [user]);
 
