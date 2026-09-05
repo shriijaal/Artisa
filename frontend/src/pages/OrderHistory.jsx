@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import Header from '../components/Header';
 import LoadingSpinner from '../components/LoadingSpinner';
+import { formatPrice } from '../utils/formatPrice';
 import { useToast } from '../components/Toast';
 
 const StarRatingInput = ({ rating, onChange }) => {
@@ -301,7 +302,7 @@ const OrderHistory = () => {
                               <div className="flex items-center gap-6 self-end sm:self-center">
                                 <div className="text-right">
                                   <span className="text-sm text-stone-500">{item.quantity} x</span>
-                                  <span className="font-semibold text-stone-900 ml-2">NPR {item.price}</span>
+                                  <span className="font-semibold text-stone-900 ml-2">NPR {formatPrice(item.price)}</span>
                                 </div>
 
                                 {item.artwork.type === 'physical' && item.shipment && (

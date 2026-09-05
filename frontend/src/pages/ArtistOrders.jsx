@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import Header from '../components/Header';
 import ArtistSideNav from '../components/ArtistSideNav';
+import { formatPrice } from '../utils/formatPrice';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { useToast } from '../components/Toast';
 
@@ -160,7 +161,7 @@ const ArtistOrders = () => {
                       </div>
                       <div>
                         <span className="block font-medium text-stone-400 text-xs uppercase">Quantity & Price</span>
-                        <span>{item.quantity} x NPR {item.price}</span>
+                        <span>{item.quantity} x NPR {formatPrice(item.price)}</span>
                       </div>
                     </div>
                   </div>

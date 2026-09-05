@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import { formatPrice } from '../utils/formatPrice';
 import ArtistSideNav from '../components/ArtistSideNav';
 import RecommendedCarousel from '../components/RecommendedCarousel';
 import { trackInteraction } from '../services/api';
@@ -434,7 +435,7 @@ const PublicArtistProfile = () => {
                         )}
                         <p className="text-white text-sm font-semibold line-clamp-1 font-heading">{artwork.title}</p>
                         <p className="text-[#fc8d6b] text-xs font-bold mt-0.5">
-                          NPR {artwork.price.toLocaleString()}
+                          NPR {formatPrice(artwork.price)}
                         </p>
                       </div>
                     </div>

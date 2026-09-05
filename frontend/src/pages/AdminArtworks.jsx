@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import authFetch from '../utils/authFetch';
+import { formatPrice } from '../utils/formatPrice';
 
 const statusColors = {
   draft: 'bg-stone-100 text-stone-600',
@@ -177,7 +178,7 @@ const AdminArtworks = () => {
                 <h3 className="text-sm font-semibold text-stone-900 truncate">{artwork.title}</h3>
                 <p className="text-xs text-stone-500 mt-0.5">{artwork.artist_name}</p>
                 <div className="flex items-center justify-between mt-3">
-                  <span className="text-sm font-bold text-stone-900">NPR {artwork.price}</span>
+                  <span className="text-sm font-bold text-stone-900">NPR {formatPrice(artwork.price)}</span>
                   <span className="text-xs text-stone-400">{artwork.type}</span>
                 </div>
                 {artwork.status === 'pending_review' && (

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import Header from '../components/Header';
 import LoadingSpinner from '../components/LoadingSpinner';
+import { formatPrice } from '../utils/formatPrice';
 import { useToast } from '../components/Toast';
 
 const Checkout = () => {
@@ -345,7 +346,7 @@ const Checkout = () => {
                     </div>
                     <div className="text-right">
                       <span className="text-sm text-stone-600">{item.quantity} x</span>
-                      <span className="font-semibold text-stone-900 ml-2">NPR {item.artwork.price}</span>
+                      <span className="font-semibold text-stone-900 ml-2">NPR {formatPrice(item.artwork.price)}</span>
                     </div>
                   </div>
                 ))}
@@ -360,15 +361,15 @@ const Checkout = () => {
               <div className="space-y-3">
                 <div className="flex justify-between text-stone-600">
                   <span>Subtotal</span>
-                  <span>NPR {subtotal.toFixed(2)}</span>
+                  <span>NPR {formatPrice(subtotal)}</span>
                 </div>
                 <div className="flex justify-between text-stone-600">
                   <span>Shipping</span>
-                  <span>{shipping > 0 ? `NPR ${shipping.toFixed(2)}` : 'Free'}</span>
+                  <span>{shipping > 0 ? `NPR ${formatPrice(shipping)}` : 'Free'}</span>
                 </div>
                 <div className="border-t border-stone-200 pt-3 flex justify-between font-semibold text-stone-900">
                   <span>Total</span>
-                  <span>NPR {total.toFixed(2)}</span>
+                  <span>NPR {formatPrice(total)}</span>
                 </div>
               </div>
 

@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
+import { formatPrice } from '../utils/formatPrice';
 
 const SkeletonCard = () => (
   <div className="flex-shrink-0 w-64">
@@ -213,7 +214,7 @@ const RecommendedCarousel = ({ title, subtitle, endpoint, limit = 8 }) => {
 
                   <div className="mt-2 flex items-center justify-between">
                     <span className="text-base font-bold text-stone-900">
-                      NPR {Math.round(Number(artwork.price)).toLocaleString()}
+                      NPR {formatPrice(artwork.price)}
                     </span>
                     <span className="text-xs font-medium text-[#9c4327] whitespace-nowrap">
                       View

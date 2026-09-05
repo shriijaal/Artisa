@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import { formatPrice } from '../utils/formatPrice';
 
 const CATEGORY_COLORS = [
   { bg: 'bg-stone-100', text: 'text-stone-700', border: 'border-stone-200', hoverBg: 'hover:bg-stone-200' },
@@ -298,7 +299,7 @@ const Home = () => {
 
                   <div className="mt-2 flex items-center justify-between">
                     <span className="text-base font-bold text-stone-900">
-                      NPR {Math.round(Number(artwork.price)).toLocaleString()}
+                      NPR {formatPrice(artwork.price)}
                     </span>
                     <div className="flex items-center gap-2">
                       {artwork.review_count > 0 && (
@@ -368,7 +369,7 @@ const Home = () => {
                   <h3 className="text-xl sm:text-2xl font-bold text-white leading-tight">{data.recommended_artworks[0].title}</h3>
                   <p className="text-sm text-white/70 mt-1">by {data.recommended_artworks[0].artist.username}</p>
                   <div className="flex items-center justify-between mt-3">
-                    <span className="font-semibold text-amber-400">NPR {data.recommended_artworks[0].price}</span>
+                    <span className="font-semibold text-amber-400">NPR {formatPrice(data.recommended_artworks[0].price)}</span>
                     <span className="text-xs text-white/50 group-hover:text-amber-400 transition-colors font-medium">View Details &rarr;</span>
                   </div>
                 </div>
@@ -386,7 +387,7 @@ const Home = () => {
                   <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
                     <h3 className="text-sm font-semibold text-white truncate">{art.title}</h3>
                     <div className="flex items-center justify-between mt-1">
-                      <span className="text-xs text-amber-400 font-semibold">NPR {art.price}</span>
+                      <span className="text-xs text-amber-400 font-semibold">NPR {formatPrice(art.price)}</span>
                       <span className="text-[10px] text-white/50">{art.artist.username}</span>
                     </div>
                   </div>

@@ -3,6 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import ArtistSideNav from '../components/ArtistSideNav';
+import { formatPrice } from '../utils/formatPrice';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { useToast } from '../components/Toast';
 import authFetch from '../utils/authFetch';
@@ -234,7 +235,7 @@ const MyArtworks = () => {
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col justify-end p-4">
                     <p className="text-white text-sm font-semibold line-clamp-1 font-heading">{artwork.title}</p>
                     <p className="text-[#fc8d6b] text-xs font-bold mt-0.5">
-                      NPR {artwork.price.toLocaleString()}
+                      NPR {formatPrice(artwork.price)}
                     </p>
                   </div>
                 </div>
@@ -280,7 +281,7 @@ const MyArtworks = () => {
                       </span>
                     </div>
                     <div className="flex items-center gap-2 mt-0.5">
-                      <span className="text-xs text-stone-500">NPR {artwork.price.toLocaleString()}</span>
+                      <span className="text-xs text-stone-500">NPR {formatPrice(artwork.price)}</span>
                       {artwork.status !== 'published' && (
                         <>
                           <span className="text-stone-300">·</span>

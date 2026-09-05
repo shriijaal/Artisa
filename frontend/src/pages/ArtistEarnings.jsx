@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import Header from '../components/Header';
 import ArtistSideNav from '../components/ArtistSideNav';
+import { formatPrice } from '../utils/formatPrice';
 import LoadingSpinner from '../components/LoadingSpinner';
 
 const ArtistEarnings = () => {
@@ -145,7 +146,7 @@ const ArtistEarnings = () => {
                         </span>
                       </td>
                       <td className="px-6 py-4 text-right">
-                        NPR {item.price.toFixed(2)}
+                        NPR {formatPrice(item.price)}
                       </td>
                       <td className="px-6 py-4 text-center">
                         {item.quantity}

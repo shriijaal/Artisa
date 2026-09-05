@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import { formatPrice } from '../utils/formatPrice';
 import LoadingSpinner from '../components/LoadingSpinner';
 import RecommendedCarousel from '../components/RecommendedCarousel';
 import { useToast } from '../components/Toast';
@@ -418,7 +419,7 @@ const Marketplace = () => {
 
                         <div className="mt-2 flex items-center justify-between">
                           <span className="text-base font-bold text-stone-900">
-                            NPR {Math.round(artwork.price).toLocaleString()}
+                            NPR {formatPrice(artwork.price)}
                           </span>
                           <div className="flex items-center gap-2">
                             {artwork.review_count > 0 && (

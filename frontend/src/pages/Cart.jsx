@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import Header from '../components/Header';
 import LoadingSpinner from '../components/LoadingSpinner';
+import { formatPrice } from '../utils/formatPrice';
 import { useToast } from '../components/Toast';
 
 const Cart = () => {
@@ -189,7 +190,7 @@ const Cart = () => {
                         </div>
                         
                         <p className="mt-2 font-semibold text-stone-900">
-                          NPR {item.artwork.price}
+                          NPR {formatPrice(item.artwork.price)}
                         </p>
                         
                         <div className="mt-4 flex items-center gap-2">
@@ -229,7 +230,7 @@ const Cart = () => {
                 <div className="space-y-3">
                   <div className="flex justify-between text-stone-600">
                     <span>Subtotal</span>
-                    <span>NPR {calculateSubtotal().toFixed(2)}</span>
+                    <span>NPR {formatPrice(calculateSubtotal())}</span>
                   </div>
                   <div className="flex justify-between text-stone-600">
                     <span>Shipping</span>
@@ -237,7 +238,7 @@ const Cart = () => {
                   </div>
                   <div className="border-t border-stone-200 pt-3 flex justify-between font-semibold text-stone-900">
                     <span>Total</span>
-                    <span>NPR {calculateSubtotal().toFixed(2)}</span>
+                    <span>NPR {formatPrice(calculateSubtotal())}</span>
                   </div>
                 </div>
                 

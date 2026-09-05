@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import Header from '../components/Header';
 import LoadingSpinner from '../components/LoadingSpinner';
+import { formatPrice } from '../utils/formatPrice';
 import { useToast } from '../components/Toast';
 import { trackInteraction } from '../services/api';
 
@@ -188,7 +189,7 @@ const Wishlist = () => {
                             by <span className="font-medium text-stone-700">{artwork.artist?.username}</span>
                           </p>
                           <p className="mt-2 text-lg font-bold text-amber-700">
-                            NPR {artwork.price.toLocaleString()}
+                            NPR {formatPrice(artwork.price)}
                           </p>
                         </div>
                         <button
