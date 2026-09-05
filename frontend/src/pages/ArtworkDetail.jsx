@@ -56,6 +56,7 @@ const ArtworkDetail = () => {
   const [submittingReview, setSubmittingReview] = useState(false);
   const [purchasedItemId, setPurchasedItemId] = useState(null);
   const [hasReviewed, setHasReviewed] = useState(false);
+  const [activeTab, setActiveTab] = useState('description');
 
   // Carousel state
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
@@ -555,48 +556,97 @@ const ArtworkDetail = () => {
           </div>
         </div>
 
-        {/* ─── Below: Description + Artist Statement ─── */}
-        <div className="mt-16 grid gap-12 lg:grid-cols-2">
-          {/* Description */}
-          <div>
-            <h2 className="text-lg font-semibold text-stone-900 font-heading">About This Artwork</h2>
-            <div className="mt-1 h-px bg-stone-200" />
-            <p className="mt-4 text-sm text-stone-700 leading-relaxed whitespace-pre-wrap">{artwork.description}</p>
+        {/* ─── Below: Tabbed Content ─── */}
+        <div className="mt-16">
+          {/* Tab Bar */}
+          <div className="flex gap-6 border-b border-stone-200">
+            <button
+              onClick={() => setActiveTab('description')}
+              className={`pb-3 text-sm font-medium transition-colors relative ${
+                activeTab === 'description'
+                  ? 'text-stone-900 font-semibold'
+                  : 'text-stone-400 hover:text-stone-600'
+              }`}
+            >
+              Description
+              {activeTab === 'description' && (
+                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-stone-900 rounded-full" />
+              )}
+            </button>
+            <button
+              onClick={() => setActiveTab('artist')}
+              className={`pb-3 text-sm font-medium transition-colors relative ${
+                activeTab === 'artist'
+                  ? 'text-stone-900 font-semibold'
+                  : 'text-stone-400 hover:text-stone-600'
+              }`}
+            >
+              Artist
+              {activeTab === 'artist' && (
+                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-stone-900 rounded-full" />
+              )}
+            </button>
+          </div>
 
-            {/* Tags */}
-            {artwork.tags && artwork.tags.length > 0 && (
-              <div className="mt-8">
-                <h2 className="text-lg font-semibold text-stone-900 font-heading">Tags</h2>
-                <div className="mt-1 h-px bg-stone-200" />
-                <div className="mt-4 flex flex-wrap gap-2">
-                  {artwork.tags.map((tag) => (
-                    <span
-                      key={tag.id}
-                      className="rounded-full bg-stone-100 border border-stone-200 px-3 py-1 text-sm text-stone-600"
-                    >
-                      {tag.tag}
-                    </span>
-                  ))}
+          {/* Tab Content */}
+          <div className="py-6">
+            {activeTab === 'description' ? (
+              <div>
+                <p className="text-sm text-stone-700 leading-relaxed whitespace-pre-wrap">{artwork.description}</p>
+
+                {/* Tags — inline at bottom */}
+                {artwork.tags && artwork.tags.length > 0 && (
+                  <div className="mt-8 flex flex-wrap gap-2">
+                    {artwork.tags.map((tag) => (
+                      <span
+                        key={tag.id}
+                        className="rounded-full bg-stone-100 border border-stone-200 px-3 py-1 text-xs font-medium text-stone-600"
+                      >
+                        {tag.tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="flex items-start gap-6">
+                {/* Artist Avatar */}
+                <div className="h-14 w-14 flex-shrink-0 rounded-full bg-stone-200 overflow-hidden">
+                  {artwork.artist.avatar ? (
+                    <img src={artwork.artist.avatar} alt="" className="h-full w-full object-cover" />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-amber-400 to-amber-600">
+                      <span className="text-lg font-bold text-white font-heading">
+                        {artwork.artist.username?.charAt(0).toUpperCase()}
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-semibold text-stone-900 font-heading">
+                      {artwork.artist.first_name || artwork.artist.username}
+                      {artwork.artist.last_name ? ` ${artwork.artist.last_name}` : ''}
+                    </h3>
+                    {artwork.artist.artist_profile?.verified_badge && (
+                      <svg className="h-4 w-4 text-emerald-500" viewBox="0 0 24 24" fill="currentColor">
+                        <path fillRule="evenodd" clipRule="evenodd" d="M8.603 3.799A4.49 4.49 0 0112 2.25c1.357 0 2.573.6 3.397 1.549a4.49 4.49 0 013.498 1.307 4.491 4.491 0 011.307 3.497A4.49 4.49 0 0121.75 12a4.49 4.49 0 01-1.549 3.397 4.491 4.491 0 01-1.307 3.497 4.491 4.491 0 01-3.497 1.307A4.49 4.49 0 0112 21.75a4.49 4.49 0 01-3.397-1.549 4.49 4.49 0 01-3.498-1.306 4.491 4.491 0 01-1.307-3.498A4.49 4.49 0 012.25 12c0-1.357.6-2.573 1.549-3.397a4.49 4.49 0 011.307-3.497 4.49 4.49 0 013.497-1.307zm7.007 6.387a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z" />
+                      </svg>
+                    )}
+                  </div>
+                  <p className="mt-1 text-sm text-stone-600 leading-relaxed">
+                    {artwork.artist.artist_profile?.bio || 'No artist statement available.'}
+                  </p>
+                  <button
+                    onClick={() => navigate(`/artists/${artwork.artist.username}`)}
+                    className="mt-3 text-sm font-medium text-stone-900 underline underline-offset-4 decoration-stone-300 hover:decoration-stone-900 transition-colors"
+                  >
+                    View Full Profile →
+                  </button>
                 </div>
               </div>
             )}
-          </div>
-
-          {/* Artist Statement */}
-          <div>
-            <h2 className="text-lg font-semibold text-stone-900 font-heading">Artist Statement</h2>
-            <div className="mt-1 h-px bg-stone-200" />
-            <div className="mt-4">
-              <p className="text-sm text-stone-700 leading-relaxed">
-                {artwork.artist.artist_profile?.bio || 'No artist statement available.'}
-              </p>
-              <button
-                onClick={() => navigate(`/artists/${artwork.artist.username}`)}
-                className="mt-4 text-sm font-medium text-stone-900 underline underline-offset-4 decoration-stone-300 hover:decoration-stone-900 transition-colors"
-              >
-                View Full Profile
-              </button>
-            </div>
           </div>
         </div>
 
