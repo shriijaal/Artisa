@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useSidebar } from '../contexts/SidebarContext';
 import Header from '../components/Header';
 import ArtistSideNav from '../components/ArtistSideNav';
 import { formatPrice } from '../utils/formatPrice';
@@ -9,7 +10,7 @@ import LoadingSpinner from '../components/LoadingSpinner';
 const ArtistEarnings = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  
+  const { compact } = useSidebar();
   const [earningsData, setEarningsData] = useState({ total_earnings: 0, sales_count: 0, orders: [] });
   const [loading, setLoading] = useState(true);
 
@@ -55,7 +56,7 @@ const ArtistEarnings = () => {
 
       {isApprovedArtist && <ArtistSideNav />}
 
-      <main className={`mx-auto w-full max-w-5xl px-6 py-10 page-enter flex-1 ${isApprovedArtist ? 'md:pl-60 xl:pl-72' : ''}`}>
+      <main className={`mx-auto w-full max-w-5xl px-6 py-10 page-enter flex-1 ${isApprovedArtist ? (compact ? 'md:pl-16' : 'md:pl-60 xl:pl-72') : ''}`}>
         <div className="mb-8">
           <div className="flex items-center gap-2 text-sm text-stone-500 mb-3">
             <button onClick={() => navigate(`/artists/${user?.username}`)} className="hover:text-[#9c4327] transition-colors">

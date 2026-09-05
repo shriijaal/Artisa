@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { useSidebar } from '../contexts/SidebarContext';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import ArtistSideNav from '../components/ArtistSideNav';
@@ -8,6 +9,7 @@ import { useToast } from '../components/Toast';
 
 const ProfileEditor = () => {
   const { user } = useAuth();
+  const { compact } = useSidebar();
   const navigate = useNavigate();
   const { addToast } = useToast();
   const [profile, setProfile] = useState(null);
@@ -155,7 +157,7 @@ const ProfileEditor = () => {
 
       {isApprovedArtist && <ArtistSideNav />}
 
-      <main className={`mx-auto w-full max-w-3xl px-6 py-10 page-enter flex-1 ${isApprovedArtist ? 'md:pl-60 xl:pl-72' : ''}`}>
+      <main className={`mx-auto w-full max-w-3xl px-6 py-10 page-enter flex-1 ${isApprovedArtist ? (compact ? 'md:pl-16' : 'md:pl-60 xl:pl-72') : ''}`}>
         {/* Application Status Banners */}
         {isPendingArtist && (
           <div className="mb-8 rounded-lg bg-yellow-50/90 border border-yellow-200 p-5 flex items-start gap-4 text-yellow-900">

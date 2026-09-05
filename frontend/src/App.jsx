@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
+import { SidebarProvider } from './contexts/SidebarContext'
 import { ToastProvider } from './components/Toast'
 import ProtectedRoute from './components/ProtectedRoute'
 import AdminRoute from './components/AdminRoute'
@@ -48,6 +49,7 @@ function App() {
     <AuthProvider>
       <ToastProvider>
         <Router>
+        <SidebarProvider>
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
@@ -212,6 +214,7 @@ function App() {
             <Route path="orders" element={<AdminOrders />} />
           </Route>
         </Routes>
+        </SidebarProvider>
       </Router>
       </ToastProvider>
     </AuthProvider>

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { useSidebar } from '../contexts/SidebarContext';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import ArtistSideNav from '../components/ArtistSideNav';
@@ -10,6 +11,7 @@ import authFetch from '../utils/authFetch';
 
 const MyArtworks = () => {
   const { user } = useAuth();
+  const { compact } = useSidebar();
   const navigate = useNavigate();
   const { addToast } = useToast();
   const [artworks, setArtworks] = useState([]);
@@ -115,7 +117,7 @@ const MyArtworks = () => {
 
       {isApprovedArtist && <ArtistSideNav artworkCount={artworks.length} />}
 
-      <main className={`mx-auto w-full max-w-5xl px-6 py-10 page-enter flex-1 ${isApprovedArtist ? 'md:pl-60 xl:pl-72' : ''}`}>
+      <main className={`mx-auto w-full max-w-5xl px-6 py-10 page-enter flex-1 ${isApprovedArtist ? (compact ? 'md:pl-16' : 'md:pl-60 xl:pl-72') : ''}`}>
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center gap-2 text-sm text-stone-500 mb-3">

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useSidebar } from '../contexts/SidebarContext';
 import Header from '../components/Header';
 import ArtistSideNav from '../components/ArtistSideNav';
 import LoadingSpinner from '../components/LoadingSpinner';
@@ -32,6 +33,7 @@ const STATUS_COLORS = {
 const ArtistInbox = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { compact } = useSidebar();
   const [activeTab, setActiveTab] = useState('all');
   const [commissions, setCommissions] = useState([]);
   const [inquiries, setInquiries] = useState([]);
@@ -82,7 +84,7 @@ const ArtistInbox = () => {
       <Header />
       <div className="flex">
         <ArtistSideNav />
-        <main className="ml-60 xl:ml-72 flex-1 px-6 py-10">
+        <main className={`${compact ? 'md:ml-16' : 'md:ml-60 xl:ml-72'} flex-1 px-6 py-10`}>
           {/* Page Header */}
           <div className="mb-8">
             <div className="flex items-center gap-3 mb-1">

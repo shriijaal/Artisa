@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useSidebar } from '../contexts/SidebarContext';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { formatPrice } from '../utils/formatPrice';
@@ -44,6 +45,7 @@ const PublicArtistProfile = () => {
   const { username } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { compact } = useSidebar();
   const [profile, setProfile] = useState(null);
   const [artworks, setArtworks] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -171,7 +173,7 @@ const PublicArtistProfile = () => {
 
       {isOwnProfile && <ArtistSideNav artworkCount={artworks.length} />}
 
-      <div className={`flex-1 flex flex-col ${isOwnProfile ? 'md:pl-60 xl:pl-72 pb-16 md:pb-0' : ''}`}>
+      <div className={`flex-1 flex flex-col ${isOwnProfile ? (compact ? 'md:pl-16' : 'md:pl-60 xl:pl-72') + ' pb-16 md:pb-0' : ''}`}>
         {/* Cover Image */}
         <div className="relative h-64 sm:h-80 lg:h-96 w-full bg-gradient-to-br from-stone-800 via-[#9c4327]/40 to-stone-700 z-0">
           {profile.cover_image ? (

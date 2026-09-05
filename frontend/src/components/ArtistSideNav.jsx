@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useSidebar } from '../contexts/SidebarContext';
 
 const navItems = [
   { to: (u) => `/artists/${u}`, label: 'My Profile', icon: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z', end: true },
@@ -15,13 +15,7 @@ const navItems = [
 const ArtistSideNav = ({ artworkCount = 0 }) => {
   const location = useLocation();
   const { user } = useAuth();
-  const [compact, setCompact] = useState(() => {
-    return localStorage.getItem('artist-nav-compact') === 'true';
-  });
-
-  useEffect(() => {
-    localStorage.setItem('artist-nav-compact', compact);
-  }, [compact]);
+  const { compact, setCompact } = useSidebar();
 
   const sidebarWidth = compact ? 'w-16' : 'w-60 xl:w-72';
 
