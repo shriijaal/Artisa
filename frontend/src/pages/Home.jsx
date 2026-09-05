@@ -227,7 +227,7 @@ const Home = () => {
 
           <div className="relative group/carousel py-5">
             {/* Left Arrow — centered on image */}
-            <button onClick={() => scrollCarousel('left')} className="absolute left-3 top-1/2 -translate-y-[70%] z-20 h-10 w-10 rounded-full bg-white/90 backdrop-blur-sm border border-stone-200 flex items-center justify-center text-stone-600 hover:text-stone-900 hover:bg-white shadow-sm transition-all opacity-0 group-hover/carousel:opacity-100 cursor-pointer">
+            <button onClick={() => scrollCarousel('left')} className="absolute left-5 top-1/2 -translate-y-[85%] z-20 h-10 w-10 rounded-full bg-white/90 backdrop-blur-sm border border-stone-200 flex items-center justify-center text-stone-600 hover:text-stone-900 hover:bg-white shadow-sm transition-all opacity-0 group-hover/carousel:opacity-100 cursor-pointer">
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
             </button>
 
@@ -327,7 +327,7 @@ const Home = () => {
             </div>
 
             {/* Right Arrow — centered on image */}
-            <button onClick={() => scrollCarousel('right')} className="absolute right-3 top-1/2 -translate-y-[70%] z-20 h-10 w-10 rounded-full bg-white/90 backdrop-blur-sm border border-stone-200 flex items-center justify-center text-stone-600 hover:text-stone-900 hover:bg-white shadow-sm transition-all opacity-0 group-hover/carousel:opacity-100 cursor-pointer">
+            <button onClick={() => scrollCarousel('right')} className="absolute right-5 top-1/2 -translate-y-[85%] z-20 h-10 w-10 rounded-full bg-white/90 backdrop-blur-sm border border-stone-200 flex items-center justify-center text-stone-600 hover:text-stone-900 hover:bg-white shadow-sm transition-all opacity-0 group-hover/carousel:opacity-100 cursor-pointer">
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
             </button>
           </div>
