@@ -586,6 +586,21 @@ const ArtworkDetail = () => {
                 <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-stone-900 rounded-full" />
               )}
             </button>
+            {reviews.length > 0 && (
+              <button
+                onClick={() => setActiveTab('ratings')}
+                className={`pb-3 text-sm font-medium transition-colors relative ${
+                  activeTab === 'ratings'
+                    ? 'text-stone-900 font-semibold'
+                    : 'text-stone-400 hover:text-stone-600'
+                }`}
+              >
+                Ratings
+                {activeTab === 'ratings' && (
+                  <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-stone-900 rounded-full" />
+                )}
+              </button>
+            )}
           </div>
 
           {/* Tab Content */}
@@ -649,6 +664,57 @@ const ArtworkDetail = () => {
             )}
           </div>
         </div>
+
+        {/* ─── Ratings Summary ─── */}
+        {activeTab === 'ratings' && reviews.length > 0 && (() => {
+          const distribution = [0, 0, 0, 0, 0];
+          reviews.forEach(r => { if (r.rating >= 1 && r.rating <= 5) distribution[r.rating - 1]++; });
+          const maxCount = Math.max(...distribution, 1);
+          return (
+            <div className="mt-16 flex flex-col sm:flex-row gap-10 items-start">
+              {/* Left: Big average */}
+              <div className="text-center sm:text-left flex-shrink-0">
+                <p className="text-5xl font-bold text-stone-900 font-heading">{artwork.avg_rating || '—'}</p>
+                <div className="mt-2 flex items-center gap-1 justify-center sm:justify-start">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <svg
+                      key={star}
+                      className={`h-5 w-5 ${star <= Math.round(artwork.avg_rating || 0) ? 'text-amber-500' : 'text-stone-200'}`}
+                      fill="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                    </svg>
+                  ))}
+                </div>
+                <p className="mt-1 text-sm text-stone-500">{reviews.length} review{reviews.length !== 1 ? 's' : ''}</p>
+              </div>
+
+              {/* Right: Distribution bars */}
+              <div className="flex-1 w-full space-y-2">
+                {[5, 4, 3, 2, 1].map((star) => {
+                  const count = distribution[star - 1];
+                  const pct = reviews.length > 0 ? (count / reviews.length) * 100 : 0;
+                  return (
+                    <div key={star} className="flex items-center gap-3">
+                      <span className="text-xs font-medium text-stone-500 w-3 text-right">{star}</span>
+                      <svg className="h-3.5 w-3.5 text-amber-500 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                      </svg>
+                      <div className="flex-1 h-2 rounded-full bg-stone-100 overflow-hidden">
+                        <div
+                          className="h-full rounded-full bg-amber-400 transition-all duration-500"
+                          style={{ width: `${pct}%` }}
+                        />
+                      </div>
+                      <span className="text-xs text-stone-400 w-6 text-right">{count}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })()}
 
         {/* Similar Works */}
         <div className="mt-16">
