@@ -225,14 +225,14 @@ const Home = () => {
             </Link>
           </div>
 
-          <div className="relative group/carousel">
-            {/* Left Arrow */}
-            <button onClick={() => scrollCarousel('left')} className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 z-20 h-12 w-12 rounded-full bg-white border border-stone-200 flex items-center justify-center text-stone-600 hover:text-stone-900 transition-all opacity-0 group-hover/carousel:opacity-100 cursor-pointer">
-              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
+          <div className="relative group/carousel py-5">
+            {/* Left Arrow — centered on image */}
+            <button onClick={() => scrollCarousel('left')} className="absolute left-3 top-1/2 -translate-y-[70%] z-20 h-10 w-10 rounded-full bg-white/90 backdrop-blur-sm border border-stone-200 flex items-center justify-center text-stone-600 hover:text-stone-900 hover:bg-white shadow-sm transition-all opacity-0 group-hover/carousel:opacity-100 cursor-pointer">
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
             </button>
 
             {/* Scrollable Track */}
-            <div ref={carouselRef} className="flex gap-5 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-4 -mx-2 px-2 scrollbar-hide" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+            <div ref={carouselRef} className="flex gap-5 overflow-x-auto scroll-smooth snap-x snap-mandatory -mx-2 px-2 scrollbar-hide" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
               {data.recommended_artworks?.map((artwork) => (
                 <Link key={artwork.id} to={`/artworks/${artwork.id}`} className="group flex-shrink-0 w-64 snap-start">
                   <div className="aspect-[4/5] overflow-hidden bg-stone-100 rounded-lg border border-stone-200 hover:border-stone-300 transition-all duration-300 hover:-translate-y-1 relative">
@@ -326,9 +326,9 @@ const Home = () => {
               ))}
             </div>
 
-            {/* Right Arrow */}
-            <button onClick={() => scrollCarousel('right')} className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 z-20 h-12 w-12 rounded-full bg-white border border-stone-200 flex items-center justify-center text-stone-600 hover:text-stone-900 transition-all opacity-0 group-hover/carousel:opacity-100 cursor-pointer">
-              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
+            {/* Right Arrow — centered on image */}
+            <button onClick={() => scrollCarousel('right')} className="absolute right-3 top-1/2 -translate-y-[70%] z-20 h-10 w-10 rounded-full bg-white/90 backdrop-blur-sm border border-stone-200 flex items-center justify-center text-stone-600 hover:text-stone-900 hover:bg-white shadow-sm transition-all opacity-0 group-hover/carousel:opacity-100 cursor-pointer">
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
             </button>
           </div>
           <div className="mt-8 text-center sm:hidden">
