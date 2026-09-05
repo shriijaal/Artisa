@@ -27,7 +27,10 @@ const AdminUsers = () => {
 
   useEffect(() => { fetchUsers(); }, [fetchUsers]);
 
-  const handleDeactivate = async (userId) => {
+  const handleDeactivate = async (userId, username, isActive) => {
+    const action = isActive ? 'deactivate' : 'activate';
+    if (!confirm(`Are you sure you want to ${action} ${username}?`)) return;
+
     const res = await authFetch(`/api/admin/users/${userId}/deactivate/`, { method: 'PUT' });
     if (res.ok) {
       const data = await res.json();
@@ -157,7 +160,7 @@ const AdminUsers = () => {
                     <td className="px-6 py-4 text-right">
                       {user.role !== 'admin' && (
                         <button
-                          onClick={() => handleDeactivate(user.id)}
+                          onClick={() => handleDeactivate(user.id, user.username, user.is_active)}
                           className={`text-xs font-medium px-3 py-1.5 rounded-lg transition-all ${
                             user.is_active
                               ? 'text-red-700 bg-red-50 hover:bg-red-100'
