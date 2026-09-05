@@ -372,7 +372,7 @@ const ArtworkDetail = () => {
           <div className="flex flex-col">
             {/* Title + Favorite + Share */}
             <div className="flex items-start justify-between gap-4">
-              <h1 className="text-2xl sm:text-3xl font-bold text-stone-900 leading-tight font-heading">
+              <h1 className="text-2xl sm:text-3xl font-bold text-stone-900 leading-tight">
                 {artwork.title}
               </h1>
               <div className="flex items-center gap-2 flex-shrink-0">
@@ -631,7 +631,7 @@ const ArtworkDetail = () => {
                     <img src={artwork.artist.avatar} alt="" className="h-full w-full object-cover" />
                   ) : (
                     <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-amber-400 to-amber-600">
-                      <span className="text-lg font-bold text-white font-heading">
+                      <span className="text-lg font-bold text-white">
                         {artwork.artist.username?.charAt(0).toUpperCase()}
                       </span>
                     </div>
@@ -640,7 +640,7 @@ const ArtworkDetail = () => {
 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <h3 className="font-semibold text-stone-900 font-heading">
+                    <h3 className="font-semibold text-stone-900">
                       {artwork.artist.first_name || artwork.artist.username}
                       {artwork.artist.last_name ? ` ${artwork.artist.last_name}` : ''}
                     </h3>
@@ -674,7 +674,7 @@ const ArtworkDetail = () => {
             <div className="mt-16 flex flex-col sm:flex-row gap-10 items-start">
               {/* Left: Big average */}
               <div className="text-center sm:text-left flex-shrink-0">
-                <p className="text-5xl font-bold text-stone-900 font-heading">{artwork.avg_rating || '—'}</p>
+                <p className="text-5xl font-bold text-stone-900">{artwork.avg_rating || '—'}</p>
                 <div className="mt-2 flex items-center gap-1 justify-center sm:justify-start">
                   {[1, 2, 3, 4, 5].map((star) => (
                     <svg
@@ -727,7 +727,7 @@ const ArtworkDetail = () => {
 
         {/* Reviews Section */}
         <div className="mt-16">
-          <h2 className="text-2xl font-semibold text-stone-900 font-heading">
+          <h2 className="text-2xl font-semibold text-stone-900">
             Reviews {reviews.length > 0 && <span className="text-base font-normal text-stone-500">({reviews.length})</span>}
           </h2>
 
