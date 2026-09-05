@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import Header from '../components/Header';
 import LoadingSpinner from '../components/LoadingSpinner';
@@ -8,6 +8,7 @@ import { useToast } from '../components/Toast';
 
 const Checkout = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { user } = useAuth();
   const { addToast } = useToast();
   
@@ -33,8 +34,42 @@ const Checkout = () => {
       navigate('/login');
       return;
     }
-    fetchCartAndAddresses();
+    handleBuyNow();
   }, [user]);
+
+  const handleBuyNow = async () => {
+    const buyNowId = searchParams.get('buy_now');
+    if (!buyNowId) {
+      fetchCartAndAddresses();
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('access_token');
+      const res = await fetch('/api/orders/cart/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ artwork_id: buyNowId, quantity: 1 })
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        setError(data.error || 'Failed to add item to cart.');
+        setLoading(false);
+        return;
+      }
+    } catch (err) {
+      console.error('Buy now error:', err);
+      setError('Failed to add item to cart.');
+      setLoading(false);
+      return;
+    }
+
+    fetchCartAndAddresses();
+  };
 
   const fetchCartAndAddresses = async () => {
     try {
