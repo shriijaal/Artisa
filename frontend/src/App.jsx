@@ -33,6 +33,7 @@ import AdminArtworks from './pages/AdminArtworks'
 import AdminCategories from './pages/AdminCategories'
 import AdminUsers from './pages/AdminUsers'
 import AdminOrders from './pages/AdminOrders'
+import ArtistInbox from './pages/ArtistInbox'
 
 const DashboardRedirect = () => {
   const { user } = useAuth();
@@ -139,6 +140,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <ArtistOrders />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/artist/inboxes"
+            element={
+              <ProtectedRoute>
+                <ArtistInbox />
               </ProtectedRoute>
             }
           />

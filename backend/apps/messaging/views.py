@@ -113,14 +113,81 @@ class UnreadCountView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        count = Message.objects.filter(receiver=request.user, read_at__isnull=True).count()
-        threads = (
-            Message.objects.filter(receiver=request.user, read_at__isnull=True)
-            .exclude(commission__isnull=True)
+        unread = Message.objects.filter(receiver=request.user, read_at__isnull=True)
+
+        count = unread.count()
+
+        commission_threads = (
+            unread.exclude(commission__isnull=True)
             .values_list('commission_id', flat=True)
             .distinct()
         )
+
+        artwork_threads = (
+            unread.exclude(artwork__isnull=True)
+            .values_list('artwork_id', flat=True)
+            .distinct()
+        )
+
         return Response({
             'unread_count': count,
-            'unread_commission_ids': [str(cid) for cid in threads],
+            'unread_commission_ids': [str(cid) for cid in commission_threads],
+            'unread_artwork_ids': [str(aid) for aid in artwork_threads],
         })
+
+
+class InquiryListView(APIView):
+    """GET /api/messages/inquiries/ — list artwork inquiry threads for the current user."""
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        from django.db.models import Max
+        from apps.users.serializers import UserSerializer
+
+        messages = Message.objects.filter(
+            Q(receiver=request.user, artwork__isnull=False) |
+            Q(sender=request.user, artwork__isnull=False)
+        ).select_related('sender', 'receiver', 'artwork')
+
+        threads = (
+            messages.values('artwork_id')
+            .annotate(last_message_at=Max('created_at'))
+            .order_by('-last_message_at')
+        )
+
+        result = []
+        for thread in threads:
+            artwork_id = thread['artwork_id']
+            last_msg = messages.filter(artwork_id=artwork_id).order_by('-created_at').first()
+            unread_count = messages.filter(
+                artwork_id=artwork_id,
+                receiver=request.user,
+                read_at__isnull=True
+            ).count()
+
+            other_party = (
+                last_msg.sender if last_msg.receiver_id == request.user.id
+                else last_msg.receiver
+            )
+
+            artwork_data = None
+            if last_msg and last_msg.artwork:
+                primary_image = last_msg.artwork.images.filter(is_primary=True).first()
+                if not primary_image:
+                    primary_image = last_msg.artwork.images.first()
+                artwork_data = {
+                    'id': str(last_msg.artwork.id),
+                    'title': last_msg.artwork.title,
+                    'image': primary_image.image if primary_image else None,
+                }
+
+            result.append({
+                'artwork_id': str(artwork_id),
+                'artwork': artwork_data,
+                'other_party': UserSerializer(other_party, context={'request': request}).data,
+                'last_message': last_msg.body if last_msg else '',
+                'last_message_at': last_msg.created_at.isoformat() if last_msg else None,
+                'unread_count': unread_count,
+            })
+
+        return Response(result)

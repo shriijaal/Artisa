@@ -16,6 +16,7 @@ const Header = () => {
   const [searching, setSearching] = useState(false);
   const [catDropdown, setCatDropdown] = useState(false);
   const [categories, setCategories] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
   const searchInputRef = useRef(null);
   const searchTimerRef = useRef(null);
   const searchWrapperRef = useRef(null);
@@ -81,6 +82,20 @@ const Header = () => {
   const goToSearch = (q) => { navigate(`/marketplace?search=${encodeURIComponent(q)}`); setSearchFocused(false); setSearchQuery(''); };
 
   useEffect(() => { user ? fetchCartCount() : setCartCount(0); }, [user, location.pathname]);
+
+  useEffect(() => {
+    if (!user) { setUnreadCount(0); return; }
+    const fetchUnread = async () => {
+      try {
+        const token = localStorage.getItem('access_token');
+        const r = await fetch('/api/messages/unread/', { headers: { Authorization: `Bearer ${token}` } });
+        if (r.ok) { const d = await r.json(); setUnreadCount(d.unread_count || 0); }
+      } catch {}
+    };
+    fetchUnread();
+    const interval = setInterval(fetchUnread, 30000);
+    return () => clearInterval(interval);
+  }, [user]);
 
   const fetchCartCount = async () => {
     try {
@@ -266,6 +281,20 @@ const Header = () => {
           </button>
           {user ? (
             <>
+              <button
+                onClick={() => navigate(user.artist_profile?.status === 'approved' ? '/artist/inboxes' : '/orders/history')}
+                className="relative p-2 text-stone-600 hover:text-stone-900 transition-colors"
+                aria-label="Messages"
+              >
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+                </svg>
+                {unreadCount > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-amber-600 text-[10px] font-bold text-white">
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </span>
+                )}
+              </button>
               <button onClick={() => navigate('/cart')} className="relative p-2 text-stone-600 hover:text-stone-900 transition-colors" aria-label="Shopping cart">
                 <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-7 3a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
                 {cartCount > 0 && <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-amber-600 text-[10px] font-bold text-white">{cartCount > 9 ? '9+' : cartCount}</span>}
