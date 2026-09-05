@@ -193,28 +193,33 @@ const Cart = () => {
                           NPR {formatPrice(item.artwork.price)}
                         </p>
                         
-                        <div className="mt-4 flex items-center gap-2">
-                          <button
-                            onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                            disabled={updating || item.quantity <= 1}
-                            className="rounded-lg border border-stone-200 px-3 py-1 text-stone-600 hover:bg-stone-50 disabled:opacity-50 transition"
-                          >
-                            -
-                          </button>
-                          <span className="w-8 text-center">{item.quantity}</span>
-                          <button
-                            onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                            disabled={updating || (item.artwork.type === 'digital')}
-                            className="rounded-lg border border-stone-200 px-3 py-1 text-stone-600 hover:bg-stone-50 disabled:opacity-50 transition"
-                          >
-                            +
-                          </button>
-                        </div>
-                        
-                        {item.artwork.type === 'digital' && (
-                          <p className="mt-2 text-xs text-stone-500">
-                            Digital artwork - quantity fixed at 1
+                        {item.artwork.type === 'digital' ? (
+                          <p className="mt-4 text-xs text-stone-500">
+                            Digital artwork — quantity fixed at 1
                           </p>
+                        ) : (
+                          <div className="mt-4 flex items-center gap-2">
+                            <button
+                              onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                              disabled={updating || item.quantity <= 1}
+                              className="rounded-lg border border-stone-200 px-3 py-1 text-stone-600 hover:bg-stone-50 disabled:opacity-50 transition"
+                            >
+                              -
+                            </button>
+                            <span className="w-8 text-center">{item.quantity}</span>
+                            <button
+                              onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                              disabled={updating || (item.artwork.stock && item.quantity >= item.artwork.stock)}
+                              className="rounded-lg border border-stone-200 px-3 py-1 text-stone-600 hover:bg-stone-50 disabled:opacity-50 transition"
+                            >
+                              +
+                            </button>
+                            {item.artwork.stock != null && (
+                              <span className="ml-2 text-xs text-stone-400">
+                                {item.artwork.stock} available
+                              </span>
+                            )}
+                          </div>
                         )}
                       </div>
                     </div>
