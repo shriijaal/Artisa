@@ -79,10 +79,12 @@ class ShippingAddress(models.Model):
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='shipping_addresses')
+    recipient_name = models.CharField(max_length=200, default='')
     province = models.CharField(max_length=100)
     district = models.CharField(max_length=100)
     city = models.CharField(max_length=100)
     street = models.CharField(max_length=255)
+    landmark = models.CharField(max_length=255, blank=True, default='')
     phone = models.CharField(max_length=20)
     is_default = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)

@@ -38,7 +38,7 @@ class CartItemSerializer(serializers.ModelSerializer):
 class ShippingAddressSerializer(serializers.ModelSerializer):
     class Meta:
         model = ShippingAddress
-        fields = ('id', 'user', 'province', 'district', 'city', 'street', 'phone', 'is_default')
+        fields = ('id', 'user', 'recipient_name', 'province', 'district', 'city', 'street', 'landmark', 'phone', 'is_default')
         read_only_fields = ('id', 'user')
 
 

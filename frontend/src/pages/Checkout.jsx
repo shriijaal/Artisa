@@ -17,10 +17,12 @@ const Checkout = () => {
   const [selectedAddressId, setSelectedAddressId] = useState('');
   
   // New address form state
+  const [recipientName, setRecipientName] = useState('');
   const [province, setProvince] = useState('');
   const [district, setDistrict] = useState('');
   const [city, setCity] = useState('');
   const [street, setStreet] = useState('');
+  const [landmark, setLandmark] = useState('');
   const [phone, setPhone] = useState('');
   const [isDefault, setIsDefault] = useState(false);
   const [useNewAddress, setUseNewAddress] = useState(false);
@@ -141,12 +143,12 @@ const Checkout = () => {
 
       if (hasPhysicalItems()) {
         if (useNewAddress) {
-          if (!province || !district || !city || !street || !phone) {
-            setError('Please fill in all address fields.');
+          if (!recipientName || !province || !district || !city || !street || !phone) {
+            setError('Please fill in all required address fields.');
             setSubmitting(false);
             return;
           }
-          payload = { province, district, city, street, phone, is_default: isDefault };
+          payload = { recipient_name: recipientName, province, district, city, street, landmark, phone, is_default: isDefault };
         } else {
           if (!selectedAddressId) {
             setError('Please select a shipping address.');
@@ -260,7 +262,7 @@ const Checkout = () => {
                           >
                             <div className="flex items-center justify-between">
                               <span className="font-semibold text-stone-900">
-                                {addr.street}, {addr.city}
+                                {addr.recipient_name || 'Recipient'} — {addr.street}, {addr.city}
                               </span>
                               <input
                                 type="radio"
@@ -274,6 +276,9 @@ const Checkout = () => {
                             <span className="text-sm text-stone-600 mt-1">
                               {addr.district} District, {addr.province} Province
                             </span>
+                            {addr.landmark && (
+                              <span className="text-sm text-stone-500 mt-0.5">Landmark: {addr.landmark}</span>
+                            )}
                             <span className="text-sm text-stone-600 mt-1">Phone: {addr.phone}</span>
                             {addr.is_default && (
                               <span className="inline-self-start mt-2 rounded bg-stone-200 px-2 py-0.5 text-xs text-stone-800">
@@ -302,9 +307,19 @@ const Checkout = () => {
 
                 {(useNewAddress || addresses.length === 0) && (
                   <div className="space-y-4 pl-6">
+                    <div>
+                      <label className="block text-xs font-semibold text-stone-600 uppercase mb-1">Recipient Name *</label>
+                      <input
+                        type="text"
+                        value={recipientName}
+                        onChange={e => setRecipientName(e.target.value)}
+                        placeholder="Full name of the person receiving"
+                        className="w-full rounded-lg border border-stone-200 bg-white px-3 py-2 text-sm focus:border-stone-400 focus:outline-none focus:ring-1 focus:ring-stone-400"
+                      />
+                    </div>
                     <div className="grid gap-4 sm:grid-cols-2">
                       <div>
-                        <label className="block text-xs font-semibold text-stone-600 uppercase mb-1">Province</label>
+                        <label className="block text-xs font-semibold text-stone-600 uppercase mb-1">Province *</label>
                         <input
                           type="text"
                           value={province}
@@ -349,7 +364,18 @@ const Checkout = () => {
                     </div>
 
                     <div>
-                      <label className="block text-xs font-semibold text-stone-600 uppercase mb-1">Phone Number</label>
+                      <label className="block text-xs font-semibold text-stone-600 uppercase mb-1">Landmark <span className="normal-case text-stone-400">(optional)</span></label>
+                      <input
+                        type="text"
+                        value={landmark}
+                        onChange={e => setLandmark(e.target.value)}
+                        placeholder="e.g. Near Big Mart, beside temple"
+                        className="w-full rounded-lg border border-stone-200 bg-white px-3 py-2 text-sm focus:border-stone-400 focus:outline-none focus:ring-1 focus:ring-stone-400"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-semibold text-stone-600 uppercase mb-1">Phone Number *</label>
                       <input
                         type="text"
                         value={phone}
