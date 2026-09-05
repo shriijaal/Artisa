@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from './Toast';
 
-const CommissionChat = ({ commission, otherParty, onUnreadUpdate }) => {
+const CommissionChat = ({ commission, artworkId, artist, onUnreadUpdate, embedded }) => {
   const { user } = useAuth();
   const { addToast } = useToast();
   const [messages, setMessages] = useState([]);
@@ -13,7 +13,9 @@ const CommissionChat = ({ commission, otherParty, onUnreadUpdate }) => {
   const textareaRef = useRef(null);
   const isFirstLoad = useRef(true);
 
-  const isClosed = ['cancelled', 'declined'].includes(commission?.status);
+  const isClosed = commission ? ['cancelled', 'declined'].includes(commission?.status) : false;
+  const isArtworkChat = !!artworkId;
+  const threadId = isArtworkChat ? artworkId : commission?.id;
 
   const scrollToBottom = (smooth = true) => {
     if (messagesEndRef.current) {
@@ -24,7 +26,10 @@ const CommissionChat = ({ commission, otherParty, onUnreadUpdate }) => {
   const fetchMessages = async (isPolling = false) => {
     try {
       const token = localStorage.getItem('access_token');
-      const response = await fetch(`/api/messages/?commission_id=${commission.id}`, {
+      const url = isArtworkChat
+        ? `/api/messages/?artwork_id=${artworkId}`
+        : `/api/messages/?commission_id=${commission.id}`;
+      const response = await fetch(url, {
         headers: { 'Authorization': `Bearer ${token}` },
       });
 
@@ -66,7 +71,7 @@ const CommissionChat = ({ commission, otherParty, onUnreadUpdate }) => {
     }, 6000);
 
     return () => clearInterval(interval);
-  }, [commission?.id]);
+  }, [threadId]);
 
   // Scroll to bottom when message list grows
   useEffect(() => {
@@ -83,16 +88,17 @@ const CommissionChat = ({ commission, otherParty, onUnreadUpdate }) => {
     setSending(true);
     try {
       const token = localStorage.getItem('access_token');
+      const payload = isArtworkChat
+        ? { artwork_id: artworkId, body: trimmed }
+        : { commission_id: commission.id, body: trimmed };
+
       const response = await fetch('/api/messages/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          commission_id: commission.id,
-          body: trimmed,
-        }),
+        body: JSON.stringify(payload),
       });
 
       if (response.ok) {
@@ -155,15 +161,16 @@ const CommissionChat = ({ commission, otherParty, onUnreadUpdate }) => {
     return groups;
   }, {});
 
+  const otherParty = isArtworkChat ? artist : commission?.customer;
   const otherName = otherParty?.first_name && otherParty?.last_name
     ? `${otherParty.first_name} ${otherParty.last_name}`
     : otherParty?.username || 'User';
 
   const otherAvatar = otherParty?.avatar || otherParty?.profile?.avatar;
-  const isOtherArtist = user?.id === commission?.customer?.id;
+  const isOtherArtist = isArtworkChat ? true : user?.id === commission?.customer?.id;
 
   return (
-    <div className="rounded-lg border border-stone-200 bg-white overflow-hidden flex flex-col h-[580px]">
+    <div className={`${embedded ? '' : 'rounded-lg border border-stone-200 bg-white'} overflow-hidden flex flex-col h-full`}>
       {/* Chat Header */}
       <div className="flex items-center justify-between px-5 py-4 border-b border-stone-100 bg-stone-50/70">
         <div className="flex items-center gap-3">
@@ -184,7 +191,7 @@ const CommissionChat = ({ commission, otherParty, onUnreadUpdate }) => {
           <div>
             <h3 className="text-sm font-semibold text-stone-900 leading-tight">{otherName}</h3>
             <p className="text-xs text-stone-500">
-              {isOtherArtist ? 'Artist' : 'Customer'} • Commission Thread
+              {isArtworkChat ? 'Inquiry Thread' : (isOtherArtist ? 'Artist' : 'Customer') + ' • Commission Thread'}
             </p>
           </div>
         </div>
@@ -213,7 +220,9 @@ const CommissionChat = ({ commission, otherParty, onUnreadUpdate }) => {
             </div>
             <h4 className="text-sm font-semibold text-stone-800">No messages yet</h4>
             <p className="text-xs text-stone-500 mt-1 max-w-xs">
-              Send a message to discuss your commission requirements, artistic vision, or timeline.
+              {isArtworkChat
+                ? 'Send a message to the artist about this artwork.'
+                : 'Send a message to discuss your commission requirements, artistic vision, or timeline.'}
             </p>
           </div>
         ) : (
