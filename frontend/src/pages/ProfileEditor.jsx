@@ -8,7 +8,7 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import { useToast } from '../components/Toast';
 
 const ProfileEditor = () => {
-  const { user } = useAuth();
+  const { user, setUser } = useAuth();
   const { compact } = useSidebar();
   const navigate = useNavigate();
   const { addToast } = useToast();
@@ -17,6 +17,13 @@ const ProfileEditor = () => {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   
+  const [userData, setUserData] = useState({
+    username: '',
+    first_name: '',
+    last_name: '',
+  });
+  const [userDirty, setUserDirty] = useState(false);
+
   const [formData, setFormData] = useState({
     bio: '',
     cover_image: null,
@@ -53,6 +60,18 @@ const ProfileEditor = () => {
             website: '',
             facebook: '',
           },
+        });
+      }
+
+      const userRes = await fetch('/api/auth/me/', {
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+      if (userRes.ok) {
+        const u = await userRes.json();
+        setUserData({
+          username: u.username || '',
+          first_name: u.first_name || '',
+          last_name: u.last_name || '',
         });
       }
     } catch (err) {
@@ -136,6 +155,45 @@ const ProfileEditor = () => {
         addToast(err.error || 'Failed to save avatar', 'error');
       }
     } catch (err) {
+      setError('Network error. Please try again.');
+      addToast('Network error', 'error');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleSaveUser = async (e) => {
+    e.preventDefault();
+    setSaving(true);
+    setError('');
+
+    try {
+      const token = localStorage.getItem('access_token');
+      const response = await fetch('/api/auth/me/', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          username: userData.username,
+          first_name: userData.first_name,
+          last_name: userData.last_name,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setUser(data);
+        setUserDirty(false);
+        addToast('Account details updated!', 'success');
+      } else {
+        const err = await response.json();
+        const msg = err.username?.[0] || err.error || 'Failed to update';
+        setError(msg);
+        addToast(msg, 'error');
+      }
+    } catch {
       setError('Network error. Please try again.');
       addToast('Network error', 'error');
     } finally {
@@ -284,6 +342,70 @@ const ProfileEditor = () => {
               <p className="mt-2 text-sm text-stone-500">Max 5MB. JPG, PNG, GIF, WEBP.</p>
             </div>
           </div>
+        </div>
+
+        {/* Account Details */}
+        <div className="mb-8 rounded-lg border border-stone-200 bg-white p-6">
+          <h3 className="text-lg font-semibold mb-1">Account Details</h3>
+          <p className="text-sm text-stone-500 mb-5">Your display name and username visible across Artisa.</p>
+          <form onSubmit={handleSaveUser} className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="first_name" className="block text-sm font-medium text-stone-700 mb-1.5">
+                  First Name
+                </label>
+                <input
+                  id="first_name"
+                  type="text"
+                  value={userData.first_name}
+                  onChange={(e) => { setUserData({ ...userData, first_name: e.target.value }); setUserDirty(true); }}
+                  className="w-full rounded-lg border border-stone-200 bg-white px-4 py-2.5 text-sm text-stone-900 placeholder-stone-400 focus:border-stone-400 focus:outline-none focus:ring-1 focus:ring-stone-400"
+                  placeholder="First name"
+                />
+              </div>
+              <div>
+                <label htmlFor="last_name" className="block text-sm font-medium text-stone-700 mb-1.5">
+                  Last Name
+                </label>
+                <input
+                  id="last_name"
+                  type="text"
+                  value={userData.last_name}
+                  onChange={(e) => { setUserData({ ...userData, last_name: e.target.value }); setUserDirty(true); }}
+                  className="w-full rounded-lg border border-stone-200 bg-white px-4 py-2.5 text-sm text-stone-900 placeholder-stone-400 focus:border-stone-400 focus:outline-none focus:ring-1 focus:ring-stone-400"
+                  placeholder="Last name"
+                />
+              </div>
+            </div>
+            <div>
+              <label htmlFor="username" className="block text-sm font-medium text-stone-700 mb-1.5">
+                Username
+              </label>
+              <div className="flex rounded-lg border border-stone-200 bg-white overflow-hidden focus-within:border-stone-400 focus-within:ring-1 focus-within:ring-stone-400">
+                <span className="flex items-center px-3 text-sm text-stone-400 bg-stone-50 border-r border-stone-200">artisa.com/</span>
+                <input
+                  id="username"
+                  type="text"
+                  value={userData.username}
+                  onChange={(e) => { setUserData({ ...userData, username: e.target.value }); setUserDirty(true); }}
+                  className="flex-1 px-3 py-2.5 text-sm text-stone-900 placeholder-stone-400 focus:outline-none bg-transparent"
+                  placeholder="username"
+                />
+              </div>
+              <p className="mt-1.5 text-xs text-stone-400">Your public profile URL: <span className="text-stone-600">artisa.com/{userData.username || 'username'}</span></p>
+            </div>
+            {userDirty && (
+              <div className="flex justify-end">
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="rounded-lg bg-[#000] px-5 py-2 text-sm font-semibold text-white hover:bg-stone-800 disabled:opacity-50 transition-colors"
+                >
+                  {saving ? 'Saving...' : 'Save Account Details'}
+                </button>
+              </div>
+            )}
+          </form>
         </div>
 
         {/* Profile Form */}

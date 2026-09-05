@@ -18,7 +18,13 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('id', 'username', 'email', 'role', 'first_name', 'last_name', 'avatar', 'artist_profile')
-        read_only_fields = ('id', 'role', 'username')
+        read_only_fields = ('id', 'role')
+
+    def validate_username(self, value):
+        user = self.context['request'].user
+        if User.objects.filter(username__iexact=value).exclude(pk=user.pk).exists():
+            raise serializers.ValidationError("This username is already taken.")
+        return value
 
 
 class RegisterSerializer(serializers.ModelSerializer):
