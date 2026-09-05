@@ -428,7 +428,7 @@ const ArtworkDetail = () => {
 
             {/* Price + Rating */}
             <div className="mt-5 flex items-center gap-4 flex-wrap">
-              <p className="text-2xl font-bold text-stone-900 font-heading">
+              <p className="text-2xl font-bold text-stone-900">
                 NPR {artwork.price?.toLocaleString()}
               </p>
               {artwork.review_count > 0 && (
