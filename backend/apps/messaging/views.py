@@ -115,16 +115,42 @@ class UnreadCountView(APIView):
     def get(self, request):
         unread = Message.objects.filter(receiver=request.user, read_at__isnull=True)
 
-        count = unread.count()
+        # Only count unread messages that belong to valid threads
+        unread_commissions = unread.filter(commission__isnull=False)
+        unread_artworks = unread.filter(artwork__isnull=False)
+
+        # Auto-mark orphaned messages (no commission, no artwork) as read
+        orphaned = unread.filter(commission__isnull=True, artwork__isnull=True)
+        if orphaned.exists():
+            orphaned.update(read_at=timezone.now())
+
+        # Auto-mark messages pointing to deleted commissions/artworks as read
+        from apps.commissions.models import Commission
+        from apps.artworks.models import Artwork
+        invalid_commissions = unread_commissions.exclude(
+            commission__in=Commission.objects.all()
+        )
+        if invalid_commissions.exists():
+            invalid_commissions.update(read_at=timezone.now())
+            unread_commissions = unread_commissions.filter(commission__in=Commission.objects.all())
+
+        invalid_artworks = unread_artworks.exclude(
+            artwork__in=Artwork.objects.all()
+        )
+        if invalid_artworks.exists():
+            invalid_artworks.update(read_at=timezone.now())
+            unread_artworks = unread_artworks.filter(artwork__in=Artwork.objects.all())
+
+        count = unread_commissions.count() + unread_artworks.count()
 
         commission_threads = (
-            unread.exclude(commission__isnull=True)
+            unread_commissions
             .values_list('commission_id', flat=True)
             .distinct()
         )
 
         artwork_threads = (
-            unread.exclude(artwork__isnull=True)
+            unread_artworks
             .values_list('artwork_id', flat=True)
             .distinct()
         )
