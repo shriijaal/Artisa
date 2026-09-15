@@ -6,6 +6,7 @@ If your laptop crashes, follow these steps to restore the project on a new machi
 - Python 3.12+
 - Node.js 18+
 - Git
+- PostgreSQL 18+ (for database restore)
 
 ## Steps
 
@@ -16,7 +17,17 @@ cd Artisa
 ```
 
 ### 2. Restore the database
-**Option A — From JSON dump (recommended):**
+
+**Option A — From PostgreSQL dump (recommended — this is the active database):**
+```bash
+# Create the database first
+psql -U postgres -c "CREATE DATABASE artisa_db;"
+
+# Restore from dump
+psql -U postgres -d artisa_db -f backup_postgres.sql
+```
+
+**Option B — From Django JSON fixture:**
 ```bash
 cd backend
 python -m venv .venv
@@ -27,7 +38,7 @@ python manage.py migrate
 python manage.py loaddata ../backup_database.json
 ```
 
-**Option B — From raw SQLite file:**
+**Option C — From raw SQLite file (fallback):**
 ```bash
 copy backup_db.sqlite3 backend\db.sqlite3
 ```
@@ -52,6 +63,7 @@ python manage.py runserver
 ```
 
 ## Backup Files
+- `backup_postgres.sql` — PostgreSQL dump (active database, use this)
 - `backup_database.json` — Django fixture dump (all tables, data)
-- `backup_db.sqlite3` — Raw SQLite database file
+- `backup_db.sqlite3` — Raw SQLite database file (stale, kept for reference)
 - `backup_media.zip` — All uploaded artwork/artist images (184 files, ~10MB)
