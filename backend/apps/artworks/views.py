@@ -57,11 +57,6 @@ def artwork_detail(request, artwork_id):
         return Response(serializer.data)
     
     elif request.method == 'PUT':
-        if artwork.status != Artwork.Status.DRAFT:
-            return Response(
-                {'error': 'Can only edit draft artworks'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
         serializer = ArtworkUpdateSerializer(artwork, data=request.data, partial=True)
         if serializer.is_valid():
             artwork = serializer.save()

@@ -27,6 +27,39 @@ class UserSerializer(serializers.ModelSerializer):
         return value
 
 
+class FeaturedArtistSerializer(serializers.ModelSerializer):
+    artist_profile = ArtistProfileSummarySerializer(read_only=True)
+    sample_artworks = serializers.SerializerMethodField()
+    artwork_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = ('id', 'username', 'first_name', 'last_name', 'avatar', 'artist_profile', 'sample_artworks', 'artwork_count')
+
+    def get_sample_artworks(self, obj):
+        from apps.artworks.models import Artwork, ArtworkImage
+        artworks = Artwork.objects.filter(
+            artist=obj,
+            status='published',
+        ).order_by('-created_at')[:2]
+
+        result = []
+        for art in artworks:
+            primary_image = ArtworkImage.objects.filter(artwork=art, is_primary=True).first()
+            if not primary_image:
+                primary_image = ArtworkImage.objects.filter(artwork=art).first()
+            result.append({
+                'id': str(art.id),
+                'title': art.title,
+                'image': primary_image.image.url if primary_image and primary_image.image else None,
+            })
+        return result
+
+    def get_artwork_count(self, obj):
+        from apps.artworks.models import Artwork
+        return Artwork.objects.filter(artist=obj, status='published').count()
+
+
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True, style={'input_type': 'password'})
     password_confirm = serializers.CharField(write_only=True, required=True, style={'input_type': 'password'})
@@ -72,14 +105,14 @@ class ArtistProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ArtistProfile
-        fields = ('id', 'user', 'bio', 'cover_image', 'social_links', 'status', 'verified_badge', 'created_at')
+        fields = ('id', 'user', 'bio', 'cover_image', 'social_links', 'status', 'verified_badge', 'specialties', 'created_at', 'commission_available', 'commission_starting_price')
         read_only_fields = ('id', 'user', 'status', 'verified_badge', 'created_at')
 
 
 class ArtistProfileUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = ArtistProfile
-        fields = ('bio', 'cover_image', 'social_links')
+        fields = ('bio', 'cover_image', 'social_links', 'specialties')
 
     def validate_cover_image(self, value):
         if value:
@@ -112,7 +145,7 @@ class ArtistApplicationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ArtistApplication
-        fields = ('id', 'user', 'portfolio_samples', 'verification_document', 'reason', 'status', 'rejection_reason', 'reviewed_at')
+        fields = ('id', 'user', 'portfolio_samples', 'verification_document', 'reason', 'bio', 'specialties', 'social_links', 'status', 'rejection_reason', 'reviewed_at')
         read_only_fields = ('id', 'user', 'status', 'rejection_reason', 'reviewed_at')
 
     def create(self, validated_data):
@@ -126,5 +159,5 @@ class ArtistApplicationAdminSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ArtistApplication
-        fields = ('id', 'user', 'user_id', 'portfolio_samples', 'verification_document', 'reason', 'status', 'rejection_reason', 'reviewed_by', 'reviewed_at')
+        fields = ('id', 'user', 'user_id', 'portfolio_samples', 'verification_document', 'reason', 'bio', 'specialties', 'social_links', 'status', 'rejection_reason', 'reviewed_by', 'reviewed_at')
         read_only_fields = ('id', 'user', 'reviewed_at')

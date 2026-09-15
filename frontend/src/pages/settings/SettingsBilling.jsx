@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { formatPrice } from '../../utils/formatPrice';
 import LoadingSpinner from '../../components/LoadingSpinner';
+import authFetch from '../../utils/authFetch';
 
 const SettingsBilling = () => {
   const [orders, setOrders] = useState([]);
@@ -9,8 +10,7 @@ const SettingsBilling = () => {
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const token = localStorage.getItem('access_token');
-        const res = await fetch('/api/orders/', { headers: { Authorization: `Bearer ${token}` } });
+        const res = await authFetch('/api/orders/');
         if (res.ok) setOrders(await res.json());
       } catch (e) { console.error(e); }
       finally { setLoading(false); }

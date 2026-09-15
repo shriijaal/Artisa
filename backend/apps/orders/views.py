@@ -25,6 +25,8 @@ from apps.core.email import (
     send_payment_confirmation_email,
     send_shipping_notification_email,
     send_delivery_notification_email,
+    send_order_cancelled_email,
+    send_order_rejected_email,
 )
 
 
@@ -278,12 +280,105 @@ def mock_pay_order(request, order_id):
     return Response(OrderSerializer(order).data)
 
 
+# --- ORDER CANCEL / REJECT VIEWS ---
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def cancel_order(request, order_id):
+    """Customer cancels an unpaid order. Restores stock for physical items."""
+    try:
+        order = Order.objects.get(id=order_id, customer=request.user)
+    except Order.DoesNotExist:
+        return Response({'error': 'Order not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    if order.payment_status == Order.PaymentStatus.PAID:
+        return Response({'error': 'Cannot cancel a paid order. Please request a refund instead.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    if order.status == Order.Status.CANCELLED:
+        return Response({'error': 'Order is already cancelled'}, status=status.HTTP_400_BAD_REQUEST)
+
+    # Restore stock for physical items
+    for item in order.items.all():
+        if item.artwork.type == Artwork.Type.PHYSICAL and item.artwork.stock is not None:
+            item.artwork.stock += item.quantity
+            item.artwork.save()
+
+    order.status = Order.Status.CANCELLED
+    order.cancellation_reason = 'Cancelled by customer'
+    order.cancelled_by = request.user
+    order.save()
+
+    send_order_cancelled_email(order, cancelled_by=request.user)
+    return Response({'message': 'Order cancelled successfully'})
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated, IsApprovedArtist])
+def artist_accept_order(request, order_id):
+    """Artist accepts an unpaid order, acknowledging they will fulfill it."""
+    try:
+        order = Order.objects.get(id=order_id)
+    except Order.DoesNotExist:
+        return Response({'error': 'Order not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    artist_items = order.items.filter(artist=request.user)
+    if not artist_items.exists():
+        return Response({'error': 'You have no items in this order'}, status=status.HTTP_403_FORBIDDEN)
+
+    if order.status == Order.Status.CANCELLED:
+        return Response({'error': 'Cannot accept a cancelled order'}, status=status.HTTP_400_BAD_REQUEST)
+
+    if order.status != Order.Status.PENDING:
+        return Response({'error': 'Order has already been accepted or is being processed'}, status=status.HTTP_400_BAD_REQUEST)
+
+    order.status = Order.Status.PROCESSING
+    order.save()
+
+    return Response({'message': 'Order accepted successfully', 'status': order.status})
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated, IsApprovedArtist])
+def artist_reject_order(request, order_id):
+    """Artist rejects an order item belonging to their artwork. Cancels the order."""
+    try:
+        order = Order.objects.get(id=order_id)
+    except Order.DoesNotExist:
+        return Response({'error': 'Order not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    # Verify the artist has items in this order
+    artist_items = order.items.filter(artist=request.user)
+    if not artist_items.exists():
+        return Response({'error': 'You have no items in this order'}, status=status.HTTP_403_FORBIDDEN)
+
+    if order.status == Order.Status.CANCELLED:
+        return Response({'error': 'Order is already cancelled'}, status=status.HTTP_400_BAD_REQUEST)
+
+    reason = request.data.get('reason', '').strip()
+    if not reason:
+        return Response({'error': 'Rejection reason is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+    # Restore stock for physical items from this artist
+    for item in artist_items:
+        if item.artwork.type == Artwork.Type.PHYSICAL and item.artwork.stock is not None:
+            item.artwork.stock += item.quantity
+            item.artwork.save()
+
+    order.status = Order.Status.CANCELLED
+    order.cancellation_reason = f'Rejected by artist: {reason}'
+    order.cancelled_by = request.user
+    order.save()
+
+    send_order_rejected_email(order, artist=request.user, reason=reason)
+    return Response({'message': 'Order rejected successfully'})
+
+
 # --- ARTIST ORDER FULFILLMENT VIEWS ---
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated, IsApprovedArtist])
 def artist_orders(request):
-    order_items = OrderItem.objects.filter(artist=request.user).order_by('-created_at')
+    order_items = OrderItem.objects.filter(artist=request.user).exclude(order__status=Order.Status.CANCELLED).order_by('-created_at')
     serializer = OrderItemSerializer(order_items, many=True)
     return Response(serializer.data)
 

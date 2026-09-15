@@ -424,7 +424,7 @@ Build **one task at a time**. Task briefs live in [`tasks/`](../tasks/).
 - Polling for new messages (WebSockets = stretch)
 - Unread indicators
 
-#### Task 17: Purchase-verified reviews
+#### Task 17: Purchase-verified reviews 
 - Review only after order item `delivered`
 - One review per order item
 - Average rating on artwork cards and artist profiles

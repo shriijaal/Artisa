@@ -6,6 +6,7 @@ import Header from '../components/Header';
 import ArtistSideNav from '../components/ArtistSideNav';
 import { formatPrice } from '../utils/formatPrice';
 import LoadingSpinner from '../components/LoadingSpinner';
+import authFetch from '../utils/authFetch';
 
 const ArtistEarnings = () => {
   const navigate = useNavigate();
@@ -21,7 +22,7 @@ const ArtistEarnings = () => {
     }
     // Verify artist status
     if (user.artist_profile?.status !== 'approved') {
-      navigate('/profile/edit');
+      navigate('/settings/account');
       return;
     }
     fetchEarnings();
@@ -29,10 +30,7 @@ const ArtistEarnings = () => {
 
   const fetchEarnings = async () => {
     try {
-      const token = localStorage.getItem('access_token');
-      const response = await fetch('/api/orders/artist/earnings/', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
+      const response = await authFetch('/api/orders/artist/earnings/');
       if (response.ok) {
         const data = await response.json();
         setEarningsData(data);

@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from apps.users.models import User, ArtistProfile, ArtistApplication
 from apps.artworks.models import Artwork, Category
-from apps.orders.models import Order
+from apps.orders.models import Order, OrderItem, OrderShipment, ShippingAddress
 
 
 class AdminUserSerializer(serializers.ModelSerializer):
@@ -34,7 +34,7 @@ class AdminApplicationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ArtistApplication
-        fields = ['id', 'username', 'email', 'status', 'reason', 'rejection_reason',
+        fields = ['id', 'username', 'email', 'status', 'reason', 'bio', 'specialties', 'social_links', 'rejection_reason',
                   'reviewed_by', 'reviewed_at', 'created_at']
 
 
@@ -59,10 +59,11 @@ class AdminArtworkSerializer(serializers.ModelSerializer):
 class AdminCategorySerializer(serializers.ModelSerializer):
     artwork_count = serializers.SerializerMethodField()
     children_count = serializers.SerializerMethodField()
+    children_names = serializers.SerializerMethodField()
 
     class Meta:
         model = Category
-        fields = ['id', 'name', 'slug', 'parent', 'description', 'artwork_count', 'children_count', 'created_at']
+        fields = ['id', 'name', 'slug', 'parent', 'description', 'artwork_count', 'children_count', 'children_names', 'created_at']
 
     def get_artwork_count(self, obj):
         return obj.artworks.count()
@@ -70,15 +71,81 @@ class AdminCategorySerializer(serializers.ModelSerializer):
     def get_children_count(self, obj):
         return obj.children.count()
 
+    def get_children_names(self, obj):
+        return list(obj.children.values_list('name', flat=True).order_by('name'))
+
 
 class AdminOrderSerializer(serializers.ModelSerializer):
     customer_name = serializers.CharField(source='customer.username', read_only=True)
     item_count = serializers.SerializerMethodField()
+    cancelled_by_name = serializers.CharField(source='cancelled_by.username', read_only=True, default=None)
 
     class Meta:
         model = Order
         fields = ['id', 'customer', 'customer_name', 'subtotal', 'shipping_cost', 'total',
-                  'status', 'payment_status', 'item_count', 'created_at']
+                  'status', 'payment_status', 'item_count', 'cancellation_reason', 'cancelled_by_name', 'created_at']
 
     def get_item_count(self, obj):
         return obj.items.count()
+
+
+class AdminOrderItemSerializer(serializers.ModelSerializer):
+    artwork_title = serializers.CharField(source='artwork.title', read_only=True)
+    artwork_type = serializers.CharField(source='artwork.type', read_only=True)
+    artist_name = serializers.CharField(source='artist.username', read_only=True)
+    primary_image = serializers.SerializerMethodField()
+    shipment = serializers.SerializerMethodField()
+
+    class Meta:
+        model = OrderItem
+        fields = ['id', 'artwork_title', 'artwork_type', 'artist_name', 'primary_image',
+                  'price', 'quantity', 'shipment']
+
+    def get_primary_image(self, obj):
+        img = obj.artwork.images.filter(is_primary=True).first()
+        if img:
+            return img.image.url
+        img = obj.artwork.images.first()
+        return img.image.url if img else None
+
+    def get_shipment(self, obj):
+        try:
+            s = obj.shipment
+            return {
+                'id': str(s.id),
+                'tracking_number': s.tracking_number,
+                'status': s.status,
+                'shipped_at': s.shipped_at,
+                'delivered_at': s.delivered_at,
+            }
+        except OrderShipment.DoesNotExist:
+            return None
+
+
+class AdminOrderDetailSerializer(serializers.ModelSerializer):
+    customer_name = serializers.CharField(source='customer.username', read_only=True)
+    customer_email = serializers.CharField(source='customer.email', read_only=True)
+    cancelled_by_name = serializers.CharField(source='cancelled_by.username', read_only=True, default=None)
+    items = AdminOrderItemSerializer(many=True, read_only=True)
+    shipping_address = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Order
+        fields = ['id', 'customer', 'customer_name', 'customer_email', 'shipping_address',
+                  'subtotal', 'shipping_cost', 'total', 'status', 'payment_status',
+                  'cancellation_reason', 'cancelled_by_name',
+                  'items', 'created_at', 'updated_at']
+
+    def get_shipping_address(self, obj):
+        if not obj.shipping_address:
+            return None
+        sa = obj.shipping_address
+        return {
+            'recipient_name': sa.recipient_name,
+            'province': sa.province,
+            'district': sa.district,
+            'city': sa.city,
+            'street': sa.street,
+            'landmark': sa.landmark,
+            'phone': sa.phone,
+        }

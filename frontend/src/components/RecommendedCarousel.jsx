@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { formatPrice } from '../utils/formatPrice';
+import authFetch from '../utils/authFetch';
 
 const SkeletonCard = () => (
   <div className="flex-shrink-0 w-64">
@@ -26,11 +27,7 @@ const RecommendedCarousel = ({ title, subtitle, endpoint, limit = 8 }) => {
   const fetchArtworks = async () => {
     try {
       const url = endpoint || `/api/recs/artworks/?k=${limit}`;
-      const token = localStorage.getItem('access_token');
-      const headers = {};
-      if (token) headers['Authorization'] = `Bearer ${token}`;
-
-      const response = await fetch(url, { headers });
+      const response = await authFetch(url);
       if (response.ok) {
         setArtworks(await response.json());
       }
@@ -129,7 +126,7 @@ const RecommendedCarousel = ({ title, subtitle, endpoint, limit = 8 }) => {
               <div className="aspect-[4/5] overflow-hidden bg-stone-100 rounded-lg border border-stone-200 transition-all duration-300 hover:-translate-y-1 relative">
                   {primaryImage ? (
                     <img
-                      src={`http://127.0.0.1:8000${primaryImage.image}`}
+                      src={primaryImage.image}
                       alt={artwork.title}
                       className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500"
                       loading="lazy"

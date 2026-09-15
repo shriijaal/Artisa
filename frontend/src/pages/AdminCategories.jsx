@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import authFetch from '../utils/authFetch';
+import CustomSelect from '../components/CustomSelect';
+import ResizableTable from '../components/ResizableTable';
 
 const AdminCategories = () => {
   const [categories, setCategories] = useState([]);
@@ -66,7 +68,7 @@ const AdminCategories = () => {
         </div>
         <button
           onClick={() => { setShowForm(!showForm); setEditCategory(null); setForm({ name: '', slug: '', description: '', parent: '' }); }}
-          className="px-4 py-2.5 text-sm font-medium text-white bg-[#000] rounded-lg hover:bg-stone-800 transition-colors"
+          className="px-4 py-2.5 text-sm font-medium text-white bg-black rounded-lg hover:bg-stone-800 transition-colors"
         >
           {showForm ? 'Cancel' : 'Add Category'}
         </button>
@@ -108,20 +110,20 @@ const AdminCategories = () => {
           </div>
           <div>
             <label className="block text-xs font-medium text-stone-500 mb-1">Parent Category</label>
-            <select
+            <CustomSelect
               value={form.parent}
-              onChange={(e) => setForm({ ...form, parent: e.target.value })}
-              className="w-full px-3 py-2 rounded-lg border border-stone-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
-            >
-              <option value="">None (top-level)</option>
-              {categories.filter((c) => c.id !== editCategory?.id).map((c) => (
-                <option key={c.id} value={c.id}>{c.name}</option>
-              ))}
-            </select>
+              onChange={(val) => setForm({ ...form, parent: val })}
+              placeholder="None (top-level)"
+              options={[
+                { value: '', label: 'None (top-level)' },
+                ...categories.filter((c) => c.id !== editCategory?.id).map((c) => ({ value: c.id, label: c.name })),
+              ]}
+              className="w-full"
+            />
           </div>
           <button
             type="submit"
-            className="px-4 py-2 text-sm font-medium text-white bg-[#000] rounded-lg hover:bg-stone-800"
+            className="px-4 py-2 text-sm font-medium text-white bg-black rounded-lg hover:bg-stone-800"
           >
             {editCategory ? 'Save Changes' : 'Create Category'}
           </button>
@@ -151,35 +153,36 @@ const AdminCategories = () => {
         ) : categories.length === 0 ? (
           <div className="text-center py-12 text-stone-500 text-sm">No categories found</div>
         ) : (
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-stone-200 bg-stone-50">
-                <th className="text-left px-6 py-3 text-xs font-semibold text-stone-500 uppercase tracking-wider">Name</th>
-                <th className="text-left px-6 py-3 text-xs font-semibold text-stone-500 uppercase tracking-wider">Slug</th>
-                <th className="text-left px-6 py-3 text-xs font-semibold text-stone-500 uppercase tracking-wider">Parent</th>
-                <th className="text-left px-6 py-3 text-xs font-semibold text-stone-500 uppercase tracking-wider">Artworks</th>
-                <th className="text-left px-6 py-3 text-xs font-semibold text-stone-500 uppercase tracking-wider">Subcategories</th>
-                <th className="text-right px-6 py-3 text-xs font-semibold text-stone-500 uppercase tracking-wider">Actions</th>
+          <ResizableTable
+            columns={[
+              { key: 'name', label: 'Name', width: 200 },
+              { key: 'parent', label: 'Parent', width: 160 },
+              { key: 'subcategories', label: 'Subcategories', width: 300 },
+              { key: 'artworks', label: 'Artworks', width: 100 },
+              { key: 'actions', label: 'Actions', width: 120 },
+            ]}
+          >
+            {categories.map((cat) => (
+              <tr key={cat.id} className="hover:bg-stone-50">
+                <td className="px-4 py-4 text-sm font-medium text-stone-900">{cat.name}</td>
+                <td className="px-4 py-4 text-sm text-stone-500">{cat.parent ? categories.find((c) => c.id === cat.parent)?.name || 'None' : 'None'}</td>
+                <td className="px-4 py-4 text-sm text-stone-500">
+                  {cat.children_names?.length > 0 ? (
+                    <span>{cat.children_names.join(', ')}</span>
+                  ) : (
+                    <span className="text-stone-300">None</span>
+                  )}
+                </td>
+                <td className="px-4 py-4 text-sm text-stone-500">{cat.artwork_count}</td>
+                <td className="px-4 py-4 text-right">
+                  <div className="flex items-center justify-end gap-2">
+                    <button onClick={() => startEdit(cat)} className="text-xs text-amber-600 hover:text-amber-700 font-medium">Edit</button>
+                    <button onClick={() => handleDelete(cat.id)} className="text-xs text-red-600 hover:text-red-700 font-medium">Delete</button>
+                  </div>
+                </td>
               </tr>
-            </thead>
-            <tbody className="divide-y divide-stone-100">
-              {categories.map((cat) => (
-                <tr key={cat.id} className="hover:bg-stone-50">
-                  <td className="px-6 py-4 text-sm font-medium text-stone-900">{cat.name}</td>
-                  <td className="px-6 py-4 text-sm text-stone-500">{cat.slug}</td>
-                  <td className="px-6 py-4 text-sm text-stone-500">{cat.parent ? categories.find((c) => c.id === cat.parent)?.name || '—' : '—'}</td>
-                  <td className="px-6 py-4 text-sm text-stone-500">{cat.artwork_count}</td>
-                  <td className="px-6 py-4 text-sm text-stone-500">{cat.children_count}</td>
-                  <td className="px-6 py-4 text-right">
-                    <div className="flex items-center justify-end gap-2">
-                      <button onClick={() => startEdit(cat)} className="text-xs text-amber-600 hover:text-amber-700 font-medium">Edit</button>
-                      <button onClick={() => handleDelete(cat.id)} className="text-xs text-red-600 hover:text-red-700 font-medium">Delete</button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+            ))}
+          </ResizableTable>
         )}
       </div>
     </div>

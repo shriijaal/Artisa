@@ -5,6 +5,7 @@ import Header from '../components/Header';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { formatPrice } from '../utils/formatPrice';
 import { useToast } from '../components/Toast';
+import authFetch from '../utils/authFetch';
 
 const Cart = () => {
   const navigate = useNavigate();
@@ -24,13 +25,7 @@ const Cart = () => {
 
   const fetchCart = async () => {
     try {
-      const token = localStorage.getItem('access_token');
-      const response = await fetch('/api/orders/cart/', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-      
+      const response = await authFetch('/api/orders/cart/');
       if (response.ok) {
         const data = await response.json();
         setCartItems(data);
@@ -47,13 +42,9 @@ const Cart = () => {
     
     setUpdating(true);
     try {
-      const token = localStorage.getItem('access_token');
-      const response = await fetch(`/api/orders/cart/${itemId}/`, {
+      const response = await authFetch(`/api/orders/cart/${itemId}/`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ quantity: newQuantity }),
       });
 
@@ -70,12 +61,8 @@ const Cart = () => {
   const removeItem = async (itemId) => {
     setUpdating(true);
     try {
-      const token = localStorage.getItem('access_token');
-      await fetch(`/api/orders/cart/${itemId}/`, {
+      await authFetch(`/api/orders/cart/${itemId}/`, {
         method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
       });
       fetchCart();
       addToast('Item removed from cart', 'info');
@@ -91,12 +78,8 @@ const Cart = () => {
     
     setUpdating(true);
     try {
-      const token = localStorage.getItem('access_token');
-      await fetch('/api/orders/cart/clear/', {
+      await authFetch('/api/orders/cart/clear/', {
         method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
       });
       fetchCart();
     } catch (err) {

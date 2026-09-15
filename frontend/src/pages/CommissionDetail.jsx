@@ -5,6 +5,7 @@ import Header from '../components/Header';
 import CommissionChat from '../components/CommissionChat';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { useToast } from '../components/Toast';
+import authFetch from '../utils/authFetch';
 
 const STATUS_CONFIG = {
   pending: {
@@ -190,10 +191,7 @@ const CommissionDetail = () => {
 
   const checkUnread = async () => {
     try {
-      const token = localStorage.getItem('access_token');
-      const res = await fetch('/api/messages/unread/', {
-        headers: { 'Authorization': `Bearer ${token}` },
-      });
+      const res = await authFetch('/api/messages/unread/');
       if (res.ok) {
         const data = await res.json();
         if (data.unread_commission_ids && data.unread_commission_ids.includes(id)) {
@@ -207,10 +205,7 @@ const CommissionDetail = () => {
 
   const fetchCommission = async () => {
     try {
-      const token = localStorage.getItem('access_token');
-      const response = await fetch(`/api/commissions/${id}/`, {
-        headers: { 'Authorization': `Bearer ${token}` },
-      });
+      const response = await authFetch(`/api/commissions/${id}/`);
       if (response.ok) {
         setCommission(await response.json());
       } else {
@@ -227,13 +222,9 @@ const CommissionDetail = () => {
   const handleAction = async (action, body = {}) => {
     setActionLoading(true);
     try {
-      const token = localStorage.getItem('access_token');
-      const response = await fetch(`/api/commissions/${id}/${action}/`, {
+      const response = await authFetch(`/api/commissions/${id}/${action}/`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       });
       if (response.ok) {
@@ -272,13 +263,11 @@ const CommissionDetail = () => {
     }
     setActionLoading(true);
     try {
-      const token = localStorage.getItem('access_token');
       const formData = new FormData();
       formData.append('file', deliverFile);
       formData.append('notes', deliverNotes);
-      const response = await fetch(`/api/commissions/${id}/deliver/`, {
+      const response = await authFetch(`/api/commissions/${id}/deliver/`, {
         method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` },
         body: formData,
       });
       if (response.ok) {

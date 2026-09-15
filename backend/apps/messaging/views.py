@@ -39,6 +39,17 @@ class MessageListCreateView(APIView):
                 return error
             messages = Message.objects.filter(commission=commission).select_related('sender', 'receiver')
         elif artwork_id:
+            # Permission check: user must be the artist or have messages in this thread
+            try:
+                artwork = Artwork.objects.get(id=artwork_id)
+            except Artwork.DoesNotExist:
+                return Response({'error': 'Artwork not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+            is_artist = artwork.artist_id == request.user.id
+            has_messages = Message.objects.filter(artwork_id=artwork_id, sender=request.user).exists()
+            if not is_artist and not has_messages:
+                return Response({'error': 'You do not have access to this conversation.'}, status=status.HTTP_403_FORBIDDEN)
+
             messages = Message.objects.filter(artwork_id=artwork_id).select_related('sender', 'receiver')
         else:
             # Return all messages for the user (inquiries + commission messages)
@@ -71,11 +82,23 @@ class MessageListCreateView(APIView):
                 return Response({'error': 'Artwork not found.'}, status=status.HTTP_404_NOT_FOUND)
 
             if artwork.artist_id == request.user.id:
-                return Response({'error': 'You cannot send an inquiry to yourself.'}, status=status.HTTP_400_BAD_REQUEST)
+                # Artist replying to an existing inquiry thread — find the buyer
+                last_msg = (
+                    Message.objects
+                    .filter(artwork=artwork)
+                    .exclude(sender=request.user)
+                    .order_by('-created_at')
+                    .first()
+                )
+                if not last_msg:
+                    return Response({'error': 'You cannot start an inquiry on your own artwork.'}, status=status.HTTP_400_BAD_REQUEST)
+                receiver = last_msg.sender
+            else:
+                receiver = artwork.artist
 
             message = Message.objects.create(
                 sender=request.user,
-                receiver=artwork.artist,
+                receiver=receiver,
                 artwork=artwork,
                 body=data['body'],
             )
@@ -173,7 +196,7 @@ class InquiryListView(APIView):
         messages = Message.objects.filter(
             Q(receiver=request.user, artwork__isnull=False) |
             Q(sender=request.user, artwork__isnull=False)
-        ).select_related('sender', 'receiver', 'artwork')
+        ).select_related('sender', 'receiver', 'artwork').prefetch_related('artwork__images')
 
         threads = (
             messages.values('artwork_id')
@@ -204,7 +227,7 @@ class InquiryListView(APIView):
                 artwork_data = {
                     'id': str(last_msg.artwork.id),
                     'title': last_msg.artwork.title,
-                    'image': primary_image.image if primary_image else None,
+                    'image': primary_image.image.url if primary_image and primary_image.image else None,
                 }
 
             result.append({
@@ -212,6 +235,7 @@ class InquiryListView(APIView):
                 'artwork': artwork_data,
                 'other_party': UserSerializer(other_party, context={'request': request}).data,
                 'last_message': last_msg.body if last_msg else '',
+                'last_message_sender': last_msg.sender_id if last_msg else None,
                 'last_message_at': last_msg.created_at.isoformat() if last_msg else None,
                 'unread_count': unread_count,
             })

@@ -9,8 +9,8 @@ import Login from './pages/Login'
 import Register from './pages/Register'
 import ArtistApplication from './pages/ArtistApplication'
 import PublicArtistProfile from './pages/PublicArtistProfile'
-import ProfileEditor from './pages/ProfileEditor'
 import CreateArtwork from './pages/CreateArtwork'
+import EditArtwork from './pages/EditArtwork'
 import MyArtworks from './pages/MyArtworks'
 import Marketplace from './pages/Marketplace'
 import Artists from './pages/Artists'
@@ -49,7 +49,7 @@ const DashboardRedirect = () => {
   if (user?.artist_profile?.status === 'approved') {
     return <Navigate to={`/artists/${user.username}`} replace />;
   }
-  return <Navigate to="/profile/edit" replace />;
+  return <Navigate to="/settings/account" replace />;
 };
 
 function App() {
@@ -82,14 +82,6 @@ function App() {
             }
           />
           <Route
-            path="/profile/edit"
-            element={
-              <ProtectedRoute>
-                <ProfileEditor />
-              </ProtectedRoute>
-            }
-          />
-          <Route
             path="/settings"
             element={
               <ProtectedRoute>
@@ -111,6 +103,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <CreateArtwork />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/artworks/:id/edit"
+            element={
+              <ProtectedRoute>
+                <EditArtwork />
               </ProtectedRoute>
             }
           />

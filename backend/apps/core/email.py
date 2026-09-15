@@ -197,3 +197,38 @@ def send_commission_cancelled_email(commission, cancelled_by=None):
         },
         recipient_list=[other_party.email],
     )
+
+
+# --- Order cancel / reject emails ---
+
+def send_order_cancelled_email(order, cancelled_by=None):
+    """Notify the platform (admin) when a customer cancels an order."""
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
+    admin_emails = list(User.objects.filter(role='admin', is_active=True).values_list('email', flat=True))
+    if admin_emails:
+        _send(
+            subject=f'Artisa - Order #{str(order.id)[:8]} Cancelled by Customer',
+            template_name='order_cancelled.html',
+            context={
+                'order': order,
+                'cancelled_by': cancelled_by,
+                'site_url': settings.KHALTI_WEBSITE_URL,
+            },
+            recipient_list=admin_emails,
+        )
+
+
+def send_order_rejected_email(order, artist=None, reason=''):
+    """Notify the customer when an artist rejects their order."""
+    _send(
+        subject=f'Artisa - Order #{str(order.id)[:8]} Rejected by Artist',
+        template_name='order_rejected.html',
+        context={
+            'order': order,
+            'artist': artist,
+            'reason': reason,
+            'site_url': settings.KHALTI_WEBSITE_URL,
+        },
+        recipient_list=[order.customer.email],
+    )

@@ -64,6 +64,7 @@ class Artwork(models.Model):
     height = models.FloatField(null=True, blank=True, help_text='Height in cm')
     depth = models.FloatField(null=True, blank=True, help_text='Depth in cm (for 3D artworks)')
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.DRAFT)
+    rejection_reason = models.TextField(blank=True, default='')
     originality_confirmed = models.BooleanField(default=False)
     is_featured = models.BooleanField(default=False)  # For featured badge
     created_at = models.DateTimeField(auto_now_add=True)

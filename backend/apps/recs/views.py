@@ -12,8 +12,8 @@ from apps.recs.models import UserInteraction, RecommendationCache
 from apps.recs.serializers import InteractionSerializer
 from apps.recs.utils import log_interaction
 from apps.recs.engine import get_recommendation_engine
-from apps.artworks.serializers import ArtworkSerializer, CategorySerializer
-from apps.users.serializers import UserSerializer
+from apps.artworks.serializers import ArtworkSerializer, CategorySerializer, CategoryWithArtworksSerializer
+from apps.users.serializers import UserSerializer, FeaturedArtistSerializer
 
 logger = logging.getLogger(__name__)
 
@@ -185,12 +185,20 @@ class HomepageView(APIView):
             artist_profile__status='approved'
         ).order_by('-date_joined')[:4]
 
+        # 5. Stats
+        total_artists = User.objects.filter(artist_profile__status='approved').count()
+        total_artworks = Artwork.objects.filter(status='published').count()
+
         return Response({
             'hero_featured': ArtworkSerializer(hero_artworks, many=True, context={'request': request}).data,
             'recommendation_type': recommendation_type,
             'recommended_artworks': ArtworkSerializer(recommended_artworks, many=True, context={'request': request}).data,
-            'categories': CategorySerializer(categories, many=True, context={'request': request}).data,
-            'featured_artists': UserSerializer(featured_artists, many=True, context={'request': request}).data,
+            'categories': CategoryWithArtworksSerializer(categories, many=True, context={'request': request}).data,
+            'featured_artists': FeaturedArtistSerializer(featured_artists, many=True, context={'request': request}).data,
+            'stats': {
+                'total_artists': total_artists,
+                'total_artworks': total_artworks,
+            },
         })
 
 

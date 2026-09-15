@@ -19,6 +19,7 @@ from apps.users.views import (
     remove_favorite,
     remove_favorite_by_artwork,
     update_avatar,
+    upload_portfolio_samples,
 )
 
 urlpatterns = [
@@ -31,6 +32,7 @@ urlpatterns = [
     path('password-reset/', password_reset_request, name='password_reset_request'),
     path('password-reset-confirm/', password_reset_confirm, name='password_reset_confirm'),
     path('artist/application/', artist_application, name='artist_application'),
+    path('artist/portfolio/upload/', upload_portfolio_samples, name='upload_portfolio_samples'),
     path('artist/profile/', artist_profile, name='artist_profile'),
     path('artist/avatar/', update_avatar, name='update_avatar'),
     path('artists/list/', artists_list, name='artists_list'),

@@ -3,10 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import CustomSelect from '../components/CustomSelect';
 import { formatPrice } from '../utils/formatPrice';
 import LoadingSpinner from '../components/LoadingSpinner';
 import RecommendedCarousel from '../components/RecommendedCarousel';
 import { useToast } from '../components/Toast';
+import authFetch from '../utils/authFetch';
 
 const Marketplace = () => {
   const navigate = useNavigate();
@@ -88,10 +90,7 @@ const Marketplace = () => {
 
   const fetchFavorites = async () => {
     try {
-      const token = localStorage.getItem('access_token');
-      const response = await fetch('/api/auth/favorites/', {
-        headers: { 'Authorization': `Bearer ${token}` },
-      });
+      const response = await authFetch('/api/auth/favorites/');
       if (response.ok) {
         const data = await response.json();
         setFavorites(data.map(f => f.artwork_id));
@@ -107,18 +106,16 @@ const Marketplace = () => {
       return;
     }
     try {
-      const token = localStorage.getItem('access_token');
       if (favorites.includes(artworkId)) {
-        await fetch(`/api/auth/favorites/artwork/${artworkId}/`, {
+        await authFetch(`/api/auth/favorites/artwork/${artworkId}/`, {
           method: 'DELETE',
-          headers: { 'Authorization': `Bearer ${token}` },
         });
         setFavorites(prev => prev.filter(id => id !== artworkId));
         addToast('Removed from wishlist', 'info');
       } else {
-        await fetch('/api/auth/favorites/', {
+        await authFetch('/api/auth/favorites/', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ artwork_id: artworkId }),
         });
         setFavorites(prev => [...prev, artworkId]);
@@ -143,29 +140,31 @@ const Marketplace = () => {
 
       <div>
         <label className="block text-xs font-medium text-stone-500 uppercase tracking-wider mb-1.5">Category</label>
-        <select
+        <CustomSelect
           value={filters.category}
-          onChange={(e) => handleFilterChange('category', e.target.value)}
-          className="w-full rounded-lg border border-stone-200 bg-white px-3 py-2 text-sm text-stone-900 focus:border-stone-400 focus:outline-none focus:ring-1 focus:ring-stone-400"
-        >
-          <option value="">All Categories</option>
-          {categories.map((cat) => (
-            <option key={cat.id} value={cat.id}>{cat.name}</option>
-          ))}
-        </select>
+          onChange={(val) => handleFilterChange('category', val)}
+          placeholder="All Categories"
+          options={[
+            { value: '', label: 'All Categories' },
+            ...categories.map((cat) => ({ value: cat.id, label: cat.name })),
+          ]}
+          className="w-full"
+        />
       </div>
 
       <div>
         <label className="block text-xs font-medium text-stone-500 uppercase tracking-wider mb-1.5">Type</label>
-        <select
+        <CustomSelect
           value={filters.type}
-          onChange={(e) => handleFilterChange('type', e.target.value)}
-          className="w-full rounded-lg border border-stone-200 bg-white px-3 py-2 text-sm text-stone-900 focus:border-stone-400 focus:outline-none focus:ring-1 focus:ring-stone-400"
-        >
-          <option value="">All Types</option>
-          <option value="physical">Physical</option>
-          <option value="digital">Digital</option>
-        </select>
+          onChange={(val) => handleFilterChange('type', val)}
+          placeholder="All Types"
+          options={[
+            { value: '', label: 'All Types' },
+            { value: 'physical', label: 'Physical' },
+            { value: 'digital', label: 'Digital' },
+          ]}
+          className="w-full"
+        />
       </div>
 
       <div className="flex items-center gap-2.5">
@@ -201,16 +200,17 @@ const Marketplace = () => {
 
       <div>
         <label className="block text-xs font-medium text-stone-500 uppercase tracking-wider mb-1.5">Sort By</label>
-        <select
+        <CustomSelect
           value={filters.sort}
-          onChange={(e) => handleFilterChange('sort', e.target.value)}
-          className="w-full rounded-lg border border-stone-200 bg-white px-3 py-2 text-sm text-stone-900 focus:border-stone-400 focus:outline-none focus:ring-1 focus:ring-stone-400"
-        >
-          <option value="newest">Newest First</option>
-          <option value="price_asc">Price: Low to High</option>
-          <option value="price_desc">Price: High to Low</option>
-          <option value="rating">Top Rated</option>
-        </select>
+          onChange={(val) => handleFilterChange('sort', val)}
+          options={[
+            { value: 'newest', label: 'Newest First' },
+            { value: 'price_asc', label: 'Price: Low to High' },
+            { value: 'price_desc', label: 'Price: High to Low' },
+            { value: 'rating', label: 'Top Rated' },
+          ]}
+          className="w-full"
+        />
       </div>
     </div>
   );
@@ -319,7 +319,7 @@ const Marketplace = () => {
                       <div className="aspect-[4/5] overflow-hidden bg-stone-100 rounded-lg border border-stone-200 hover:border-stone-300 transition-all duration-300 hover:-translate-y-1 relative">
                         {primaryImage ? (
                           <img
-                            src={`http://127.0.0.1:8000${primaryImage.image}`}
+                            src={primaryImage.image}
                             alt={artwork.title}
                             className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500"
                             loading="lazy"

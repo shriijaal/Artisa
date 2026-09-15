@@ -15,6 +15,9 @@ urlpatterns = [
     path('', views.orders, name='orders'),
     path('<uuid:order_id>/', views.order_detail, name='order_detail'),
     path('<uuid:order_id>/pay/', views.mock_pay_order, name='mock_pay_order'),
+    path('<uuid:order_id>/cancel/', views.cancel_order, name='cancel_order'),
+    path('<uuid:order_id>/artist-accept/', views.artist_accept_order, name='artist_accept_order'),
+    path('<uuid:order_id>/artist-reject/', views.artist_reject_order, name='artist_reject_order'),
     
     # Artist order routes
     path('artist/items/', views.artist_orders, name='artist_orders'),

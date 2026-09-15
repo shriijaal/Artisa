@@ -189,19 +189,20 @@ const ArtworkDetail = () => {
   };
 
   const openInquiryModal = async () => {
-    // Check if there are existing messages for this artwork
     try {
-      const token = localStorage.getItem('access_token');
-      const res = await fetch(`/api/messages/?artwork_id=${id}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
+      const res = await authFetch(`/api/messages/?artwork_id=${id}`);
+      console.log('[ArtworkDetail] openInquiryModal status:', res.status, 'ok:', res.ok);
       if (res.ok) {
         const msgs = await res.json();
+        console.log('[ArtworkDetail] existing messages:', msgs.length, msgs);
         setInquiryView(msgs.length > 0 ? 'chat' : 'form');
       } else {
+        const err = await res.json().catch(() => ({}));
+        console.log('[ArtworkDetail] openInquiryModal error:', err);
         setInquiryView('form');
       }
-    } catch {
+    } catch (e) {
+      console.error('[ArtworkDetail] openInquiryModal catch:', e);
       setInquiryView('form');
     }
     setShowInquiryModal(true);
@@ -213,13 +214,9 @@ const ArtworkDetail = () => {
 
     setSubmittingInquiry(true);
     try {
-      const token = localStorage.getItem('access_token');
-      const res = await fetch('/api/messages/', {
+      const res = await authFetch('/api/messages/', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           artwork_id: id,
           body: inquiryMessage.trim()
@@ -232,6 +229,7 @@ const ArtworkDetail = () => {
         addToast('Inquiry sent!', 'success');
       } else {
         const err = await res.json();
+        console.log('[ArtworkDetail] submitInquiry error:', err);
         addToast(err.error || 'Failed to send inquiry', 'error');
       }
     } catch {
@@ -247,6 +245,15 @@ const ArtworkDetail = () => {
       if (response.ok) {
         const data = await response.json();
         setArtwork(data);
+      } else if (user) {
+        // Try fetching as owner's own artwork (drafts/pending)
+        const ownRes = await authFetch(`/api/artworks/my-artworks/${id}/`);
+        if (ownRes.ok) {
+          const data = await ownRes.json();
+          setArtwork(data);
+        } else {
+          navigate('/marketplace');
+        }
       } else {
         navigate('/marketplace');
       }
@@ -371,6 +378,54 @@ const ArtworkDetail = () => {
       <Header />
 
       <main className="mx-auto max-w-7xl px-6 py-12">
+        {/* Status banner — only for artwork owner on non-published artworks */}
+        {user && artwork.artist?.id === user.id && artwork.status !== 'published' && (
+          <div className={`mb-8 rounded-lg border px-5 py-4 flex items-start gap-3 ${
+            artwork.status === 'pending_review' ? 'bg-amber-50 border-amber-200' :
+            artwork.status === 'draft' ? 'bg-stone-100 border-stone-200' :
+            'bg-red-50 border-red-200'
+          }`}>
+            {artwork.status === 'pending_review' && (
+              <span className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center">
+                <span className="relative flex h-2.5 w-2.5">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-400 opacity-75" />
+                  <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-amber-500" />
+                </span>
+              </span>
+            )}
+            {artwork.status === 'draft' && (
+              <svg className="h-5 w-5 flex-shrink-0 text-stone-400 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+              </svg>
+            )}
+            {artwork.status === 'removed' && (
+              <svg className="h-5 w-5 flex-shrink-0 text-red-400 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            )}
+            <div>
+              <p className={`text-sm font-semibold ${
+                artwork.status === 'pending_review' ? 'text-amber-800' :
+                artwork.status === 'draft' ? 'text-stone-700' :
+                'text-red-800'
+              }`}>
+                {artwork.status === 'pending_review' && 'Waiting for admin review'}
+                {artwork.status === 'draft' && 'This artwork is a draft'}
+                {artwork.status === 'removed' && 'This artwork was removed'}
+              </p>
+              <p className={`mt-0.5 text-xs ${
+                artwork.status === 'pending_review' ? 'text-amber-600' :
+                artwork.status === 'draft' ? 'text-stone-500' :
+                'text-red-600'
+              }`}>
+                {artwork.status === 'pending_review' && 'This usually takes 24-48 hours. You will be notified once it is approved.'}
+                {artwork.status === 'draft' && 'Submit it for review from your artwork management page.'}
+                {artwork.status === 'removed' && 'Contact support if you believe this is an error.'}
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Top Section: Image + Details */}
         <div className="grid gap-10 lg:grid-cols-2">
 

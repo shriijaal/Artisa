@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import LoadingSpinner from '../components/LoadingSpinner';
+import authFetch from '../utils/authFetch';
 
 const STATUS_CONFIG = {
   pending: { label: 'Pending', color: 'bg-yellow-100 text-yellow-700 border-yellow-200', icon: '⏳' },
@@ -45,14 +46,9 @@ const MyCommissions = () => {
 
   const fetchCommissions = async () => {
     try {
-      const token = localStorage.getItem('access_token');
       const [resCommissions, resUnread] = await Promise.all([
-        fetch('/api/commissions/mine/', {
-          headers: { 'Authorization': `Bearer ${token}` },
-        }),
-        fetch('/api/messages/unread/', {
-          headers: { 'Authorization': `Bearer ${token}` },
-        }),
+        authFetch('/api/commissions/mine/'),
+        authFetch('/api/messages/unread/'),
       ]);
 
       if (resCommissions.ok) {

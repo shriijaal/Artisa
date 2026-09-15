@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import authFetch from '../utils/authFetch';
+import CustomSelect from '../components/CustomSelect';
 
 const statusColors = {
   pending: 'bg-amber-50 text-amber-700',
@@ -75,16 +76,18 @@ const AdminApplications = () => {
             className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-stone-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
           />
         </div>
-        <select
+        <CustomSelect
           value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          className="px-3 py-2.5 rounded-lg border border-stone-200 bg-white text-sm text-stone-700 focus:outline-none focus:ring-2 focus:ring-amber-500"
-        >
-          <option value="">All Status</option>
-          <option value="pending">Pending</option>
-          <option value="approved">Approved</option>
-          <option value="rejected">Rejected</option>
-        </select>
+          onChange={setStatusFilter}
+          placeholder="All Status"
+          options={[
+            { value: '', label: 'All Status' },
+            { value: 'pending', label: 'Pending' },
+            { value: 'approved', label: 'Approved' },
+            { value: 'rejected', label: 'Rejected' },
+          ]}
+          className="w-full sm:w-44"
+        />
       </div>
 
       {/* Table */}

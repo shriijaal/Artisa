@@ -12,6 +12,42 @@ class CategorySerializer(serializers.ModelSerializer):
         read_only_fields = ('id', 'slug')
 
 
+class CategoryWithArtworksSerializer(serializers.ModelSerializer):
+    sample_artworks = serializers.SerializerMethodField()
+    artwork_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Category
+        fields = ('id', 'name', 'slug', 'parent', 'description', 'sample_artworks', 'artwork_count')
+        read_only_fields = ('id', 'slug')
+
+    def get_sample_artworks(self, obj):
+        from apps.artworks.models import Artwork, ArtworkImage
+        artworks = Artwork.objects.filter(
+            category=obj,
+            status=Artwork.Status.PUBLISHED,
+        ).select_related('artist').order_by('-created_at')[:2]
+
+        result = []
+        for art in artworks:
+            primary_image = ArtworkImage.objects.filter(artwork=art, is_primary=True).first()
+            if not primary_image:
+                primary_image = ArtworkImage.objects.filter(artwork=art).first()
+            result.append({
+                'id': str(art.id),
+                'title': art.title,
+                'image': primary_image.image.url if primary_image and primary_image.image else None,
+            })
+        return result
+
+    def get_artwork_count(self, obj):
+        from apps.artworks.models import Artwork
+        return Artwork.objects.filter(
+            category=obj,
+            status=Artwork.Status.PUBLISHED,
+        ).count()
+
+
 class ArtworkTagSerializer(serializers.ModelSerializer):
     class Meta:
         model = ArtworkTag
@@ -55,7 +91,7 @@ class ArtworkSerializer(serializers.ModelSerializer):
         model = Artwork
         fields = (
             'id', 'artist', 'title', 'description', 'price', 'type', 
-            'category', 'stock', 'status', 'originality_confirmed',
+            'category', 'stock', 'status', 'rejection_reason', 'originality_confirmed',
             'images', 'tags', 'digital_file', 'avg_rating', 'review_count',
             'created_at', 'updated_at'
         )

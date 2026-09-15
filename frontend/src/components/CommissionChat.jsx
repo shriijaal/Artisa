@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from './Toast';
+import authFetch from '../utils/authFetch';
 
 const CommissionChat = ({ commission, artworkId, artist, onUnreadUpdate, embedded }) => {
   const { user } = useAuth();
@@ -25,16 +26,16 @@ const CommissionChat = ({ commission, artworkId, artist, onUnreadUpdate, embedde
 
   const fetchMessages = async (isPolling = false) => {
     try {
-      const token = localStorage.getItem('access_token');
       const url = isArtworkChat
         ? `/api/messages/?artwork_id=${artworkId}`
         : `/api/messages/?commission_id=${commission.id}`;
-      const response = await fetch(url, {
-        headers: { 'Authorization': `Bearer ${token}` },
-      });
+      console.log('[CommissionChat] fetching:', url, 'isPolling:', isPolling);
+      const response = await authFetch(url);
+      console.log('[CommissionChat] response status:', response.status, 'ok:', response.ok);
 
       if (response.ok) {
         const data = await response.json();
+        console.log('[CommissionChat] received messages:', data.length, data);
         setMessages((prev) => {
           // If polling and length is the same, avoid unnecessary re-render
           if (isPolling && prev.length === data.length) {
@@ -62,6 +63,7 @@ const CommissionChat = ({ commission, artworkId, artist, onUnreadUpdate, embedde
   };
 
   useEffect(() => {
+    console.log('[CommissionChat] useEffect fired, threadId:', threadId, 'artworkId:', artworkId, 'commission:', commission?.id);
     isFirstLoad.current = true;
     fetchMessages(false);
 
@@ -87,17 +89,13 @@ const CommissionChat = ({ commission, artworkId, artist, onUnreadUpdate, embedde
 
     setSending(true);
     try {
-      const token = localStorage.getItem('access_token');
       const payload = isArtworkChat
         ? { artwork_id: artworkId, body: trimmed }
         : { commission_id: commission.id, body: trimmed };
 
-      const response = await fetch('/api/messages/', {
+      const response = await authFetch('/api/messages/', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
 

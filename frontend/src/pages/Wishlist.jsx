@@ -6,6 +6,7 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import { formatPrice } from '../utils/formatPrice';
 import { useToast } from '../components/Toast';
 import { trackInteraction } from '../services/api';
+import authFetch from '../utils/authFetch';
 
 const Wishlist = () => {
   const navigate = useNavigate();
@@ -25,10 +26,7 @@ const Wishlist = () => {
 
   const fetchFavorites = async () => {
     try {
-      const token = localStorage.getItem('access_token');
-      const response = await fetch('/api/auth/favorites/', {
-        headers: { 'Authorization': `Bearer ${token}` },
-      });
+      const response = await authFetch('/api/auth/favorites/');
       
       if (response.ok) {
         const data = await response.json();
@@ -56,10 +54,8 @@ const Wishlist = () => {
 
   const removeFavorite = async (favoriteId) => {
     try {
-      const token = localStorage.getItem('access_token');
-      await fetch(`/api/auth/favorites/${favoriteId}/`, {
+      await authFetch(`/api/auth/favorites/${favoriteId}/`, {
         method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` },
       });
       setFavorites(prev => prev.filter(f => f.id !== favoriteId));
       addToast('Removed from wishlist', 'info');
@@ -71,13 +67,9 @@ const Wishlist = () => {
 
   const addToCart = async (artworkId) => {
     try {
-      const token = localStorage.getItem('access_token');
-      const response = await fetch('/api/orders/cart/', {
+      const response = await authFetch('/api/orders/cart/', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ artwork_id: artworkId, quantity: 1 }),
       });
       if (response.ok) {

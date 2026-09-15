@@ -1,8 +1,32 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import LoadingSpinner from '../../components/LoadingSpinner';
+import ImageCropModal from '../../components/ImageCropModal';
 import { useToast } from '../../components/Toast';
+import authFetch from '../../utils/authFetch';
+
+const SPECIALTIES = [
+  'Painting', 'Digital Art', 'Sculpture', 'Photography', 'Illustration',
+  'Printmaking', 'Mixed Media', 'Textile Art', 'Ceramics', 'Calligraphy',
+  '3D Art', 'Sketching', 'Other',
+];
+
+const DropZone = ({ children, onDrop, className = '' }) => {
+  const [over, setOver] = useState(false);
+  const handleDrag = (e) => { e.preventDefault(); e.stopPropagation(); };
+  return (
+    <div
+      onDragEnter={(e) => { handleDrag(e); setOver(true); }}
+      onDragOver={(e) => { handleDrag(e); setOver(true); }}
+      onDragLeave={(e) => { handleDrag(e); setOver(false); }}
+      onDrop={(e) => { handleDrag(e); setOver(false); onDrop(e.dataTransfer.files); }}
+      className={`${className} ${over ? 'ring-2 ring-stone-400 ring-offset-2' : ''}`}
+    >
+      {children}
+    </div>
+  );
+};
 
 const SettingsAccount = () => {
   const { user, setUser } = useAuth();
@@ -10,30 +34,39 @@ const SettingsAccount = () => {
   const { addToast } = useToast();
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
+  const [saving, setSaving] = useState({ user: false, avatar: false, profile: false });
   const [error, setError] = useState('');
 
   const [userData, setUserData] = useState({ username: '', first_name: '', last_name: '' });
   const [userDirty, setUserDirty] = useState(false);
 
-  const [formData, setFormData] = useState({
-    bio: '', cover_image: null, avatar: null,
-    social_links: { instagram: '', website: '', facebook: '' },
-  });
+  const [bio, setBio] = useState('');
+  const [bioDirty, setBioDirty] = useState(false);
+  const [specialties, setSpecialties] = useState([]);
+  const [socialLinks, setSocialLinks] = useState({ instagram: '', website: '', facebook: '' });
+  const [socialDirty, setSocialDirty] = useState(false);
+
+  const [avatarFile, setAvatarFile] = useState(null);
+  const [avatarPreview, setAvatarPreview] = useState(null);
+  const [coverFile, setCoverFile] = useState(null);
+  const [coverPreview, setCoverPreview] = useState(null);
+
+  const [cropModal, setCropModal] = useState(null);
 
   useEffect(() => { fetchProfile(); }, []);
 
   const fetchProfile = async () => {
     try {
-      const token = localStorage.getItem('access_token');
       const [resProfile, resUser] = await Promise.all([
-        fetch('/api/auth/artist/profile/', { headers: { Authorization: `Bearer ${token}` } }),
-        fetch('/api/auth/me/', { headers: { Authorization: `Bearer ${token}` } }),
+        authFetch('/api/auth/artist/profile/'),
+        authFetch('/api/auth/me/'),
       ]);
       if (resProfile.ok) {
         const d = await resProfile.json();
         setProfile(d);
-        setFormData({ bio: d.bio || '', cover_image: null, avatar: null, social_links: d.social_links || { instagram: '', website: '', facebook: '' } });
+        setBio(d.bio || '');
+        setSpecialties(d.specialties || []);
+        setSocialLinks(d.social_links || { instagram: '', website: '', facebook: '' });
       }
       if (resUser.ok) {
         const u = await resUser.json();
@@ -43,14 +76,38 @@ const SettingsAccount = () => {
     finally { setLoading(false); }
   };
 
+  const handleAvatarDrop = (files) => {
+    const file = files[0];
+    if (!file || !file.type.startsWith('image/')) return;
+    setAvatarFile(file);
+    setCropModal({ type: 'avatar', file, aspect: 1 });
+  };
+
+  const handleCoverDrop = (files) => {
+    const file = files[0];
+    if (!file || !file.type.startsWith('image/')) return;
+    setCoverFile(file);
+    setCropModal({ type: 'cover', file, aspect: 16 / 5 });
+  };
+
+  const handleCrop = (croppedFile) => {
+    if (cropModal.type === 'avatar') {
+      setAvatarFile(croppedFile);
+      setAvatarPreview(URL.createObjectURL(croppedFile));
+    } else {
+      setCoverFile(croppedFile);
+      setCoverPreview(URL.createObjectURL(croppedFile));
+    }
+    setCropModal(null);
+  };
+
   const handleSaveUser = async (e) => {
     e.preventDefault();
-    setSaving(true); setError('');
+    setSaving((s) => ({ ...s, user: true })); setError('');
     try {
-      const token = localStorage.getItem('access_token');
-      const res = await fetch('/api/auth/me/', {
+      const res = await authFetch('/api/auth/me/', {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username: userData.username, first_name: userData.first_name, last_name: userData.last_name }),
       });
       if (res.ok) {
@@ -63,39 +120,46 @@ const SettingsAccount = () => {
         setError(msg); addToast(msg, 'error');
       }
     } catch { setError('Network error.'); addToast('Network error', 'error'); }
-    finally { setSaving(false); }
+    finally { setSaving((s) => ({ ...s, user: false })); }
   };
 
   const handleSaveAvatar = async () => {
-    setSaving(true); setError('');
+    if (!avatarFile) return;
+    setSaving((s) => ({ ...s, avatar: true }));
     try {
-      const token = localStorage.getItem('access_token');
       const fd = new FormData();
-      if (formData.avatar) fd.append('avatar', formData.avatar);
-      const res = await fetch('/api/auth/artist/avatar/', { method: 'PUT', headers: { Authorization: `Bearer ${token}` }, body: fd });
+      fd.append('avatar', avatarFile);
+      const res = await authFetch('/api/auth/artist/avatar/', { method: 'PUT', body: fd });
       if (res.ok) {
         const d = await res.json();
-        setProfile({ ...profile, user: d }); setFormData({ ...formData, avatar: null });
+        setProfile((p) => ({ ...p, user: d }));
+        setAvatarFile(null); setAvatarPreview(null);
         addToast('Avatar updated!', 'success');
       } else { const err = await res.json(); addToast(err.error || 'Failed', 'error'); }
     } catch { addToast('Network error', 'error'); }
-    finally { setSaving(false); }
+    finally { setSaving((s) => ({ ...s, avatar: false })); }
   };
 
-  const handleSaveProfile = async (e) => {
-    e.preventDefault();
-    setSaving(true); setError('');
+  const handleSaveProfile = async () => {
+    setSaving((s) => ({ ...s, profile: true })); setError('');
     try {
-      const token = localStorage.getItem('access_token');
       const fd = new FormData();
-      fd.append('bio', formData.bio);
-      fd.append('social_links', JSON.stringify(formData.social_links));
-      if (formData.cover_image) fd.append('cover_image', formData.cover_image);
-      const res = await fetch('/api/auth/artist/profile/', { method: 'PUT', headers: { Authorization: `Bearer ${token}` }, body: fd });
-      if (res.ok) { const d = await res.json(); setProfile(d); addToast('Profile saved!', 'success'); }
-      else { const err = await res.json(); addToast(err.error || 'Failed', 'error'); }
+      fd.append('bio', bio);
+      fd.append('social_links', JSON.stringify(socialLinks));
+      fd.append('specialties', JSON.stringify(specialties));
+      if (coverFile) fd.append('cover_image', coverFile);
+      const res = await authFetch('/api/auth/artist/profile/', { method: 'PUT', body: fd });
+      if (res.ok) {
+        const d = await res.json();
+        setProfile(d); setCoverFile(null); setCoverPreview(null); setBioDirty(false); setSocialDirty(false);
+        addToast('Profile saved!', 'success');
+      } else { const err = await res.json(); addToast(err.error || 'Failed', 'error'); }
     } catch { addToast('Network error', 'error'); }
-    finally { setSaving(false); }
+    finally { setSaving((s) => ({ ...s, profile: false })); }
+  };
+
+  const toggleSpecialty = (s) => {
+    setSpecialties((prev) => prev.includes(s) ? prev.filter((x) => x !== s) : [...prev, s]);
   };
 
   if (loading) return <LoadingSpinner label="Loading account..." />;
@@ -103,6 +167,9 @@ const SettingsAccount = () => {
   const isApprovedArtist = profile?.status === 'approved' || user?.artist_profile?.status === 'approved';
   const isPendingArtist = profile?.status === 'pending' || user?.artist_profile?.status === 'pending';
   const isRejectedArtist = profile?.status === 'rejected' || user?.artist_profile?.status === 'rejected';
+  const displayName = [userData.first_name, userData.last_name].filter(Boolean).join(' ') || userData.username;
+  const displayAvatar = avatarPreview || profile?.user?.avatar;
+  const displayCover = coverPreview || profile?.cover_image;
 
   return (
     <div className="max-w-2xl">
@@ -138,34 +205,98 @@ const SettingsAccount = () => {
         </div>
       )}
 
+      {/* Live Profile Preview */}
+      <div className="mb-6 rounded-xl border border-stone-200 bg-white overflow-hidden">
+        <div className="px-5 pt-5 pb-3">
+          <p className="text-[11px] font-bold uppercase tracking-widest text-stone-400 mb-3">Profile Preview</p>
+        </div>
+        <div className="relative h-32 sm:h-40 bg-stone-100">
+          {displayCover ? (
+            <img src={displayCover} alt="" className="h-full w-full object-cover" />
+          ) : (
+            <div className="h-full w-full bg-gradient-to-br from-stone-200 to-stone-100" />
+          )}
+          <div className="absolute -bottom-8 left-5">
+            <div className="h-16 w-16 rounded-full border-3 border-white bg-stone-100 overflow-hidden shadow-md">
+              {displayAvatar ? (
+                <img src={displayAvatar} alt="" className="h-full w-full object-cover" />
+              ) : (
+                <div className="flex h-full w-full items-center justify-center">
+                  <span className="text-lg font-bold text-stone-400">{userData.username?.charAt(0).toUpperCase()}</span>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+        <div className="pt-10 pb-4 px-5">
+          <h3 className="font-semibold text-stone-900 text-sm">{displayName}</h3>
+          <p className="text-xs text-stone-500">@{userData.username}</p>
+          {isApprovedArtist && specialties.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 mt-2">
+              {specialties.map((s) => (
+                <span key={s} className="inline-flex items-center rounded-full bg-stone-100 px-2 py-0.5 text-[10px] font-medium text-stone-600">{s}</span>
+              ))}
+            </div>
+          )}
+          {isApprovedArtist && bio && (
+            <p className="text-xs text-stone-500 mt-2 line-clamp-2">{bio}</p>
+          )}
+        </div>
+      </div>
+
       {/* Avatar */}
       <div className="rounded-lg border border-stone-200 bg-white p-6 mb-6">
         <h3 className="font-semibold mb-4">Profile Picture</h3>
-        <div className="flex items-center gap-6">
-          <div className="h-20 w-20 rounded-full border-2 border-stone-200 bg-stone-100 overflow-hidden shrink-0">
-            {profile?.user?.avatar ? (
-              <img src={profile.user.avatar} alt="" className="h-full w-full object-cover" />
-            ) : (
-              <div className="flex h-full w-full items-center justify-center">
-                <span className="text-xl font-bold text-stone-400">{user?.username?.charAt(0).toUpperCase()}</span>
-              </div>
-            )}
+        <DropZone onDrop={handleAvatarDrop} className="rounded-lg border-2 border-dashed border-stone-200 hover:border-stone-300 transition-colors">
+          <div className="flex items-center gap-6 p-4">
+            <div className="h-20 w-20 rounded-full border-2 border-stone-200 bg-stone-100 overflow-hidden shrink-0">
+              {displayAvatar ? (
+                <img src={displayAvatar} alt="" className="h-full w-full object-cover" />
+              ) : (
+                <div className="flex h-full w-full items-center justify-center">
+                  <span className="text-xl font-bold text-stone-400">{user?.username?.charAt(0).toUpperCase()}</span>
+                </div>
+              )}
+            </div>
+            <div className="flex-1">
+              <p className="text-sm text-stone-700 font-medium">Drag & drop an image here</p>
+              <p className="text-xs text-stone-400 mt-0.5">or click to browse. JPG, PNG, GIF, WEBP. Max 5MB.</p>
+              <label className="mt-2 inline-flex items-center gap-1.5 rounded-lg border border-stone-200 bg-white px-3 py-1.5 text-xs font-medium text-stone-600 hover:bg-stone-50 cursor-pointer transition-colors">
+                Choose File
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => { if (e.target.files[0]) handleAvatarDrop(e.target.files); }}
+                />
+              </label>
+            </div>
           </div>
-          <div className="flex-1">
-            <input type="file" accept="image/*" onChange={(e) => setFormData({ ...formData, avatar: e.target.files[0] })} className="mb-2 text-sm" />
-            {formData.avatar && (
-              <button onClick={handleSaveAvatar} disabled={saving} className="rounded-lg bg-black px-4 py-2 text-sm font-semibold text-white hover:bg-stone-800 disabled:opacity-50 transition">
-                {saving ? 'Saving...' : 'Upload Avatar'}
-              </button>
-            )}
-            <p className="text-xs text-stone-400 mt-1">JPG, PNG, GIF, WEBP. Max 5MB.</p>
+        </DropZone>
+        {avatarFile && (
+          <div className="mt-3 flex items-center gap-3">
+            <span className="text-xs text-stone-500 truncate max-w-[200px]">{avatarFile.name}</span>
+            <button
+              onClick={handleSaveAvatar}
+              disabled={saving.avatar}
+              className="rounded-lg bg-[#000] px-4 py-1.5 text-xs font-semibold text-white hover:bg-stone-800 disabled:opacity-50 transition"
+            >
+              {saving.avatar ? 'Uploading...' : 'Upload Avatar'}
+            </button>
+            <button
+              onClick={() => { setAvatarFile(null); setAvatarPreview(null); }}
+              className="text-xs text-stone-400 hover:text-stone-600 transition"
+            >
+              Cancel
+            </button>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Account Details */}
       <div className="rounded-lg border border-stone-200 bg-white p-6 mb-6">
-        <h3 className="font-semibold mb-4">Account Details</h3>
+        <h3 className="font-semibold mb-1">Account Details</h3>
+        <p className="text-sm text-stone-500 mb-5">Your display name and username visible across Artisa.</p>
         <form onSubmit={handleSaveUser} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -190,8 +321,8 @@ const SettingsAccount = () => {
           {error && <p className="text-sm text-red-600">{error}</p>}
           {userDirty && (
             <div className="flex justify-end">
-              <button type="submit" disabled={saving} className="rounded-lg bg-black px-5 py-2 text-sm font-semibold text-white hover:bg-stone-800 disabled:opacity-50 transition">
-                {saving ? 'Saving...' : 'Save Changes'}
+              <button type="submit" disabled={saving.user} className="rounded-lg bg-[#000] px-5 py-2 text-sm font-semibold text-white hover:bg-stone-800 disabled:opacity-50 transition">
+                {saving.user ? 'Saving...' : 'Save Account Details'}
               </button>
             </div>
           )}
@@ -201,40 +332,114 @@ const SettingsAccount = () => {
       {/* Artist Profile */}
       {isApprovedArtist && (
         <div className="rounded-lg border border-stone-200 bg-white p-6">
-          <h3 className="font-semibold mb-4">Artist Profile</h3>
-          <form onSubmit={handleSaveProfile} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-stone-700 mb-1.5">Bio</label>
-              <textarea rows={4} value={formData.bio} onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
-                className="w-full rounded-lg border border-stone-200 px-3 py-2.5 text-sm focus:border-stone-400 focus:outline-none focus:ring-1 focus:ring-stone-400" placeholder="Tell visitors about yourself..." />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-stone-700 mb-1.5">Cover Image</label>
-              <input type="file" accept="image/*" onChange={(e) => setFormData({ ...formData, cover_image: e.target.files[0] })}
-                className="w-full rounded-lg border border-stone-200 px-3 py-2.5 text-sm focus:border-stone-400 focus:outline-none focus:ring-1 focus:ring-stone-400 file:mr-4 file:py-1 file:px-3 file:rounded-full file:border-0 file:text-sm file:font-medium file:bg-stone-100 file:text-stone-600 hover:file:bg-stone-200" />
-              {profile?.cover_image && <img src={profile.cover_image} alt="" className="mt-3 h-32 w-full object-cover rounded-lg" />}
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-stone-700 mb-1.5">Social Links</label>
-              <div className="space-y-2">
-                <input type="url" value={formData.social_links.instagram} placeholder="Instagram URL"
-                  onChange={(e) => setFormData({ ...formData, social_links: { ...formData.social_links, instagram: e.target.value } })}
-                  className="w-full rounded-lg border border-stone-200 px-3 py-2.5 text-sm focus:border-stone-400 focus:outline-none focus:ring-1 focus:ring-stone-400" />
-                <input type="url" value={formData.social_links.website} placeholder="Website URL"
-                  onChange={(e) => setFormData({ ...formData, social_links: { ...formData.social_links, website: e.target.value } })}
-                  className="w-full rounded-lg border border-stone-200 px-3 py-2.5 text-sm focus:border-stone-400 focus:outline-none focus:ring-1 focus:ring-stone-400" />
-                <input type="url" value={formData.social_links.facebook} placeholder="Facebook URL"
-                  onChange={(e) => setFormData({ ...formData, social_links: { ...formData.social_links, facebook: e.target.value } })}
-                  className="w-full rounded-lg border border-stone-200 px-3 py-2.5 text-sm focus:border-stone-400 focus:outline-none focus:ring-1 focus:ring-stone-400" />
+          <h3 className="font-semibold mb-1">Artist Profile</h3>
+          <p className="text-sm text-stone-500 mb-5">Your public artist profile shown to visitors.</p>
+
+          {/* Cover Image */}
+          <div className="mb-5">
+            <label className="block text-sm font-medium text-stone-700 mb-2">Cover Image</label>
+            <DropZone onDrop={handleCoverDrop} className="rounded-lg border-2 border-dashed border-stone-200 hover:border-stone-300 transition-colors">
+              <div className="p-4">
+                {displayCover ? (
+                  <div className="relative group">
+                    <img src={displayCover} alt="" className="h-32 w-full object-cover rounded-lg" />
+                    <div className="absolute inset-0 bg-black/40 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <span className="text-white text-xs font-medium">Click or drag to replace</span>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="h-24 flex flex-col items-center justify-center text-stone-400">
+                    <svg className="h-8 w-8 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    <p className="text-xs font-medium">Drag & drop or click to upload</p>
+                    <p className="text-[10px] text-stone-300 mt-0.5">Recommended: 1920×600px</p>
+                  </div>
+                )}
+                <label className="block mt-2">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => { if (e.target.files[0]) handleCoverDrop(e.target.files); }}
+                  />
+                  <span className="inline-flex items-center rounded-lg border border-stone-200 bg-white px-3 py-1.5 text-xs font-medium text-stone-600 hover:bg-stone-50 cursor-pointer transition-colors">
+                    {displayCover ? 'Change Cover' : 'Choose Cover'}
+                  </span>
+                </label>
               </div>
+            </DropZone>
+          </div>
+
+          {/* Bio */}
+          <div className="mb-5">
+            <label className="block text-sm font-medium text-stone-700 mb-2">Bio</label>
+            <textarea rows={4} value={bio} onChange={(e) => { setBio(e.target.value); setBioDirty(true); }}
+              className="w-full rounded-lg border border-stone-200 px-3 py-2.5 text-sm focus:border-stone-400 focus:outline-none focus:ring-1 focus:ring-stone-400"
+              placeholder="Tell visitors about yourself, your artistic style, and your journey..." />
+          </div>
+
+          {/* Specialties */}
+          <div className="mb-5">
+            <label className="block text-sm font-medium text-stone-700 mb-2">Specialties</label>
+            <div className="flex flex-wrap gap-2">
+              {SPECIALTIES.map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  onClick={() => toggleSpecialty(s)}
+                  className={`inline-flex items-center rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
+                    specialties.includes(s)
+                      ? 'bg-[#000] text-white'
+                      : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
+                  }`}
+                >
+                  {s}
+                </button>
+              ))}
             </div>
-            <div className="flex justify-end">
-              <button type="submit" disabled={saving} className="rounded-lg bg-black px-5 py-2 text-sm font-semibold text-white hover:bg-stone-800 disabled:opacity-50 transition">
-                {saving ? 'Saving...' : 'Save Artist Profile'}
+            <p className="text-[11px] text-stone-400 mt-2">Select all that apply to your work.</p>
+          </div>
+
+          {/* Social Links */}
+          <div className="mb-5">
+            <label className="block text-sm font-medium text-stone-700 mb-2">Social Links</label>
+            <div className="space-y-2">
+              <input type="url" value={socialLinks.instagram} placeholder="https://instagram.com/yourusername"
+                onChange={(e) => { setSocialLinks({ ...socialLinks, instagram: e.target.value }); setSocialDirty(true); }}
+                className="w-full rounded-lg border border-stone-200 px-3 py-2.5 text-sm focus:border-stone-400 focus:outline-none focus:ring-1 focus:ring-stone-400" />
+              <input type="url" value={socialLinks.website} placeholder="https://yourwebsite.com"
+                onChange={(e) => { setSocialLinks({ ...socialLinks, website: e.target.value }); setSocialDirty(true); }}
+                className="w-full rounded-lg border border-stone-200 px-3 py-2.5 text-sm focus:border-stone-400 focus:outline-none focus:ring-1 focus:ring-stone-400" />
+              <input type="url" value={socialLinks.facebook} placeholder="https://facebook.com/yourusername"
+                onChange={(e) => { setSocialLinks({ ...socialLinks, facebook: e.target.value }); setSocialDirty(true); }}
+                className="w-full rounded-lg border border-stone-200 px-3 py-2.5 text-sm focus:border-stone-400 focus:outline-none focus:ring-1 focus:ring-stone-400" />
+            </div>
+          </div>
+
+          {(bioDirty || socialDirty || coverFile || specialties.length > 0) && (
+            <div className="flex justify-end pt-2 border-t border-stone-100">
+              <button
+                onClick={handleSaveProfile}
+                disabled={saving.profile}
+                className="rounded-lg bg-[#000] px-5 py-2 text-sm font-semibold text-white hover:bg-stone-800 disabled:opacity-50 transition"
+              >
+                {saving.profile ? 'Saving...' : 'Save Artist Profile'}
               </button>
             </div>
-          </form>
+          )}
         </div>
+      )}
+
+      {/* Crop Modal */}
+      {cropModal && (
+        <ImageCropModal
+          file={cropModal.file}
+          type={cropModal.type}
+          aspect={cropModal.aspect}
+          onCrop={handleCrop}
+          onCancel={() => setCropModal(null)}
+        />
       )}
     </div>
   );

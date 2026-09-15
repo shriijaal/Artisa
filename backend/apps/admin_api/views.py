@@ -16,6 +16,7 @@ from .serializers import (
     AdminArtworkSerializer,
     AdminCategorySerializer,
     AdminOrderSerializer,
+    AdminOrderDetailSerializer,
     AdminUserSerializer,
 )
 
@@ -29,7 +30,7 @@ User = get_user_model()
 def admin_stats(request):
     total_users = User.objects.count()
     total_artists = User.objects.filter(artist_profile__status='approved').count()
-    total_orders = Order.objects.count()
+    total_orders = Order.objects.exclude(status='cancelled').count()
     revenue = Order.objects.filter(payment_status='paid').aggregate(total=Sum('total'))['total'] or 0
     pending_applications = ArtistApplication.objects.filter(status='pending').count()
     pending_artworks = Artwork.objects.filter(status='pending_review').count()
@@ -37,7 +38,7 @@ def admin_stats(request):
     total_categories = Category.objects.count()
 
     recent_orders = AdminOrderSerializer(
-        Order.objects.order_by('-created_at')[:5], many=True
+        Order.objects.exclude(status='cancelled').order_by('-created_at')[:5], many=True
     ).data
 
     return Response({
@@ -89,11 +90,23 @@ def admin_application_action(request, application_id):
 
         profile, created = ArtistProfile.objects.get_or_create(
             user=application.user,
-            defaults={'status': ArtistProfile.Status.APPROVED, 'verified_badge': True}
+            defaults={
+                'status': ArtistProfile.Status.APPROVED,
+                'verified_badge': True,
+                'bio': application.bio or '',
+                'specialties': application.specialties or [],
+                'social_links': application.social_links or {},
+            }
         )
         if not created:
             profile.status = ArtistProfile.Status.APPROVED
             profile.verified_badge = True
+            if application.bio:
+                profile.bio = application.bio
+            if application.specialties:
+                profile.specialties = application.specialties
+            if application.social_links:
+                profile.social_links = application.social_links
             profile.save()
 
         from apps.core.email import send_artist_approved_email
@@ -157,7 +170,12 @@ def admin_artwork_reject(request, artwork_id):
     except Artwork.DoesNotExist:
         return Response({'error': 'Artwork not found'}, status=status.HTTP_404_NOT_FOUND)
 
+    reason = request.data.get('reason', '').strip()
+    if not reason:
+        return Response({'error': 'Rejection reason is required'}, status=status.HTTP_400_BAD_REQUEST)
+
     artwork.status = Artwork.Status.DRAFT
+    artwork.rejection_reason = reason
     artwork.save()
     return Response({'message': 'Artwork rejected'})
 
@@ -268,6 +286,7 @@ def admin_user_deactivate(request, user_id):
 def admin_orders_list(request):
     q = request.query_params.get('q', '')
     status_filter = request.query_params.get('status', '')
+    payment_status_filter = request.query_params.get('payment_status', '')
 
     qs = Order.objects.select_related('customer').order_by('-created_at')
     if q:
@@ -278,5 +297,45 @@ def admin_orders_list(request):
         )
     if status_filter:
         qs = qs.filter(status=status_filter)
+    else:
+        qs = qs.exclude(status='cancelled')
+    if payment_status_filter:
+        qs = qs.filter(payment_status=payment_status_filter)
 
     return Response(AdminOrderSerializer(qs, many=True).data)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated, IsAdmin])
+def admin_order_detail(request, order_id):
+    try:
+        order = Order.objects.select_related('customer', 'shipping_address').prefetch_related('items__artwork__images', 'items__shipment').get(id=order_id)
+    except Order.DoesNotExist:
+        return Response({'error': 'Order not found'}, status=status.HTTP_404_NOT_FOUND)
+    return Response(AdminOrderDetailSerializer(order).data)
+
+
+@api_view(['PUT'])
+@permission_classes([IsAuthenticated, IsAdmin])
+def admin_order_update(request, order_id):
+    try:
+        order = Order.objects.get(id=order_id)
+    except Order.DoesNotExist:
+        return Response({'error': 'Order not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    new_status = request.data.get('status')
+    new_payment_status = request.data.get('payment_status')
+
+    if new_status and new_status not in Order.Status.values:
+        return Response({'error': 'Invalid order status'}, status=status.HTTP_400_BAD_REQUEST)
+
+    if new_payment_status and new_payment_status not in Order.PaymentStatus.values:
+        return Response({'error': 'Invalid payment status'}, status=status.HTTP_400_BAD_REQUEST)
+
+    if new_status:
+        order.status = new_status
+    if new_payment_status:
+        order.payment_status = new_payment_status
+
+    order.save()
+    return Response(AdminOrderDetailSerializer(order).data)

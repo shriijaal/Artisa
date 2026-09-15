@@ -166,6 +166,24 @@ const MyArtworks = () => {
           </div>
         </div>
 
+        {/* Pending review banner */}
+        {artworks.filter(a => a.status === 'pending_review').length > 0 && (
+          <div className="mb-6 rounded-lg bg-amber-50 border border-amber-200 px-5 py-4 flex items-start gap-3">
+            <span className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center">
+              <span className="relative flex h-2.5 w-2.5">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-400 opacity-75" />
+                <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-amber-500" />
+              </span>
+            </span>
+            <div>
+              <p className="text-sm font-semibold text-amber-800">
+                {artworks.filter(a => a.status === 'pending_review').length} artwork{artworks.filter(a => a.status === 'pending_review').length !== 1 ? 's' : ''} waiting for admin review
+              </p>
+              <p className="mt-0.5 text-xs text-amber-600">This usually takes 24-48 hours. You will be notified once it is approved.</p>
+            </div>
+          </div>
+        )}
+
         {/* Content */}
         {artworks.length === 0 ? (
           <div className="rounded-lg border border-dashed border-stone-300 bg-white p-16 text-center">
@@ -227,8 +245,14 @@ const MyArtworks = () => {
                   {/* Status pill — show for non-published */}
                   {artwork.status !== 'published' && (
                     <div className="absolute top-3 right-3 z-10">
-                      <span className={`inline-flex items-center rounded-lg px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.05em] shadow-sm ${statusColor(artwork.status)}`}>
-                        {artwork.status === 'pending_review' ? 'Pending' : artwork.status.replace('_', ' ')}
+                      <span className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.05em] shadow-sm ${statusColor(artwork.status)}`}>
+                        {artwork.status === 'pending_review' && (
+                          <span className="relative flex h-1.5 w-1.5">
+                            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-400 opacity-75" />
+                            <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-amber-500" />
+                          </span>
+                        )}
+                        {artwork.status === 'pending_review' ? 'In Review' : artwork.status.replace('_', ' ')}
                       </span>
                     </div>
                   )}
@@ -239,6 +263,58 @@ const MyArtworks = () => {
                     <p className="text-[#fc8d6b] text-xs font-bold mt-0.5">
                       NPR {formatPrice(artwork.price)}
                     </p>
+                    {artwork.status === 'draft' && artwork.rejection_reason && (
+                      <p className="text-red-300 text-[10px] mt-1.5 line-clamp-2">Rejected: {artwork.rejection_reason}</p>
+                    )}
+                    <div className="mt-2 flex gap-1.5">
+                      {artwork.status === 'draft' && (
+                        <>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); handleSubmitForReview(artwork.id); }}
+                            disabled={submitting}
+                            className="flex-1 rounded-lg bg-white px-3 py-1.5 text-[11px] font-bold text-stone-900 hover:bg-white/90 disabled:opacity-50 transition-colors"
+                          >
+                            Submit
+                          </button>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); deleteArtwork(artwork.id); }}
+                            className="rounded-lg border border-white/30 px-3 py-1.5 text-[11px] font-medium text-white hover:bg-white/10 transition-colors"
+                          >
+                            Delete
+                          </button>
+                        </>
+                      )}
+                      {artwork.status === 'pending_review' && (
+                        <>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); cancelSubmission(artwork.id); }}
+                            className="flex-1 rounded-lg bg-white/20 backdrop-blur-sm px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-white/30 transition-colors"
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); deleteArtwork(artwork.id); }}
+                            className="rounded-lg border border-white/30 px-3 py-1.5 text-[11px] font-medium text-white hover:bg-white/10 transition-colors"
+                          >
+                            Delete
+                          </button>
+                        </>
+                      )}
+                      {artwork.status === 'published' && (
+                        <button
+                          onClick={(e) => { e.stopPropagation(); navigate(`/artworks/${artwork.id}`); }}
+                          className="flex-1 rounded-lg bg-white/20 backdrop-blur-sm px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-white/30 transition-colors"
+                        >
+                          View
+                        </button>
+                      )}
+                      <button
+                        onClick={(e) => { e.stopPropagation(); navigate(`/artworks/${artwork.id}/edit`); }}
+                        className={`rounded-lg bg-white/20 backdrop-blur-sm px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-white/30 transition-colors ${artwork.status === 'published' ? 'flex-1' : ''}`}
+                      >
+                        Edit
+                      </button>
+                    </div>
                   </div>
                 </div>
               );
@@ -287,8 +363,14 @@ const MyArtworks = () => {
                       {artwork.status !== 'published' && (
                         <>
                           <span className="text-stone-300">·</span>
-                          <span className={`inline-flex items-center rounded-full px-1.5 py-px text-[10px] font-semibold uppercase tracking-[0.03em] ${statusColor(artwork.status)}`}>
-                            {artwork.status === 'pending_review' ? 'Pending' : artwork.status}
+                          <span className={`inline-flex items-center gap-1 rounded-full px-1.5 py-px text-[10px] font-semibold uppercase tracking-[0.03em] ${statusColor(artwork.status)}`}>
+                            {artwork.status === 'pending_review' && (
+                              <span className="relative flex h-1.5 w-1.5">
+                                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-400 opacity-75" />
+                                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-amber-500" />
+                              </span>
+                            )}
+                            {artwork.status === 'pending_review' ? 'In Review' : artwork.status}
                           </span>
                         </>
                       )}
@@ -299,10 +381,19 @@ const MyArtworks = () => {
                         </>
                       )}
                     </div>
+                    {artwork.status === 'draft' && artwork.rejection_reason && (
+                      <p className="mt-1 text-[11px] text-red-500 line-clamp-1">Rejected: {artwork.rejection_reason}</p>
+                    )}
                   </div>
 
                   {/* Actions */}
                   <div className="flex items-center gap-2 flex-shrink-0">
+                    <button
+                      onClick={() => navigate(`/artworks/${artwork.id}/edit`)}
+                      className="rounded-lg border border-stone-200 px-3 py-1.5 text-[11px] font-medium text-stone-600 hover:bg-stone-50 transition-colors"
+                    >
+                      Edit
+                    </button>
                     {artwork.status === 'draft' && (
                       <>
                         <button

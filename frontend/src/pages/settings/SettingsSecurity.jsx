@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../components/Toast';
+import authFetch from '../../utils/authFetch';
 
 const SettingsSecurity = () => {
   const { user } = useAuth();
@@ -21,10 +22,9 @@ const SettingsSecurity = () => {
     }
     setSaving(true);
     try {
-      const token = localStorage.getItem('access_token');
-      const res = await fetch('/api/auth/change-password/', {
+      const res = await authFetch('/api/auth/change-password/', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ current_password: passwords.current, new_password: passwords.new }),
       });
       if (res.ok) {

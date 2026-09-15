@@ -148,7 +148,25 @@ def password_reset_confirm(request):
         return Response({'error': 'Invalid reset link'}, status=status.HTTP_400_BAD_REQUEST)
 
 
-@api_view(['GET', 'POST'])
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def upload_portfolio_samples(request):
+    files = request.FILES.getlist('portfolio_samples')
+    if not files:
+        return Response({'error': 'No files provided'}, status=status.HTTP_400_BAD_REQUEST)
+    if len(files) < 3:
+        return Response({'error': 'At least 3 images required'}, status=status.HTTP_400_BAD_REQUEST)
+
+    from django.core.files.storage import default_storage
+    urls = []
+    for f in files[:5]:
+        path = default_storage.save(f'artists/portfolio/{request.user.id}/{f.name}', f)
+        urls.append(default_storage.url(path))
+
+    return Response({'urls': urls}, status=status.HTTP_201_CREATED)
+
+
+@api_view(['GET', 'POST', 'DELETE'])
 @permission_classes([IsAuthenticated])
 def artist_application(request):
     if request.method == 'GET':
@@ -170,6 +188,13 @@ def artist_application(request):
                 status=status.HTTP_201_CREATED
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    elif request.method == 'DELETE':
+        application = ArtistApplication.objects.filter(user=request.user).first()
+        if application and application.status in ('rejected', 'pending'):
+            application.delete()
+            return Response({'message': 'Application deleted'}, status=status.HTTP_204_NO_CONTENT)
+        return Response({'error': 'No deletable application found'}, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['GET', 'PUT'])
@@ -237,22 +262,76 @@ def public_artist_profile(request, username):
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def artists_list(request):
-    """GET /api/auth/artists/ — public list of all approved artists."""
-    from django.db.models import Count
+    """GET /api/auth/artists/list/ — public list of approved artists with filtering."""
+    from django.db.models import Count, Avg, Q
+    from apps.artworks.models import Artwork, ArtworkImage
+
     artists = User.objects.filter(
         artist_profile__status=ArtistProfile.Status.APPROVED
     ).select_related('artist_profile').annotate(
-        artwork_count=Count('artworks', filter=Q(artworks__status='published'))
-    ).order_by('-date_joined')
+        artwork_count=Count('artworks', filter=Q(artworks__status='published')),
+        avg_rating=Avg('received_reviews__rating'),
+    )
 
+    # Search
+    q = request.query_params.get('q', '').strip()
+    if q:
+        artists = artists.filter(
+            Q(username__icontains=q) |
+            Q(first_name__icontains=q) |
+            Q(last_name__icontains=q) |
+            Q(artist_profile__bio__icontains=q)
+        )
+
+    # Filter: commission available only
+    commission_only = request.query_params.get('commission_available', '')
+    if commission_only == 'true':
+        artists = artists.filter(artist_profile__commission_available=True)
+
+    # Filter: specialty (category ID)
+    specialty = request.query_params.get('specialty', '')
+    if specialty:
+        artists = artists.filter(artist_profile__specialties__contains=[int(specialty)])
+
+    # Sort
+    sort = request.query_params.get('sort', 'newest')
+    if sort == 'name':
+        artists = artists.order_by('first_name', 'username')
+    elif sort == 'artworks':
+        artists = artists.order_by('-artwork_count')
+    elif sort == 'rating':
+        artists = artists.order_by('-avg_rating')
+    else:
+        artists = artists.order_by('-date_joined')
+
+    # Pagination
     page = int(request.query_params.get('page', 1))
     page_size = 12
     total = artists.count()
     start = (page - 1) * page_size
-    artists = artists[start:start + page_size]
+    page_artists = artists[start:start + page_size]
+
+    # Prefetch sample artworks for this page only
+    artist_ids = [a.id for a in page_artists]
+    sample_map = {}
+    artworks = Artwork.objects.filter(
+        artist_id__in=artist_ids, status='published'
+    ).select_related('category').prefetch_related('images').order_by('-created_at')
+    for art in artworks:
+        if art.artist_id not in sample_map:
+            sample_map[art.artist_id] = []
+        if len(sample_map[art.artist_id]) < 2:
+            img = art.images.first()
+            sample_map[art.artist_id].append({
+                'id': str(art.id),
+                'title': art.title,
+                'image': img.image.url if img and img.image else None,
+                'price': str(art.price),
+                'category': art.category.name if art.category else None,
+            })
 
     results = []
-    for artist in artists:
+    for artist in page_artists:
         profile = artist.artist_profile
         results.append({
             'id': artist.id,
@@ -264,6 +343,12 @@ def artists_list(request):
             'cover_image': profile.cover_image.url if profile.cover_image else None,
             'verified_badge': profile.verified_badge,
             'artwork_count': artist.artwork_count,
+            'commission_available': profile.commission_available,
+            'commission_starting_price': str(profile.commission_starting_price) if profile.commission_starting_price else None,
+            'commission_estimated_days': profile.commission_estimated_days,
+            'specialties': profile.specialties or [],
+            'avg_rating': round(artist.avg_rating, 1) if artist.avg_rating else None,
+            'sample_artworks': sample_map.get(artist.id, []),
         })
 
     return Response({
@@ -366,17 +451,26 @@ def admin_approve_application(request, application_id):
             application.reviewed_at = timezone.now()
             application.save()
             
-            # Create or update artist profile
+            # Create or update artist profile, pre-fill from application
             profile, created = ArtistProfile.objects.get_or_create(
                 user=application.user,
                 defaults={
                     'status': ArtistProfile.Status.APPROVED,
-                    'verified_badge': True
+                    'verified_badge': True,
+                    'bio': application.bio or '',
+                    'specialties': application.specialties or [],
+                    'social_links': application.social_links or {},
                 }
             )
             if not created:
                 profile.status = ArtistProfile.Status.APPROVED
                 profile.verified_badge = True
+                if application.bio:
+                    profile.bio = application.bio
+                if application.specialties:
+                    profile.specialties = application.specialties
+                if application.social_links:
+                    profile.social_links = application.social_links
                 profile.save()
             
             send_artist_approved_email(application.user)

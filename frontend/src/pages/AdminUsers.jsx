@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import authFetch from '../utils/authFetch';
+import CustomSelect from '../components/CustomSelect';
 
 const roleConfig = {
   admin: { label: 'Admin', bg: 'bg-emerald-50', text: 'text-emerald-700', dot: 'bg-emerald-500' },
@@ -12,6 +13,8 @@ const AdminUsers = () => {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState('');
+  const [confirmModal, setConfirmModal] = useState(null);
+  const [processing, setProcessing] = useState(false);
 
   const fetchUsers = useCallback(() => {
     setLoading(true);
@@ -27,17 +30,22 @@ const AdminUsers = () => {
 
   useEffect(() => { fetchUsers(); }, [fetchUsers]);
 
-  const handleDeactivate = async (userId, username, isActive) => {
-    const action = isActive ? 'deactivate' : 'activate';
-    if (!confirm(`Are you sure you want to ${action} ${username}?`)) return;
+  const handleDeactivate = (userId, username, isActive) => {
+    setConfirmModal({ id: userId, username, isActive });
+  };
 
-    const res = await authFetch(`/api/admin/users/${userId}/deactivate/`, { method: 'PUT' });
+  const confirmAction = async () => {
+    if (!confirmModal) return;
+    setProcessing(true);
+    const res = await authFetch(`/api/admin/users/${confirmModal.id}/deactivate/`, { method: 'PUT' });
     if (res.ok) {
       const data = await res.json();
       setUsers((prev) => prev.map((u) =>
-        u.id === userId ? { ...u, is_active: data.is_active } : u
+        u.id === confirmModal.id ? { ...u, is_active: data.is_active } : u
       ));
     }
+    setProcessing(false);
+    setConfirmModal(null);
   };
 
   const getRole = (user) => {
@@ -76,17 +84,18 @@ const AdminUsers = () => {
             className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-stone-200 bg-white text-sm text-stone-900 placeholder:text-stone-400 outline-none focus:border-stone-400 focus:ring-1 focus:ring-stone-400 transition"
           />
         </div>
-        <select
+        <CustomSelect
           value={roleFilter}
-          onChange={(e) => setRoleFilter(e.target.value)}
-          className="px-3.5 py-2.5 rounded-lg border border-stone-200 bg-white text-sm text-stone-700 outline-none focus:border-stone-400 focus:ring-1 focus:ring-stone-400 transition appearance-none cursor-pointer"
-          style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23747878' stroke-width='1.5'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0.75rem center', backgroundSize: '1rem', paddingRight: '2.5rem' }}
-        >
-          <option value="">All Roles</option>
-          <option value="admin">Admin</option>
-          <option value="artist">Artist</option>
-          <option value="customer">Customer</option>
-        </select>
+          onChange={setRoleFilter}
+          placeholder="All Roles"
+          options={[
+            { value: '', label: 'All Roles' },
+            { value: 'admin', label: 'Admin' },
+            { value: 'artist', label: 'Artist' },
+            { value: 'customer', label: 'Customer' },
+          ]}
+          className="w-full sm:w-44"
+        />
       </div>
 
       {/* Table */}
@@ -124,7 +133,7 @@ const AdminUsers = () => {
                   <tr key={user.id} className="hover:bg-stone-50/60 transition-colors">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-full bg-stone-100 flex items-center justify-center text-stone-600 text-sm font-semibold ring-1 ring-stone-200 overflow-hidden flex-shrink-0">
+                        <div className="w-9 h-9 rounded-full bg-stone-100 flex items-center justify-center text-stone-600 text-sm font-semibold ring-1 ring-stone-200 overflow-hidden shrink-0">
                           {user.avatar ? (
                             <img src={user.avatar} alt="" className="w-full h-full object-cover" />
                           ) : (
@@ -178,6 +187,57 @@ const AdminUsers = () => {
           </table>
         )}
       </div>
+
+      {/* Confirm Modal */}
+      {confirmModal && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4" onClick={() => !processing && setConfirmModal(null)}>
+          <div className="bg-white rounded-lg max-w-md w-full p-6" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center gap-3 mb-4">
+              <div className={`w-10 h-10 rounded-full flex items-center justify-center ${confirmModal.isActive ? 'bg-red-50' : 'bg-emerald-50'}`}>
+                <svg className={`h-5 w-5 ${confirmModal.isActive ? 'text-red-600' : 'text-emerald-600'}`} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                  {confirmModal.isActive ? (
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                  ) : (
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  )}
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-stone-900">
+                  {confirmModal.isActive ? 'Deactivate User' : 'Activate User'}
+                </h3>
+              </div>
+            </div>
+            <p className="text-sm text-stone-600">
+              Are you sure you want to <span className={`font-semibold ${confirmModal.isActive ? 'text-red-600' : 'text-emerald-600'}`}>{confirmModal.isActive ? 'deactivate' : 'activate'}</span>{' '}
+              <span className="font-semibold text-stone-900">{confirmModal.username}</span>?
+              {confirmModal.isActive && (
+                <span className="block mt-1 text-stone-500">They will no longer be able to log in or access their account.</span>
+              )}
+            </p>
+            <div className="flex justify-end gap-3 mt-6">
+              <button
+                onClick={() => setConfirmModal(null)}
+                disabled={processing}
+                className="px-4 py-2 text-sm font-medium text-stone-600 hover:text-stone-900 rounded-lg hover:bg-stone-100 transition disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmAction}
+                disabled={processing}
+                className={`px-4 py-2 text-sm font-medium text-white rounded-lg transition disabled:opacity-50 ${
+                  confirmModal.isActive
+                    ? 'bg-red-600 hover:bg-red-700'
+                    : 'bg-emerald-600 hover:bg-emerald-700'
+                }`}
+              >
+                {processing ? 'Processing...' : (confirmModal.isActive ? 'Deactivate' : 'Activate')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

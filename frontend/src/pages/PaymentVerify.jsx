@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { useToast } from '../components/Toast';
 import LoadingSpinner from '../components/LoadingSpinner';
+import authFetch from '../utils/authFetch';
 import Header from '../components/Header';
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -50,13 +51,9 @@ const PaymentVerify = () => {
 
   const verifyPayment = async () => {
     try {
-      const token = localStorage.getItem('access_token');
-      const res = await fetch('/api/payments/khalti/verify/', {
+      const res = await authFetch('/api/payments/khalti/verify/', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ pidx, payment_id: paymentId }),
       });
 

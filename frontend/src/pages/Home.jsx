@@ -1,8 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { formatPrice } from '../utils/formatPrice';
+import authFetch from '../utils/authFetch';
 
 const CATEGORY_COLORS = [
   { bg: 'bg-stone-100', text: 'text-stone-700', border: 'border-stone-200', hoverBg: 'hover:bg-stone-200' },
@@ -17,6 +19,7 @@ const Home = () => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { user } = useAuth();
   const navigate = useNavigate();
   const carouselRef = useRef(null);
   const revealRefs = useRef([]);
@@ -61,23 +64,10 @@ const Home = () => {
 
   const fetchHomepageData = async () => {
     try {
-      const token = localStorage.getItem('access_token');
-      const headers = {};
-      if (token) headers['Authorization'] = `Bearer ${token}`;
-
-      const response = await fetch('/api/recs/homepage/', { headers });
+      const response = await authFetch('/api/recs/homepage/');
 
       if (response.ok) {
         setData(await response.json());
-      } else if (response.status === 401 && token) {
-        localStorage.removeItem('access_token');
-        localStorage.removeItem('refresh_token');
-        const retry = await fetch('/api/recs/homepage/');
-        if (retry.ok) {
-          setData(await retry.json());
-        } else {
-          setError('Failed to load homepage.');
-        }
       } else {
         setError(`Server error (${response.status}). Please try again later.`);
       }
@@ -160,49 +150,170 @@ const Home = () => {
       <main className="pb-0 page-enter">
         {/* ── HERO ── */}
         {data.hero_featured && data.hero_featured.length > 0 && (
-          <section className="relative bg-stone-900 text-white overflow-hidden">
-            <div className="absolute inset-0 z-0 opacity-30">
-              <img
-                src={data.hero_featured[0].images?.[0]?.image || 'https://images.unsplash.com/photo-1547826039-bfc35e0f1ea8?auto=format&fit=crop&q=80'}
-                alt=""
-                className="w-full h-full object-cover blur-sm scale-110"
-              />
-            </div>
-            <div className="relative z-10 max-w-7xl mx-auto px-6 py-24 sm:py-32 lg:py-40">
-              <div className="max-w-2xl">
-                <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl">
-                  Discover Extraordinary Original Art
-                </h1>
-                <p className="mt-6 text-lg leading-8 text-stone-300 max-w-xl">
-                  Collect premium physical and digital artworks directly from verified independent artists across Nepal.
-                </p>
-                <div className="mt-10 flex items-center gap-x-6">
-                  <Link
-                    to="/marketplace"
-                    className="rounded-lg bg-[#000] px-7 py-3.5 text-sm font-semibold text-white shadow-sm hover:bg-stone-800 transition"
-                  >
-                    Explore Marketplace
-                  </Link>
-                  <Link to="/register" className="text-sm font-semibold leading-6 text-white hover:text-stone-300 transition">
-                    Join as an Artist <span aria-hidden="true">&rarr;</span>
-                  </Link>
+          <section className="relative bg-stone-900 text-white overflow-hidden hero-noise">
+            {/* Subtle gradient overlay */}
+            <div className="absolute inset-0 z-0 bg-gradient-to-br from-stone-900 via-stone-900/95 to-stone-800/90" />
+
+            <div className="relative z-10 max-w-7xl mx-auto px-6 py-8 sm:py-12 lg:py-16">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-10 items-center">
+                {/* Left — Text */}
+                <div>
+                  <h1 className="text-3xl font-bold tracking-tight text-white sm:text-4xl lg:text-4xl xl:text-5xl">
+                    Nepal&apos;s Marketplace for Original Art
+                  </h1>
+                  <p className="mt-4 text-base leading-7 text-stone-300 max-w-xl">
+                    Collect premium physical and digital artworks directly from verified independent artists across Nepal.
+                  </p>
+                  <div className="mt-8 flex flex-wrap items-center gap-4">
+                    <Link
+                      to="/marketplace"
+                      className="rounded-lg bg-white px-7 py-3.5 text-sm font-semibold text-stone-900 shadow-sm hover:bg-stone-100 transition inline-flex items-center gap-2"
+                    >
+                      Explore Marketplace
+                    </Link>
+                    {!user && (
+                      <Link
+                        to="/register"
+                        className="rounded-lg border border-white/30 px-7 py-3.5 text-sm font-semibold text-white hover:bg-white/10 transition"
+                      >
+                        Join as an Artist
+                      </Link>
+                    )}
+                    {user && user.artist_profile?.status !== 'approved' && user.role !== 'admin' && (
+                      <Link
+                        to={!user.artist_profile ? '/artist-application' : user.artist_profile.status === 'rejected' ? '/artist-application' : '/settings/account'}
+                        className="rounded-lg border border-white/30 px-7 py-3.5 text-sm font-semibold text-white hover:bg-white/10 transition"
+                      >
+                        {!user.artist_profile ? 'Join as an Artist' : user.artist_profile.status === 'pending' ? 'Application Pending' : 'Re-apply as Artist'}
+                      </Link>
+                    )}
+                  </div>
+                  <div className="mt-8 flex items-center gap-6 text-sm text-stone-400">
+                    <div>
+                      <span className="block text-2xl font-bold text-white">{data.stats?.total_artists ? `${data.stats.total_artists.toLocaleString()}+` : '500+'}</span>
+                      Artists
+                    </div>
+                    <div className="w-px h-8 bg-stone-700" />
+                    <div>
+                      <span className="block text-2xl font-bold text-white">{data.stats?.total_artworks ? `${data.stats.total_artworks.toLocaleString()}+` : '2,000+'}</span>
+                      Artworks
+                    </div>
+                    <div className="w-px h-8 bg-stone-700" />
+                    <div>
+                      <span className="block text-2xl font-bold text-white">NPR 5M+</span>
+                      Earned by Artists
+                    </div>
+                  </div>
+                  <div className="mt-5 flex items-center gap-4 text-xs text-stone-500">
+                    <span className="flex items-center gap-1">
+                      <svg className="h-3 w-3 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                      </svg>
+                      Verified Artists
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <svg className="h-3 w-3 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                      </svg>
+                      Secure Payments
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <svg className="h-3 w-3 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                      </svg>
+                      Free Listings
+                    </span>
+                  </div>
                 </div>
-                <div className="mt-12 flex items-center gap-8 text-sm text-stone-400">
-                  <div>
-                    <span className="block text-2xl font-bold text-white">500+</span>
-                    Artists
+
+                {/* Right — Artwork Grid */}
+                <>
+                  {/* Mobile: horizontal carousel */}
+                  <div className="flex lg:hidden gap-3 overflow-x-auto snap-x snap-mandatory -mx-2 px-2 pb-2 scrollbar-hide" style={{ scrollbarWidth: 'none' }}>
+                    {data.hero_featured.slice(0, 5).map((artwork, i) => (
+                      <Link
+                        key={artwork.id}
+                        to={`/artworks/${artwork.id}`}
+                        className="group relative flex-shrink-0 w-48 snap-start rounded-xl overflow-hidden bg-stone-800 hero-artwork-card"
+                        style={{ animationDelay: `${i * 120}ms` }}
+                      >
+                        <div className="aspect-[3/4] relative">
+                          {artwork.images?.[0]?.image ? (
+                            <img
+                              src={artwork.images[0].image}
+                              alt={artwork.title}
+                              className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                              loading="lazy"
+                            />
+                          ) : (
+                            <div className="h-full w-full flex items-center justify-center text-stone-600">
+                              <svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                              </svg>
+                            </div>
+                          )}
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+                          <div className="absolute bottom-0 left-0 right-0 p-3">
+                            <p className="text-white text-xs font-semibold line-clamp-1">{artwork.title}</p>
+                            <p className="text-white/60 text-[10px] mt-0.5">{artwork.artist?.username}</p>
+                            <span className="text-[11px] font-bold text-white/80">रू {Number(artwork.price || 0).toLocaleString()}</span>
+                          </div>
+                        </div>
+                        <div className="absolute inset-0 rounded-xl ring-1 ring-inset ring-white/10" />
+                      </Link>
+                    ))}
                   </div>
-                  <div className="w-px h-8 bg-stone-700" />
-                  <div>
-                    <span className="block text-2xl font-bold text-white">2,000+</span>
-                    Artworks
+
+                  {/* Desktop: masonry grid */}
+                  <div className="hidden lg:grid grid-cols-2 grid-rows-[200px_200px] gap-3">
+                    {data.hero_featured.slice(0, 4).map((artwork, i) => {
+                      const spans = ['row-span-2', 'row-span-1', 'row-span-1', 'row-span-2'];
+                      return (
+                        <Link
+                          key={artwork.id}
+                          to={`/artworks/${artwork.id}`}
+                          className={`group relative ${spans[i]} rounded-xl overflow-hidden bg-stone-800 hero-artwork-card`}
+                          style={{ animationDelay: `${i * 120}ms` }}
+                        >
+                          <div className="h-full min-h-0 relative">
+                            {artwork.images?.[0]?.image ? (
+                              <img
+                                src={artwork.images[0].image}
+                                alt={artwork.title}
+                                className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                                loading={i === 0 ? 'eager' : 'lazy'}
+                              />
+                            ) : (
+                              <div className="h-full w-full flex items-center justify-center text-stone-600">
+                                <svg className="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                              </div>
+                            )}
+                            {/* Hover overlay */}
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col justify-end p-4">
+                              <p className="text-white text-sm font-semibold line-clamp-1">{artwork.title}</p>
+                              <div className="flex items-center justify-between mt-1">
+                                <span className="text-xs text-stone-300">{artwork.artist?.username || 'Artist'}</span>
+                                <span className="text-sm font-bold text-white">रू {Number(artwork.price || 0).toLocaleString()}</span>
+                              </div>
+                              <div className="mt-2.5 opacity-0 group-hover:opacity-100 translate-y-1 group-hover:translate-y-0 transition-all duration-300">
+                                <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-white/90">
+                                  View Artwork
+                                  <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                                  </svg>
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                          {/* Border + shadow on hover */}
+                          <div className="absolute inset-0 rounded-xl ring-1 ring-inset ring-white/10 group-hover:ring-white/25 group-hover:shadow-xl group-hover:shadow-black/30 transition-all duration-300" />
+                        </Link>
+                      );
+                    })}
                   </div>
-                  <div className="w-px h-8 bg-stone-700" />
-                  <div>
-                    <span className="block text-2xl font-bold text-white">NPR 5M+</span>
-                    Earned by Artists
-                  </div>
-                </div>
+                </>
               </div>
             </div>
           </section>
@@ -339,83 +450,61 @@ const Home = () => {
           </div>
         </section>
 
-        {/* ── EDITOR'S PICKS (BENTO) ── */}
-        {data.recommended_artworks && data.recommended_artworks.length >= 5 && (
-          <section ref={addRevealRef} className="reveal max-w-7xl mx-auto px-6 pt-24">
-            <div className="flex justify-between items-end mb-8">
-              <div>
-                <p className="text-xs font-bold uppercase tracking-widest text-[#9c4327] mb-2">Hand-Picked</p>
-                <h2 className="text-3xl font-bold text-stone-900">Editor's Picks</h2>
-                <p className="mt-2 text-stone-500">A curated selection of standout artworks from our community.</p>
-              </div>
-              <Link to="/marketplace" className="text-sm font-semibold text-[#9c4327] hover:text-[#7a3520] transition hidden sm:block">
-                View all &rarr;
-              </Link>
-            </div>
-
-            <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-[200px] sm:auto-rows-[240px]">
-              {/* Hero — large */}
-              <Link to={`/artworks/${data.recommended_artworks[0].id}`} className="group relative col-span-2 row-span-2 rounded-lg overflow-hidden bg-stone-100 border border-stone-200 hover:border-stone-300 transition-all duration-300">
-                {data.recommended_artworks[0].images?.[0]?.image ? (
-                  <img src={data.recommended_artworks[0].images[0].image} alt={data.recommended_artworks[0].title} className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-700" loading="lazy" />
-                ) : (
-                  <div className="flex h-full items-center justify-center text-stone-400">No Image</div>
-                )}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                <div className="absolute bottom-0 left-0 right-0 p-5 sm:p-6">
-                  <span className="inline-flex items-center gap-1 rounded-lg bg-white/15 backdrop-blur-md px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-white/90 border border-white/10 mb-3">
-                    Editor&apos;s Pick
-                  </span>
-                  <h3 className="text-xl sm:text-2xl font-bold text-white leading-tight">{data.recommended_artworks[0].title}</h3>
-                  <p className="text-sm text-white/70 mt-1">by {data.recommended_artworks[0].artist.username}</p>
-                  <div className="flex items-center justify-between mt-3">
-                    <span className="font-semibold text-amber-400">NPR {formatPrice(data.recommended_artworks[0].price)}</span>
-                    <span className="text-xs text-white/50 group-hover:text-amber-400 transition-colors font-medium">View Details &rarr;</span>
-                  </div>
-                </div>
-              </Link>
-
-              {/* Rest — 4 smaller cards */}
-              {data.recommended_artworks.slice(1, 5).map((art) => (
-                <Link key={art.id} to={`/artworks/${art.id}`} className="group relative col-span-1 row-span-1 rounded-lg overflow-hidden bg-stone-100 border border-stone-200 hover:border-stone-300 transition-all duration-300">
-                  {art.images?.[0]?.image ? (
-                    <img src={art.images[0].image} alt={art.title} className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
-                  ) : (
-                    <div className="flex h-full items-center justify-center text-stone-400 text-sm">No Image</div>
-                  )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
-                    <h3 className="text-sm font-semibold text-white truncate">{art.title}</h3>
-                    <div className="flex items-center justify-between mt-1">
-                      <span className="text-xs text-amber-400 font-semibold">NPR {formatPrice(art.price)}</span>
-                      <span className="text-[10px] text-white/50">{art.artist.username}</span>
-                    </div>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </section>
-        )}
-
         {/* ── CATEGORIES ── */}
         {data.categories && data.categories.length > 0 && (
           <section ref={addRevealRef} className="reveal max-w-7xl mx-auto px-6 pt-24">
-            <h2 className="text-2xl font-bold text-stone-900 mb-8">Browse by Medium</h2>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            <div className="flex justify-between items-end mb-8">
+              <div>
+                <h2 className="text-3xl font-bold text-stone-900">Browse by Medium</h2>
+                <p className="mt-2 text-stone-500">Explore artworks by category.</p>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
               {data.categories.map((category, idx) => {
                 const colors = CATEGORY_COLORS[idx % CATEGORY_COLORS.length];
+                const hasImages = category.sample_artworks?.length > 0;
                 return (
                   <button
                     key={category.id}
                     onClick={() => navigate(`/marketplace?category=${category.id}`)}
-                    className={`group relative rounded-lg overflow-hidden aspect-square border ${colors.border} ${colors.bg} ${colors.hoverBg} transition-all duration-200 flex flex-col items-center justify-center gap-2`}
+                    className={`group relative rounded-xl overflow-hidden aspect-[3/4] transition-all duration-300 hover:shadow-lg hover:shadow-stone-200/50 hover:-translate-y-1 ${
+                      hasImages ? 'bg-stone-900' : `${colors.bg} ${colors.border} border`
+                    }`}
                   >
-                    <span className={`text-4xl font-bold ${colors.text} opacity-20 group-hover:opacity-40 transition-opacity select-none`}>
-                      {category.name.charAt(0)}
-                    </span>
-                    <span className={`text-sm font-semibold ${colors.text} relative z-10`}>
-                      {category.name}
-                    </span>
+                    {hasImages && (
+                      <div className="absolute inset-0">
+                        <div className="relative h-full overflow-hidden bg-stone-800">
+                          {category.sample_artworks[0]?.image ? (
+                            <img src={category.sample_artworks[0].image} alt="" className="h-full w-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                          ) : (
+                            <div className="h-full w-full bg-stone-700" />
+                          )}
+                        </div>
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                      </div>
+                    )}
+                    {!hasImages && (
+                      <span className={`absolute text-6xl font-bold ${colors.text} opacity-10 group-hover:opacity-20 transition-opacity select-none top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2`}>
+                        {category.name.charAt(0)}
+                      </span>
+                    )}
+                    <div className="absolute bottom-0 left-0 right-0 p-3 z-10">
+                      <h3 className={`text-sm font-bold ${hasImages ? 'text-white' : colors.text} leading-tight`}>
+                        {category.name}
+                      </h3>
+                      {category.artwork_count > 0 && (
+                        <p className={`text-[11px] ${hasImages ? 'text-white/60' : 'text-stone-400'} mt-0.5`}>
+                          {category.artwork_count} {category.artwork_count === 1 ? 'Artwork' : 'Artworks'}
+                        </p>
+                      )}
+                    </div>
+                    <div className="absolute top-2.5 right-2.5 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-1 group-hover:translate-x-0">
+                      <div className={`h-6 w-6 rounded-full ${hasImages ? 'bg-white/20 backdrop-blur-sm' : 'bg-white/60'} flex items-center justify-center`}>
+                        <svg className={`h-3 w-3 ${hasImages ? 'text-white' : 'text-stone-700'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                        </svg>
+                      </div>
+                    </div>
                   </button>
                 );
               })}
@@ -423,65 +512,211 @@ const Home = () => {
           </section>
         )}
 
-        {/* ── FEATURED ARTISTS ── */}
-        {data.featured_artists && data.featured_artists.length > 0 && (
-          <section ref={addRevealRef} className="reveal bg-white border-y border-stone-200 mt-24 py-16">
-            <div className="max-w-7xl mx-auto px-6">
-              <h2 className="text-3xl font-bold text-stone-900 text-center mb-12">
-                Featured Artists
-              </h2>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-                {data.featured_artists.map((artist) => (
-                  <Link key={artist.id} to={`/artists/${artist.username}`} className="flex flex-col items-center group">
-                    <div className="w-28 h-28 md:w-32 md:h-32 rounded-full overflow-hidden mb-4 border-4 border-stone-100 group-hover:border-stone-300 transition-colors">
-                      {artist.avatar ? (
-                        <img src={artist.avatar} alt={artist.username} className="w-full h-full object-cover" />
-                      ) : (
-                        <div className="w-full h-full bg-stone-200 flex items-center justify-center text-2xl md:text-3xl text-stone-400 font-bold">
-                          {artist.username.charAt(0).toUpperCase()}
-                        </div>
-                      )}
-                    </div>
-                    <h3 className="text-base font-semibold text-stone-900">
-                      {artist.first_name || artist.last_name
-                        ? `${artist.first_name || ''} ${artist.last_name || ''}`.trim()
-                        : artist.username}
-                    </h3>
-                    <p className="text-sm text-stone-500 mt-0.5">@{artist.username}</p>
-                    <span className="text-xs text-stone-400 mt-1">Artist</span>
-                  </Link>
-                ))}
+        {/* ── EDITOR'S PICKS (BENTO) ── */}
+        {data.recommended_artworks && data.recommended_artworks.length >= 5 && (
+          <section ref={addRevealRef} className="reveal max-w-7xl mx-auto px-6 pt-24">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              {/* Text card — spans 2 cols */}
+              <div className="col-span-2 row-span-1 rounded-xl p-8 sm:p-10 flex flex-col justify-center hero-artwork-card" style={{ animationDelay: '0ms' }}>
+                <h2 className="text-3xl sm:text-4xl font-bold text-stone-900 leading-tight">Editor's Picks</h2>
+                <p className="mt-4 text-base sm:text-lg text-stone-500 leading-relaxed max-w-md">A curated selection of standout artworks from our community, chosen by our team.</p>
+                <Link to="/marketplace" className="mt-8 inline-flex items-center gap-2.5 rounded-full bg-stone-900 px-7 py-3.5 text-sm font-semibold text-white hover:bg-stone-800 transition-colors self-start">
+                  Shop these finds
+                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                  </svg>
+                </Link>
               </div>
+
+              {/* Top-right cards — 2 square cards */}
+              {data.recommended_artworks.slice(0, 2).map((art, i) => (
+                <Link key={art.id} to={`/artworks/${art.id}`} className="group relative col-span-1 row-span-1 rounded-xl overflow-hidden bg-stone-100 border border-stone-200 hover:border-stone-300 hover:shadow-lg hover:shadow-stone-200/50 transition-all duration-300 aspect-square hero-artwork-card" style={{ animationDelay: `${(i + 1) * 100}ms` }}>
+                  {art.images?.[0]?.image ? (
+                    <img src={art.images[0].image} alt={art.title} className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-700" loading="lazy" />
+                  ) : (
+                    <div className="flex h-full items-center justify-center text-stone-400 text-sm">No Image</div>
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
+                    <div className="flex items-center gap-2">
+                      <div className="h-5 w-5 rounded-full bg-stone-700 overflow-hidden border border-white/20">
+                        {art.artist.avatar ? <img src={art.artist.avatar} alt="" className="h-full w-full object-cover" /> : null}
+                      </div>
+                      <span className="text-xs text-white/70">{art.artist.username}</span>
+                    </div>
+                    <h3 className="text-sm font-semibold text-white mt-1 truncate">{art.title}</h3>
+                    <span className="text-xs font-bold text-amber-400">NPR {formatPrice(art.price)}</span>
+                  </div>
+                </Link>
+              ))}
+
+              {/* Bottom row — 4 square cards */}
+              {data.recommended_artworks.slice(2, 6).map((art, i) => (
+                <Link key={art.id} to={`/artworks/${art.id}`} className="group relative col-span-1 row-span-1 rounded-xl overflow-hidden bg-stone-100 border border-stone-200 hover:border-stone-300 hover:shadow-lg hover:shadow-stone-200/50 transition-all duration-300 aspect-square hero-artwork-card" style={{ animationDelay: `${(i + 3) * 100}ms` }}>
+                  {art.images?.[0]?.image ? (
+                    <img src={art.images[0].image} alt={art.title} className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-700" loading="lazy" />
+                  ) : (
+                    <div className="flex h-full items-center justify-center text-stone-400 text-sm">No Image</div>
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
+                    <div className="flex items-center gap-2">
+                      <div className="h-5 w-5 rounded-full bg-stone-700 overflow-hidden border border-white/20">
+                        {art.artist.avatar ? <img src={art.artist.avatar} alt="" className="h-full w-full object-cover" /> : null}
+                      </div>
+                      <span className="text-xs text-white/70">{art.artist.username}</span>
+                    </div>
+                    <h3 className="text-sm font-semibold text-white mt-1 truncate">{art.title}</h3>
+                    <span className="text-xs font-bold text-amber-400">NPR {formatPrice(art.price)}</span>
+                  </div>
+                </Link>
+              ))}
             </div>
           </section>
         )}
 
+        {/* ── FEATURED ARTISTS ── */}
+        {data.featured_artists && data.featured_artists.length > 0 && (
+          <section ref={addRevealRef} className="reveal max-w-7xl mx-auto px-6 mt-24">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-bold text-stone-900">Featured Artists</h2>
+              <p className="mt-3 text-stone-500">Meet the talented creators behind the work.</p>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+              {data.featured_artists.map((artist) => (
+                <Link key={artist.id} to={`/artists/${artist.username}`} className="flex flex-col items-center group">
+                  <div className="w-24 h-24 md:w-28 md:h-28 rounded-full overflow-hidden mb-3 border-4 border-stone-100 group-hover:border-stone-200 transition-colors">
+                    {artist.avatar ? (
+                      <img src={artist.avatar} alt={artist.username} className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full bg-stone-200 flex items-center justify-center text-2xl text-stone-400 font-bold">
+                        {artist.username.charAt(0).toUpperCase()}
+                      </div>
+                    )}
+                  </div>
+                  <h3 className="text-sm font-semibold text-stone-900 text-center">
+                    {artist.first_name || artist.last_name
+                      ? `${artist.first_name || ''} ${artist.last_name || ''}`.trim()
+                      : artist.username}
+                  </h3>
+                  <p className="text-xs text-stone-500 mt-0.5">@{artist.username}</p>
+                  {/* Artwork thumbnails */}
+                  {artist.sample_artworks && artist.sample_artworks.length > 0 && (
+                    <div className="flex gap-2 mt-3">
+                      {artist.sample_artworks.slice(0, 2).map((art) => (
+                        <div key={art.id} className="h-[72px] w-[72px] rounded-lg overflow-hidden bg-stone-100">
+                          {art.image ? (
+                            <img src={art.image} alt="" className="h-full w-full object-cover" />
+                          ) : (
+                            <div className="h-full w-full bg-stone-200" />
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* ── VALUE PROPOSITIONS ── */}
+        <section ref={addRevealRef} className="reveal max-w-7xl mx-auto px-6 pt-24">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-stone-900">Why Artisa?</h2>
+            <p className="mt-3 text-stone-500">Built for Nepali art and the people who love it.</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Discover */}
+            <div className="rounded-xl bg-stone-50 p-8">
+              <span className="text-5xl font-bold text-stone-200 select-none">01</span>
+              <h3 className="text-xl font-bold text-stone-900 mt-2">Discover Unique Art</h3>
+              <p className="mt-3 text-sm text-stone-600 leading-relaxed">
+                Browse <span className="border-b border-dotted border-stone-500 text-stone-800">handcrafted artworks</span> from independent Nepali artisans. From traditional Thangka paintings to modern digital illustrations, find pieces that speak to you.
+              </p>
+            </div>
+
+            {/* Commission */}
+            <div className="rounded-xl bg-stone-50 p-8">
+              <span className="text-5xl font-bold text-stone-200 select-none">02</span>
+              <h3 className="text-xl font-bold text-stone-900 mt-2">Commission Custom Work</h3>
+              <p className="mt-3 text-sm text-stone-600 leading-relaxed">
+                Work directly with artists to <span className="border-b border-dotted border-stone-500 text-stone-800">bring your vision to life</span>. Whether it is a portrait, illustration, or bespoke sculpture, collaborate one-on-one to create something truly yours.
+              </p>
+            </div>
+
+            {/* Connect */}
+            <div className="rounded-xl bg-stone-50 p-8">
+              <span className="text-5xl font-bold text-stone-200 select-none">03</span>
+              <h3 className="text-xl font-bold text-stone-900 mt-2">Connect with Creators</h3>
+              <p className="mt-3 text-sm text-stone-600 leading-relaxed">
+                <span className="border-b border-dotted border-stone-500 text-stone-800">Support local talent</span> directly and build meaningful relationships with the artists behind the work. Every purchase helps sustain Nepali artistry.
+              </p>
+            </div>
+          </div>
+        </section>
+
         {/* ── COMMISSION CTA ── */}
         <section ref={addRevealRef} className="reveal max-w-7xl mx-auto px-6 pt-24 pb-4">
-          <div className="relative rounded-lg overflow-hidden bg-stone-900 px-6 py-16 sm:px-12 sm:py-20 lg:px-16 flex flex-col lg:flex-row items-center justify-between gap-10">
+          <div className="relative rounded-2xl overflow-hidden bg-stone-900 px-8 py-16 sm:px-12 sm:py-20 lg:px-16 flex flex-col lg:flex-row items-center justify-between gap-12">
+            {/* Decorative background elements */}
+            <div className="absolute top-0 right-0 w-96 h-96 bg-[#9c4327]/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3" />
+            <div className="absolute bottom-0 left-0 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/3" />
+
             <div className="relative z-10 max-w-xl text-center lg:text-left">
-              <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
+              <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl lg:text-5xl">
                 Looking for Custom Art?
               </h2>
-              <p className="mt-4 text-lg text-stone-300">
+              <p className="mt-4 text-base sm:text-lg text-stone-300 leading-relaxed">
                 Connect with our talented artists for custom portraits, illustrations, and physical masterpieces tailored to your vision.
               </p>
-              <div className="mt-8 flex flex-wrap gap-4 justify-center lg:justify-start">
+              <div className="mt-8 flex flex-wrap gap-3 justify-center lg:justify-start">
+                <Link
+                  to="/commissions/new"
+                  className="rounded-full bg-white px-7 py-3.5 text-sm font-semibold text-stone-900 hover:bg-stone-100 transition-colors shadow-lg shadow-white/10"
+                >
+                  Request a Commission
+                </Link>
                 <Link
                   to="/marketplace"
-                  className="rounded-lg bg-[#000] px-6 py-3.5 text-sm font-semibold text-white shadow-sm hover:bg-stone-800 transition"
+                  className="rounded-full border border-white/20 px-7 py-3.5 text-sm font-semibold text-white hover:bg-white/10 transition-colors"
                 >
-                  Browse Custom Art
+                  Browse Marketplace
                 </Link>
               </div>
+              <div className="mt-6 flex items-center gap-4 justify-center lg:justify-start text-xs text-stone-400">
+                <span className="flex items-center gap-1.5">
+                  <svg className="h-3.5 w-3.5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                  </svg>
+                  Free to request
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <svg className="h-3.5 w-3.5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                  </svg>
+                  Responds in 24h
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <svg className="h-3.5 w-3.5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                  </svg>
+                  Secure payment
+                </span>
+              </div>
             </div>
+
+            {/* Single artwork image */}
             <div className="hidden lg:block relative w-64 h-64 flex-shrink-0">
               <div className="absolute inset-0 bg-amber-500 rounded-full blur-3xl opacity-20" />
-              <img
-                src="https://images.unsplash.com/photo-1513364776144-60967b0f800f?auto=format&fit=crop&q=80"
-                alt=""
-                className="absolute inset-0 w-full h-full object-cover rounded-lg rotate-3 border-4 border-stone-800"
-              />
+              <div className="relative w-full h-full rounded-lg overflow-hidden">
+                <img
+                  src="https://images.unsplash.com/photo-1513364776144-60967b0f800f?auto=format&fit=crop&q=80"
+                  alt=""
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-stone-900/80" />
+              </div>
             </div>
           </div>
         </section>

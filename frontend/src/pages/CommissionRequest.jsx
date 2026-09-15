@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import Header from '../components/Header';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { useToast } from '../components/Toast';
+import authFetch from '../utils/authFetch';
 
 const CommissionRequest = () => {
   const navigate = useNavigate();
@@ -70,10 +71,8 @@ const CommissionRequest = () => {
     try {
       const formData = new FormData();
       formData.append('image', file);
-      const token = localStorage.getItem('access_token');
-      const response = await fetch('/api/commissions/upload-ref/', {
+      const response = await authFetch('/api/commissions/upload-ref/', {
         method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` },
         body: formData,
       });
       if (response.ok) {
@@ -121,15 +120,11 @@ const CommissionRequest = () => {
 
     setSubmitting(true);
     try {
-      const token = localStorage.getItem('access_token');
       const targetArtistId = artist?.user?.id || artist?.id || artistId || artistUsername;
 
-      const response = await fetch('/api/commissions/', {
+      const response = await authFetch('/api/commissions/', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           artist_id: targetArtistId,
           title: form.title.trim(),

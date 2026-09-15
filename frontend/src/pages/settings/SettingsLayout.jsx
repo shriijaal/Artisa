@@ -45,17 +45,6 @@ const SettingsLayout = () => {
               </NavLink>
             ))}
           </nav>
-          <div className="p-3 border-t border-stone-200">
-            <NavLink
-              to="/marketplace"
-              className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-stone-500 hover:bg-stone-50 hover:text-stone-700 transition-colors"
-            >
-              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
-              </svg>
-              Back to Site
-            </NavLink>
-          </div>
         </aside>
 
         {/* Main Content */}

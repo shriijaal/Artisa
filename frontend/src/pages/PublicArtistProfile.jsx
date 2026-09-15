@@ -113,9 +113,28 @@ const PublicArtistProfile = () => {
     navigate(`/commissions/new?artist=${profile.user.id}&username=${username}`);
   };
 
+  const [copied, setCopied] = useState(false);
+  const handleShare = () => {
+    navigator.clipboard.writeText(window.location.href);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   const formatMemberSince = (dateStr) => {
     const d = new Date(dateStr);
     return d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  };
+
+  const extractSocialLabel = (platform, url) => {
+    if (!url) return platform;
+    try {
+      const u = new URL(url);
+      const path = u.pathname.replace(/\/$/, '');
+      const handle = path.split('/').filter(Boolean).pop() || '';
+      if (platform === 'website') return u.hostname.replace('www.', '');
+      if (handle) return `@${handle}`;
+    } catch {}
+    return platform;
   };
 
   if (loading) {
@@ -175,7 +194,7 @@ const PublicArtistProfile = () => {
 
       <div className={`flex-1 flex flex-col ${isOwnProfile ? (compact ? 'md:pl-16' : 'md:pl-60 xl:pl-72') + ' pb-16 md:pb-0' : ''}`}>
         {/* Cover Image */}
-        <div className="relative h-64 sm:h-80 lg:h-96 w-full bg-gradient-to-br from-stone-800 via-[#9c4327]/40 to-stone-700 z-0">
+        <div className="relative h-48 sm:h-56 lg:h-64 w-full bg-gradient-to-br from-stone-800 via-[#9c4327]/40 to-stone-700 z-0">
           {profile.cover_image ? (
             <img
               src={profile.cover_image}
@@ -244,7 +263,7 @@ const PublicArtistProfile = () => {
               <div className="flex items-center gap-3 flex-shrink-0 mt-4 sm:mt-0">
                 {isOwnProfile ? (
                   <button
-                    onClick={() => navigate('/profile/edit')}
+                    onClick={() => navigate('/settings/account')}
                     className="rounded-lg bg-[#000] px-4 py-2.5 text-sm font-semibold text-white hover:bg-stone-800 active:bg-stone-900 transition whitespace-nowrap flex items-center gap-2"
                   >
                     <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -253,41 +272,88 @@ const PublicArtistProfile = () => {
                     Edit Profile
                   </button>
                 ) : (
-                  <button
-                    onClick={handleCommissionClick}
-                    className="rounded-lg bg-[#000] px-5 py-2.5 text-sm font-semibold text-white hover:bg-stone-800 active:bg-stone-900 transition whitespace-nowrap flex items-center gap-2"
-                  >
-                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                    </svg>
-                    Commission Artist
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={handleCommissionClick}
+                      className="rounded-lg bg-[#000] px-5 py-2.5 text-sm font-semibold text-white hover:bg-stone-800 active:bg-stone-900 transition whitespace-nowrap flex items-center gap-2"
+                    >
+                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                      </svg>
+                      Commission Artist
+                    </button>
+                    <button
+                      onClick={handleShare}
+                      className="rounded-lg border border-stone-200 bg-white px-3.5 py-2.5 text-sm font-medium text-stone-600 hover:bg-stone-50 transition whitespace-nowrap flex items-center gap-2"
+                    >
+                      {copied ? (
+                        <svg className="h-4 w-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                        </svg>
+                      ) : (
+                        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z" />
+                        </svg>
+                      )}
+                      {copied ? 'Copied!' : 'Share'}
+                    </button>
+                  </div>
                 )}
               </div>
             </div>
           </div>
 
-          {/* Stats — compact inline row */}
-          <div className="mt-6 flex items-center justify-center gap-3 text-sm flex-wrap">
-            <span className="font-heading font-bold text-stone-900">{artworks.length} artworks</span>
-            {artistRating.review_count > 0 && (
-              <>
-                <span className="text-stone-300">·</span>
-                <span className="flex items-center gap-1 font-medium text-stone-900">
-                  <svg className="h-3.5 w-3.5 text-amber-500" fill="currentColor" viewBox="0 0 24 24">
+          {/* Stats — individual cards */}
+          <div className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div className="bg-white border border-stone-200 rounded-lg p-4 text-center">
+              <span className="block text-2xl font-bold text-stone-900">{artworks.length}</span>
+              <span className="text-xs text-stone-500">Artworks</span>
+            </div>
+            {artistRating.review_count > 0 ? (
+              <div className="bg-white border border-stone-200 rounded-lg p-4 text-center">
+                <span className="flex items-center justify-center gap-1 text-2xl font-bold text-stone-900">
+                  <svg className="h-4 w-4 text-amber-500" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
                   </svg>
-                  {artistRating.avg_rating} <span className="text-stone-500 font-normal">({artistRating.review_count})</span>
+                  {artistRating.avg_rating}
                 </span>
-              </>
+                <span className="text-xs text-stone-500">{artistRating.review_count} reviews</span>
+              </div>
+            ) : (
+              <div className="bg-white border border-stone-200 rounded-lg p-4 text-center">
+                <span className="block text-2xl font-bold text-stone-400">—</span>
+                <span className="text-xs text-stone-500">No reviews</span>
+              </div>
             )}
-            <span className="text-stone-300">·</span>
-            <span className="text-stone-500">Member since {formatMemberSince(profile.created_at || profile.user?.date_joined || new Date())}</span>
-            <span className="text-stone-300">·</span>
-            <span className={`font-medium ${profile.verified_badge ? 'text-emerald-600' : 'text-stone-400'}`}>
-              {profile.verified_badge ? '✓ Verified' : 'Unverified'}
-            </span>
+            <div className="bg-white border border-stone-200 rounded-lg p-4 text-center">
+              <span className="block text-sm font-bold text-stone-900">{formatMemberSince(profile.created_at || profile.user?.date_joined || new Date())}</span>
+              <span className="text-xs text-stone-500">Member since</span>
+            </div>
+            <div className="bg-white border border-stone-200 rounded-lg p-4 text-center">
+              <span className={`block text-sm font-bold ${profile.verified_badge ? 'text-emerald-600' : 'text-stone-400'}`}>
+                {profile.verified_badge ? '✓ Verified' : 'Unverified'}
+              </span>
+              <span className="text-xs text-stone-500">Status</span>
+            </div>
           </div>
+
+          {/* Specialties */}
+          {profile.specialties && profile.specialties.length > 0 && (
+            <div className="mt-4 flex flex-wrap gap-2">
+              {profile.specialties.map((s, i) => (
+                <span key={i} className="bg-stone-100 text-stone-700 rounded-full px-3 py-1 text-xs font-medium">
+                  {s}
+                </span>
+              ))}
+            </div>
+          )}
+
+          {/* Commission pricing */}
+          {profile.commission_available && profile.commission_starting_price && (
+            <p className="mt-3 text-sm text-stone-600">
+              Starting at <span className="font-semibold text-stone-900">NPR {Number(profile.commission_starting_price).toLocaleString()}</span>
+            </p>
+          )}
 
           {/* About Section — merged bio + social links */}
           {(profile.bio || Object.keys(socialLinks).length > 0) && (
@@ -308,7 +374,7 @@ const PublicArtistProfile = () => {
                       <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z" />
                       </svg>
-                      Instagram
+                      {extractSocialLabel('instagram', socialLinks.instagram)}
                     </a>
                   )}
                   {socialLinks.facebook && (
@@ -321,7 +387,7 @@ const PublicArtistProfile = () => {
                       <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
                       </svg>
-                      Facebook
+                      {extractSocialLabel('facebook', socialLinks.facebook)}
                     </a>
                   )}
                   {socialLinks.website && (
@@ -334,7 +400,7 @@ const PublicArtistProfile = () => {
                       <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
                       </svg>
-                      Website
+                      {extractSocialLabel('website', socialLinks.website)}
                     </a>
                   )}
                 </div>

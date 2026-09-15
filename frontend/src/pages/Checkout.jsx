@@ -5,6 +5,7 @@ import Header from '../components/Header';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { formatPrice } from '../utils/formatPrice';
 import { useToast } from '../components/Toast';
+import authFetch from '../utils/authFetch';
 
 const Checkout = () => {
   const navigate = useNavigate();
@@ -50,23 +51,16 @@ const Checkout = () => {
     }
 
     try {
-      const token = localStorage.getItem('access_token');
-
       // Check if item is already in cart
-      const cartRes = await fetch('/api/orders/cart/', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
+      const cartRes = await authFetch('/api/orders/cart/');
       const existingCart = await cartRes.json();
       const alreadyInCart = existingCart.some(item => String(item.artwork?.id) === String(buyNowId));
 
       if (!alreadyInCart) {
         // Add to cart
-        const addRes = await fetch('/api/orders/cart/', {
+        const addRes = await authFetch('/api/orders/cart/', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ artwork_id: buyNowId, quantity: 1 })
         });
 
@@ -89,12 +83,8 @@ const Checkout = () => {
 
   const fetchCartAndAddresses = async () => {
     try {
-      const token = localStorage.getItem('access_token');
-      
       // Fetch cart items
-      const cartRes = await fetch('/api/orders/cart/', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
+      const cartRes = await authFetch('/api/orders/cart/');
       const cartData = await cartRes.json();
       setCartItems(cartData);
       
@@ -104,9 +94,7 @@ const Checkout = () => {
       }
 
       // Fetch saved addresses
-      const addrRes = await fetch('/api/orders/shipping-addresses/', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
+      const addrRes = await authFetch('/api/orders/shipping-addresses/');
       const addrData = await addrRes.json();
       setAddresses(addrData);
 
@@ -141,7 +129,6 @@ const Checkout = () => {
     setError('');
 
     try {
-      const token = localStorage.getItem('access_token');
       let payload = {};
 
       if (hasPhysicalItems()) {
@@ -162,12 +149,9 @@ const Checkout = () => {
         }
       }
 
-      const response = await fetch('/api/orders/', {
+      const response = await authFetch('/api/orders/', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
 
@@ -177,12 +161,9 @@ const Checkout = () => {
         const orderId = data.id;
         // Initiate Khalti Payment
         addToast('Order placed! Redirecting to payment...', 'success');
-        const payRes = await fetch('/api/payments/khalti/initiate/', {
+        const payRes = await authFetch('/api/payments/khalti/initiate/', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ order_id: orderId })
         });
         const payData = await payRes.json();

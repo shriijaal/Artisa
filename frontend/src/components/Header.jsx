@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { formatPrice } from '../utils/formatPrice';
+import authFetch from '../utils/authFetch';
 
 const Header = () => {
   const navigate = useNavigate();
@@ -87,8 +88,7 @@ const Header = () => {
     if (!user) { setUnreadCount(0); return; }
     const fetchUnread = async () => {
       try {
-        const token = localStorage.getItem('access_token');
-        const r = await fetch('/api/messages/unread/', { headers: { Authorization: `Bearer ${token}` } });
+        const r = await authFetch('/api/messages/unread/');
         if (r.ok) { const d = await r.json(); setUnreadCount(d.unread_count || 0); }
       } catch {}
     };
@@ -99,8 +99,7 @@ const Header = () => {
 
   const fetchCartCount = async () => {
     try {
-      const token = localStorage.getItem('access_token');
-      const r = await fetch('/api/orders/cart/', { headers: { Authorization: `Bearer ${token}` } });
+      const r = await authFetch('/api/orders/cart/');
       if (r.ok) { const d = await r.json(); setCartCount(d.length); }
     } catch {}
   };
@@ -346,7 +345,7 @@ const Header = () => {
 
                     {user?.artist_profile?.status !== 'approved' && user.role !== 'admin' && (
                       <Link
-                        to={!user?.artist_profile ? '/artist-application' : user.artist_profile.status === 'rejected' ? '/artist-application' : '/profile/edit'}
+                        to={!user?.artist_profile ? '/artist-application' : user.artist_profile.status === 'rejected' ? '/artist-application' : '/settings/account'}
                         onClick={() => setMenuOpen(false)}
                         className="flex items-center gap-2.5 px-4 py-2 text-sm text-[#9c4327] hover:bg-stone-50"
                       >

@@ -56,7 +56,7 @@ class CommissionDetailSerializer(serializers.ModelSerializer):
 class CommissionCreateSerializer(serializers.ModelSerializer):
     artist_id = serializers.CharField(write_only=True)
     reference_images = serializers.ListField(
-        child=serializers.URLField(), required=False, default=list
+        child=serializers.CharField(), required=False, default=list
     )
     reference_image_ids = serializers.ListField(
         child=serializers.CharField(), required=False, default=list, write_only=True
