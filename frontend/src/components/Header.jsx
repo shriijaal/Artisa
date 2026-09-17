@@ -18,6 +18,7 @@ const Header = () => {
   const [catDropdown, setCatDropdown] = useState(false);
   const [categories, setCategories] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [hasCommissions, setHasCommissions] = useState(false);
   const searchInputRef = useRef(null);
   const searchTimerRef = useRef(null);
   const searchWrapperRef = useRef(null);
@@ -85,14 +86,21 @@ const Header = () => {
   useEffect(() => { user ? fetchCartCount() : setCartCount(0); }, [user, location.pathname]);
 
   useEffect(() => {
-    if (!user) { setUnreadCount(0); return; }
+    if (!user) { setUnreadCount(0); setHasCommissions(false); return; }
     const fetchUnread = async () => {
       try {
         const r = await authFetch('/api/messages/unread/');
         if (r.ok) { const d = await r.json(); setUnreadCount(d.unread_count || 0); }
       } catch {}
     };
+    const fetchCommissions = async () => {
+      try {
+        const r = await authFetch('/api/commissions/mine/');
+        if (r.ok) { const d = await r.json(); setHasCommissions(d.length > 0); }
+      } catch {}
+    };
     fetchUnread();
+    fetchCommissions();
     const interval = setInterval(fetchUnread, 30000);
     return () => clearInterval(interval);
   }, [user]);
@@ -264,7 +272,7 @@ const Header = () => {
               </div>
             )}
           </div>
-          <Link to="/commissions/landing" className={navLinkClass('/commissions/landing')}>Commissions</Link>
+          <Link to={user && hasCommissions ? '/commissions/mine' : '/commissions/landing'} className={navLinkClass(user && hasCommissions ? '/commissions/mine' : '/commissions/landing')}>{user && hasCommissions ? 'My Commissions' : 'Commissions'}</Link>
         </nav>
         <div ref={searchWrapperRef} className="relative flex-1 max-w-md hidden md:block">
           <form onSubmit={handleSearchSubmit} className="relative">
@@ -281,7 +289,7 @@ const Header = () => {
           {user ? (
             <>
               <button
-                onClick={() => navigate(user.artist_profile?.status === 'approved' ? '/artist/inboxes' : '/orders/history')}
+                onClick={() => navigate(user.artist_profile?.status === 'approved' ? '/artist/inboxes' : '/messages')}
                 className="relative p-2 text-stone-600 hover:text-stone-900 transition-colors"
                 aria-label="Messages"
               >

@@ -5,7 +5,7 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import authFetch from '../utils/authFetch';
 
 const STATUS_CONFIG = {
-  pending: { label: 'Pending', color: 'bg-yellow-100 text-yellow-700 border-yellow-200', icon: '⏳' },
+  pending: { label: 'Pending', color: 'bg-yellow-400/10 text-yellow-700 border border-yellow-300/30 backdrop-blur-sm', icon: '⏳' },
   accepted: { label: 'Accepted', color: 'bg-blue-100 text-blue-700 border-blue-200', icon: '✅' },
   in_progress: { label: 'In Progress', color: 'bg-purple-100 text-purple-700 border-purple-200', icon: '🎨' },
   delivered: { label: 'Delivered', color: 'bg-orange-100 text-orange-700 border-orange-200', icon: '📦' },
@@ -195,7 +195,7 @@ const ArtistCommissions = () => {
                       <p className="text-xs text-stone-400 mt-1 line-clamp-1">{c.description}</p>
                     </div>
                     <div className="text-right flex-shrink-0 space-y-1.5">
-                      <span className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-semibold ${sc.color}`}>
+                      <span className={`inline-flex items-center gap-1 rounded-md border px-2.5 py-0.5 text-xs font-semibold ${sc.color}`}>
                         {sc.icon} {sc.label}
                       </span>
                       <p className="text-xs text-stone-500 font-medium">

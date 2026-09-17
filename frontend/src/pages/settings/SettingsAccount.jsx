@@ -43,6 +43,8 @@ const SettingsAccount = () => {
   const [bio, setBio] = useState('');
   const [bioDirty, setBioDirty] = useState(false);
   const [specialties, setSpecialties] = useState([]);
+  const [province, setProvince] = useState('');
+  const [provinceDirty, setProvinceDirty] = useState(false);
   const [socialLinks, setSocialLinks] = useState({ instagram: '', website: '', facebook: '' });
   const [socialDirty, setSocialDirty] = useState(false);
 
@@ -66,6 +68,7 @@ const SettingsAccount = () => {
         setProfile(d);
         setBio(d.bio || '');
         setSpecialties(d.specialties || []);
+        setProvince(d.province || '');
         setSocialLinks(d.social_links || { instagram: '', website: '', facebook: '' });
       }
       if (resUser.ok) {
@@ -147,6 +150,7 @@ const SettingsAccount = () => {
       fd.append('bio', bio);
       fd.append('social_links', JSON.stringify(socialLinks));
       fd.append('specialties', JSON.stringify(specialties));
+      fd.append('province', province);
       if (coverFile) fd.append('cover_image', coverFile);
       const res = await authFetch('/api/auth/artist/profile/', { method: 'PUT', body: fd });
       if (res.ok) {
@@ -401,6 +405,26 @@ const SettingsAccount = () => {
             <p className="text-[11px] text-stone-400 mt-2">Select all that apply to your work.</p>
           </div>
 
+          {/* Province */}
+          <div className="mb-5">
+            <label className="block text-sm font-medium text-stone-700 mb-2">Province</label>
+            <select
+              value={province}
+              onChange={(e) => { setProvince(e.target.value); setProvinceDirty(true); }}
+              className="w-full rounded-lg border border-stone-200 px-3 py-2.5 text-sm focus:border-stone-400 focus:outline-none focus:ring-1 focus:ring-stone-400"
+            >
+              <option value="">Select your province</option>
+              <option value="Koshi">Koshi</option>
+              <option value="Madhesh">Madhesh</option>
+              <option value="Bagmati">Bagmati</option>
+              <option value="Gandaki">Gandaki</option>
+              <option value="Lumbini">Lumbini</option>
+              <option value="Karnali">Karnali</option>
+              <option value="Sudurpashchim">Sudurpashchim</option>
+            </select>
+            <p className="text-[11px] text-stone-400 mt-1">Used to calculate shipping costs for your buyers.</p>
+          </div>
+
           {/* Social Links */}
           <div className="mb-5">
             <label className="block text-sm font-medium text-stone-700 mb-2">Social Links</label>
@@ -417,7 +441,7 @@ const SettingsAccount = () => {
             </div>
           </div>
 
-          {(bioDirty || socialDirty || coverFile || specialties.length > 0) && (
+          {(bioDirty || socialDirty || coverFile || provinceDirty || specialties.length > 0) && (
             <div className="flex justify-end pt-2 border-t border-stone-100">
               <button
                 onClick={handleSaveProfile}

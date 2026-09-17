@@ -156,12 +156,15 @@ const OrderHistory = () => {
       if (activeTab === 'cancelled') {
         return order.status === 'cancelled';
       }
+      if (activeTab === 'all') {
+        return order.status !== 'cancelled';
+      }
       return true;
     });
   }, [orders, search, activeTab]);
 
   const tabCounts = useMemo(() => ({
-    all: orders.length,
+    all: orders.filter((o) => o.status !== 'cancelled').length,
     active: orders.filter((o) => ['pending', 'processing', 'shipped'].includes(o.status)).length,
     completed: orders.filter((o) => o.status === 'delivered').length,
     cancelled: orders.filter((o) => o.status === 'cancelled').length,

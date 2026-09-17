@@ -12,7 +12,7 @@ from django.conf import settings
 
 from apps.artworks.models import Artwork, DigitalFile
 from apps.users.permissions import IsApprovedArtist
-from apps.orders.models import CartItem, ShippingAddress, Order, OrderItem, OrderShipment
+from apps.orders.models import CartItem, ShippingAddress, Order, OrderItem, OrderShipment, ShippingRate
 from apps.orders.serializers import (
     CartItemSerializer, 
     ShippingAddressSerializer, 
@@ -28,6 +28,34 @@ from apps.core.email import (
     send_order_cancelled_email,
     send_order_rejected_email,
 )
+
+DEFAULT_SHIPPING_COST = Decimal('200.00')
+
+
+def calculate_shipping_cost(cart_items, destination_province):
+    """Calculate shipping cost based on artist provinces and destination."""
+    artist_provinces = set()
+    for item in cart_items:
+        artist = item.artwork.artist
+        if hasattr(artist, 'artist_profile') and artist.artist_profile.province:
+            artist_provinces.add(artist.artist_profile.province)
+        else:
+            artist_provinces.add('Bagmati')
+
+    if not artist_provinces:
+        return DEFAULT_SHIPPING_COST
+
+    max_cost = Decimal('0.00')
+    for origin in artist_provinces:
+        rate = ShippingRate.objects.filter(
+            origin_province=origin,
+            destination_province=destination_province,
+        ).first()
+        cost = rate.cost if rate else DEFAULT_SHIPPING_COST
+        if cost > max_cost:
+            max_cost = cost
+
+    return max_cost if max_cost > 0 else DEFAULT_SHIPPING_COST
 
 
 @api_view(['GET', 'POST'])
@@ -138,6 +166,26 @@ def shipping_address_detail(request, address_id):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+# --- SHIPPING CALCULATION ---
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def calculate_shipping(request):
+    """POST /api/orders/calculate-shipping/ — Calculate shipping cost for given province."""
+    province = request.data.get('province')
+    if not province:
+        return Response({'error': 'Province is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+    cart_items = CartItem.objects.filter(user=request.user).select_related('artwork', 'artwork__artist', 'artwork__artist__artist_profile')
+    has_physical = any(item.artwork.type == Artwork.Type.PHYSICAL for item in cart_items)
+
+    if not has_physical:
+        return Response({'shipping_cost': '0.00', 'origin': None, 'destination': province})
+
+    cost = calculate_shipping_cost(cart_items, province)
+    return Response({'shipping_cost': str(cost), 'destination': province})
+
+
 # --- ORDER VIEWS ---
 
 @api_view(['GET', 'POST'])
@@ -191,7 +239,12 @@ def orders(request):
 
         # Calculate totals
         subtotal = sum(item.artwork.price * item.quantity for item in cart_items)
-        shipping_cost = Decimal('150.00') if has_physical else Decimal('0.00')
+        if has_physical and address_obj:
+            shipping_cost = calculate_shipping_cost(cart_items, address_obj.province)
+        elif has_physical:
+            shipping_cost = DEFAULT_SHIPPING_COST
+        else:
+            shipping_cost = Decimal('0.00')
         total = subtotal + shipping_cost
 
         # Create Order

@@ -47,6 +47,7 @@ class ArtistProfile(models.Model):
     commission_categories = models.JSONField(default=list, blank=True)
     commission_starting_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     commission_estimated_days = models.IntegerField(null=True, blank=True)
+    province = models.CharField(max_length=100, blank=True, default='')
     specialties = models.JSONField(default=list, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

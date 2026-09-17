@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import Header from '../components/Header';
 import CommissionChat from '../components/CommissionChat';
@@ -10,44 +10,37 @@ import authFetch from '../utils/authFetch';
 const STATUS_CONFIG = {
   pending: {
     label: 'Pending',
-    color: 'bg-yellow-100 text-yellow-700 border-yellow-200',
-    icon: '⏳',
+    color: 'bg-yellow-400/10 text-yellow-700 border border-yellow-300/30 backdrop-blur-sm',
     description: 'Waiting for artist to respond',
   },
   accepted: {
     label: 'Accepted',
     color: 'bg-blue-100 text-blue-700 border-blue-200',
-    icon: '✅',
     description: 'Artist has accepted your request',
   },
   in_progress: {
     label: 'In Progress',
     color: 'bg-purple-100 text-purple-700 border-purple-200',
-    icon: '🎨',
     description: 'Artist is working on your commission',
   },
   delivered: {
     label: 'Delivered',
     color: 'bg-orange-100 text-orange-700 border-orange-200',
-    icon: '📦',
     description: 'Work delivered — please review',
   },
   completed: {
     label: 'Completed',
     color: 'bg-green-100 text-green-700 border-green-200',
-    icon: '🎉',
     description: 'Commission successfully completed',
   },
   cancelled: {
     label: 'Cancelled',
     color: 'bg-stone-100 text-stone-600 border-stone-200',
-    icon: '✖',
     description: 'Commission was cancelled',
   },
   declined: {
     label: 'Declined',
     color: 'bg-red-100 text-red-700 border-red-200',
-    icon: '🚫',
     description: 'Artist declined this request',
   },
 };
@@ -60,7 +53,6 @@ const StatusTimeline = ({ currentStatus }) => {
     const cfg = STATUS_CONFIG[currentStatus];
     return (
       <div className={`rounded-lg border px-4 py-3 flex items-center gap-3 ${cfg.color}`}>
-        <span className="text-lg">{cfg.icon}</span>
         <div>
           <p className="font-semibold text-sm">{cfg.label}</p>
           <p className="text-xs opacity-80">{cfg.description}</p>
@@ -134,7 +126,19 @@ const DeliverableCard = ({ deliverable }) => {
               : 'bg-stone-200'
           }`}
         >
-          {isImage ? '🖼️' : isPdf ? '📄' : isZip ? '📦' : '📁'}
+          {isImage ? (
+            <svg className="h-5 w-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5a1.5 1.5 0 001.5-1.5V5.25a1.5 1.5 0 00-1.5-1.5H3.75a1.5 1.5 0 00-1.5 1.5v14.25a1.5 1.5 0 001.5 1.5z" />
+            </svg>
+          ) : isPdf ? (
+            <svg className="h-5 w-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+            </svg>
+          ) : (
+            <svg className="h-5 w-5 text-stone-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5m8.25 3v6.75m0 0l-3-3m3 3l3-3M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+            </svg>
+          )}
         </div>
         <div>
           <p className="text-sm font-semibold text-stone-900">Revision {deliverable.revision_number}</p>
@@ -170,12 +174,13 @@ const DeliverableCard = ({ deliverable }) => {
 const CommissionDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { user } = useAuth();
   const { addToast } = useToast();
 
   const [commission, setCommission] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('details');
+  const [activeTab, setActiveTab] = useState(searchParams.get('tab') === 'messages' ? 'messages' : 'details');
   const [unreadCount, setUnreadCount] = useState(0);
   const [actionLoading, setActionLoading] = useState(false);
   const [showDeclineModal, setShowDeclineModal] = useState(false);
@@ -233,7 +238,7 @@ const CommissionDetail = () => {
         const messages = {
           accept: { msg: 'Commission accepted! You can now start working.', type: 'success' },
           start: { msg: 'Marked as in progress!', type: 'success' },
-          approve: { msg: 'Work approved! Commission completed. 🎉', type: 'success' },
+          approve: { msg: 'Work approved! Commission completed.', type: 'success' },
           revision: { msg: 'Revision requested. Artist will be notified.', type: 'info' },
           cancel: { msg: 'Commission cancelled.', type: 'info' },
           decline: { msg: 'Commission declined.', type: 'info' },
@@ -321,8 +326,7 @@ const CommissionDetail = () => {
               Created {new Date(commission.created_at).toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })}
             </p>
           </div>
-          <span className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold flex-shrink-0 ${statusConfig.color}`}>
-            <span>{statusConfig.icon}</span>
+          <span className={`inline-flex items-center gap-1.5 rounded-md border px-3 py-1 text-xs font-semibold flex-shrink-0 ${statusConfig.color}`}>
             {statusConfig.label}
           </span>
         </div>
@@ -373,6 +377,24 @@ const CommissionDetail = () => {
           <StatusTimeline currentStatus={commission.status} />
           <p className="mt-4 text-xs text-stone-500 text-center">{statusConfig.description}</p>
         </div>
+
+        {/* Overdue Banner */}
+        {daysUntilDeadline !== null && daysUntilDeadline < 0 && !['completed', 'cancelled', 'declined'].includes(commission.status) && (
+          <div className="rounded-lg border border-red-200 bg-red-50 p-4 flex items-start gap-3">
+            <div className="h-8 w-8 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+              <svg className="h-4 w-4 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+              </svg>
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-red-800">This commission is overdue</p>
+              <p className="text-xs text-red-600 mt-0.5">
+                Deadline was {new Date(commission.deadline).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                {commission.status === 'pending' && ' — the artist has not responded yet. This commission may be auto-cancelled soon.'}
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Parties */}
         <div className="grid grid-cols-2 gap-4">
@@ -516,7 +538,7 @@ const CommissionDetail = () => {
                   disabled={actionLoading}
                   className="flex-1 rounded-lg bg-emerald-600 px-4 py-3 text-sm font-semibold text-white hover:bg-emerald-700 transition disabled:opacity-50"
                 >
-                  {actionLoading ? 'Processing...' : '✓ Accept Commission'}
+                  {actionLoading ? 'Processing...' : 'Accept Commission'}
                 </button>
                 <button
                   onClick={() => setShowDeclineModal(true)}
@@ -539,7 +561,7 @@ const CommissionDetail = () => {
                 disabled={actionLoading}
                 className="w-full rounded-lg bg-blue-600 px-4 py-3 text-sm font-semibold text-white hover:bg-blue-700 transition disabled:opacity-50"
               >
-                {actionLoading ? 'Updating...' : '🎨 Start Working'}
+                {actionLoading ? 'Updating...' : 'Start Working'}
               </button>
             </div>
           )}
@@ -562,7 +584,15 @@ const CommissionDetail = () => {
                   />
                   <div className="flex items-center gap-3">
                     <div className="h-10 w-10 rounded-lg bg-stone-100 flex items-center justify-center flex-shrink-0">
-                      {deliverFile ? '📎' : '📁'}
+                      {deliverFile ? (
+                        <svg className="h-5 w-5 text-stone-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.939A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.941l-7.81 7.81a1.5 1.5 0 002.112 2.13" />
+                        </svg>
+                      ) : (
+                        <svg className="h-5 w-5 text-stone-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                        </svg>
+                      )}
                     </div>
                     <div className="min-w-0">
                       {deliverFile ? (
@@ -591,7 +621,7 @@ const CommissionDetail = () => {
                   disabled={actionLoading || !deliverFile}
                   className="w-full rounded-lg bg-[#000] px-4 py-3 text-sm font-semibold text-white hover:bg-stone-800 transition disabled:opacity-50"
                 >
-                  {actionLoading ? 'Uploading...' : '📤 Upload Deliverable'}
+                  {actionLoading ? 'Uploading...' : 'Upload Deliverable'}
                 </button>
               </div>
             </div>
@@ -613,7 +643,7 @@ const CommissionDetail = () => {
                   disabled={actionLoading}
                   className="flex-1 rounded-lg bg-emerald-600 px-4 py-3 text-sm font-semibold text-white hover:bg-emerald-700 transition disabled:opacity-50"
                 >
-                  {actionLoading ? 'Processing...' : '✓ Approve Work'}
+                  {actionLoading ? 'Processing...' : 'Approve Work'}
                 </button>
                 {commission.current_revision < commission.revision_limit && (
                   <button
@@ -631,7 +661,11 @@ const CommissionDetail = () => {
           {/* Completed Banner */}
           {commission.status === 'completed' && (
             <div className="rounded-lg border border-emerald-100 bg-emerald-50 p-5 text-center">
-              <p className="text-2xl mb-2">🎉</p>
+              <div className="h-10 w-10 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-3">
+                <svg className="h-5 w-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
               <p className="font-semibold text-emerald-800">Commission Completed!</p>
               <p className="text-xs text-emerald-600 mt-1">This commission has been successfully delivered and approved.</p>
             </div>

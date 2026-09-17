@@ -20,6 +20,9 @@ class CommissionReferenceImageSerializer(serializers.ModelSerializer):
 class CommissionListSerializer(serializers.ModelSerializer):
     artist = UserSerializer(read_only=True)
     customer = UserSerializer(read_only=True)
+    unread_count = serializers.SerializerMethodField()
+    last_message = serializers.SerializerMethodField()
+    last_message_at = serializers.SerializerMethodField()
 
     class Meta:
         model = Commission
@@ -27,8 +30,38 @@ class CommissionListSerializer(serializers.ModelSerializer):
             'id', 'title', 'description', 'budget_min', 'budget_max',
             'status', 'deadline', 'revision_limit', 'current_revision',
             'artist', 'customer', 'created_at', 'updated_at',
+            'unread_count', 'last_message', 'last_message_at',
         )
         read_only_fields = fields
+
+    def get_unread_count(self, obj):
+        request = self.context.get('request')
+        if not request or not request.user.is_authenticated:
+            return 0
+        from apps.messaging.models import Message
+        return Message.objects.filter(
+            commission=obj,
+            receiver=request.user,
+            read_at__isnull=True,
+        ).count()
+
+    def get_last_message(self, obj):
+        from apps.messaging.models import Message
+        msg = Message.objects.filter(commission=obj).order_by('-created_at').first()
+        if not msg:
+            return None
+        return {
+            'body': msg.body,
+            'sender_id': str(msg.sender_id),
+            'created_at': msg.created_at.isoformat(),
+        }
+
+    def get_last_message_at(self, obj):
+        from apps.messaging.models import Message
+        msg = Message.objects.filter(commission=obj).order_by('-created_at').first()
+        if msg:
+            return msg.created_at.isoformat()
+        return obj.updated_at.isoformat() if obj.updated_at else obj.created_at.isoformat()
 
 
 class CommissionDetailSerializer(serializers.ModelSerializer):

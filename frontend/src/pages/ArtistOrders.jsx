@@ -131,6 +131,8 @@ const ArtistOrders = () => {
       }
       if (statusFilter) {
         if (item.order_status !== statusFilter) return false;
+      } else {
+        if (item.order_status === 'cancelled') return false;
       }
       return true;
     });
@@ -187,9 +189,9 @@ const ArtistOrders = () => {
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           {[
             { label: 'Total Sales', value: stats.totalSold, color: 'text-stone-900' },
-            { label: 'Revenue', value: `रू ${stats.totalRevenue.toLocaleString()}`, color: 'text-emerald-700' },
-            { label: 'Pending Shipments', value: stats.pendingShipments, color: 'text-amber-600' },
-            { label: 'Total Orders', value: stats.totalOrders, color: 'text-blue-600' },
+            { label: 'Revenue', value: `रू ${stats.totalRevenue.toLocaleString()}`, color: 'text-stone-900' },
+            { label: 'Pending Shipments', value: stats.pendingShipments, color: 'text-stone-900' },
+            { label: 'Total Orders', value: stats.totalOrders, color: 'text-stone-900' },
           ].map((stat) => (
             <div key={stat.label} className="rounded-lg border border-stone-200 bg-white p-4">
               <p className="text-xs font-medium text-stone-500 uppercase">{stat.label}</p>
@@ -247,13 +249,13 @@ const ArtistOrders = () => {
                       <div className="flex flex-wrap items-center gap-2 mb-3">
                         <h3 className="font-semibold text-stone-950">{item.artwork.title}</h3>
                         <span className="text-xs font-semibold px-2 py-0.5 rounded bg-stone-100 text-stone-700 uppercase">{item.artwork.type}</span>
-                        <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                        <span className={`rounded-md px-2.5 py-0.5 text-xs font-semibold ${
                           isPaid ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-[#9c4327]/10 text-[#9c4327] border border-[#9c4327]/20'
                         }`}>
                           {isPaid ? 'PAID' : 'UNPAID'}
                         </span>
                         {!isPaid && item.order_status === 'processing' && (
-                          <span className="rounded-full px-2.5 py-0.5 text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">
+                          <span className="rounded-md px-2.5 py-0.5 text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">
                             ACCEPTED
                           </span>
                         )}

@@ -117,3 +117,20 @@ class OrderShipment(models.Model):
 
     def __str__(self):
         return f"Shipment for OrderItem {self.order_item.id}"
+
+
+class ShippingRate(models.Model):
+    class Meta:
+        db_table = 'shipping_rates'
+        unique_together = ['origin_province', 'destination_province']
+        verbose_name_plural = 'Shipping rates'
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    origin_province = models.CharField(max_length=100, help_text='Artist province')
+    destination_province = models.CharField(max_length=100, help_text='Customer province')
+    cost = models.DecimalField(max_digits=10, decimal_places=2)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.origin_province} → {self.destination_province}: Rs.{self.cost}"

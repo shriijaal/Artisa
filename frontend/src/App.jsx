@@ -35,6 +35,7 @@ import AdminCategories from './pages/AdminCategories'
 import AdminUsers from './pages/AdminUsers'
 import AdminOrders from './pages/AdminOrders'
 import ArtistInbox from './pages/ArtistInbox'
+import CustomerInbox from './pages/CustomerInbox'
 import SettingsLayout from './pages/settings/SettingsLayout'
 import SettingsAccount from './pages/settings/SettingsAccount'
 import SettingsSecurity from './pages/settings/SettingsSecurity'
@@ -175,6 +176,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <ArtistInbox />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/messages"
+            element={
+              <ProtectedRoute>
+                <CustomerInbox />
               </ProtectedRoute>
             }
           />

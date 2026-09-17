@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'apps.payments',
     'apps.recs',
     'apps.admin_api',
+    'channels',
 ]
 
 MIDDLEWARE = [
@@ -72,6 +73,14 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'artisa.wsgi.application'
+ASGI_APPLICATION = 'artisa.asgi.application'
+
+# Channel Layers — InMemory for dev, swap to Redis in production
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer',
+    },
+}
 
 USE_SQLITE = os.getenv('USE_SQLITE', 'False').lower() in ('true', '1', 'yes')
 

@@ -13,6 +13,7 @@ urlpatterns = [
     
     # Order routes
     path('', views.orders, name='orders'),
+    path('calculate-shipping/', views.calculate_shipping, name='calculate_shipping'),
     path('<uuid:order_id>/', views.order_detail, name='order_detail'),
     path('<uuid:order_id>/pay/', views.mock_pay_order, name='mock_pay_order'),
     path('<uuid:order_id>/cancel/', views.cancel_order, name='cancel_order'),

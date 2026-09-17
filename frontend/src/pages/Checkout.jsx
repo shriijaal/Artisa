@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import Header from '../components/Header';
 import LoadingSpinner from '../components/LoadingSpinner';
+import CustomSelect from '../components/CustomSelect';
 import { formatPrice } from '../utils/formatPrice';
 import { useToast } from '../components/Toast';
 import authFetch from '../utils/authFetch';
@@ -19,7 +20,7 @@ const Checkout = () => {
   
   // New address form state
   const [recipientName, setRecipientName] = useState('');
-  const [province, setProvince] = useState('');
+  const [province, setProvince] = useState('Bagmati');
   const [district, setDistrict] = useState('');
   const [city, setCity] = useState('');
   const [street, setStreet] = useState('');
@@ -31,6 +32,7 @@ const Checkout = () => {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [shippingCost, setShippingCost] = useState(null);
   const buyNowRun = useRef(false);
 
   useEffect(() => {
@@ -102,10 +104,13 @@ const Checkout = () => {
       const defaultAddr = addrData.find(a => a.is_default);
       if (defaultAddr) {
         setSelectedAddressId(defaultAddr.id);
+        setProvince(defaultAddr.province || '');
       } else if (addrData.length > 0) {
         setSelectedAddressId(addrData[0].id);
+        setProvince(addrData[0].province || '');
       } else {
         setUseNewAddress(true);
+        setProvince('Bagmati');
       }
 
     } catch (err) {
@@ -122,6 +127,67 @@ const Checkout = () => {
   const hasPhysicalItems = () => {
     return cartItems.some(item => item.artwork.type === 'physical');
   };
+
+  const fetchShippingCost = async (destProvince) => {
+    if (!hasPhysicalItems() || !destProvince) {
+      setShippingCost(0);
+      return;
+    }
+    try {
+      const res = await authFetch('/api/orders/calculate-shipping/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ province: destProvince }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setShippingCost(Number(data.shipping_cost));
+      } else {
+        setShippingCost(200);
+      }
+    } catch {
+      setShippingCost(200);
+    }
+  };
+
+  const handleRemoveAddress = async (addressId) => {
+    try {
+      const res = await authFetch(`/api/orders/shipping-addresses/${addressId}/`, { method: 'DELETE' });
+      if (res.ok) {
+        const updated = addresses.filter(a => a.id !== addressId);
+        setAddresses(updated);
+        if (selectedAddressId === addressId) {
+          if (updated.length > 0) {
+            setSelectedAddressId(updated[0].id);
+            setProvince(updated[0].province || 'Bagmati');
+          } else {
+            setSelectedAddressId('');
+            setUseNewAddress(true);
+            setProvince('Bagmati');
+          }
+        }
+      }
+    } catch {}
+  };
+
+  useEffect(() => {
+    if (!hasPhysicalItems()) {
+      setShippingCost(0);
+      return;
+    }
+    if (useNewAddress || addresses.length === 0) {
+      if (province) {
+        fetchShippingCost(province);
+      } else {
+        setShippingCost(null);
+      }
+    } else if (selectedAddressId) {
+      const addr = addresses.find(a => a.id === selectedAddressId);
+      if (addr?.province) {
+        fetchShippingCost(addr.province);
+      }
+    }
+  }, [selectedAddressId, useNewAddress, province, addresses, cartItems]);
 
   const handlePlaceOrder = async (e) => {
     e.preventDefault();
@@ -191,8 +257,9 @@ const Checkout = () => {
   }
 
   const subtotal = calculateSubtotal();
-  const shipping = hasPhysicalItems() ? 150 : 0;
+  const shipping = shippingCost ?? (hasPhysicalItems() ? 200 : 0);
   const total = subtotal + shipping;
+  const addressPicked = !hasPhysicalItems() || selectedAddressId || (useNewAddress && province);
 
   return (
     <div className="min-h-screen bg-[#faf9f7]">
@@ -248,14 +315,23 @@ const Checkout = () => {
                               <span className="font-semibold text-stone-900">
                                 {addr.recipient_name || 'Recipient'} — {addr.street}, {addr.city}
                               </span>
-                              <input
-                                type="radio"
-                                name="selectedAddress"
-                                value={addr.id}
-                                checked={selectedAddressId === addr.id}
-                                onChange={(e) => setSelectedAddressId(e.target.value)}
-                                className="text-stone-900 focus:ring-stone-900"
-                              />
+                              <div className="flex items-center gap-2">
+                                <button
+                                  type="button"
+                                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleRemoveAddress(addr.id); }}
+                                  className="rounded-md border border-stone-200 bg-white px-2 py-1 text-[11px] font-medium text-stone-500 hover:bg-red-50 hover:text-red-700 hover:border-red-200 transition-colors"
+                                >
+                                  Remove
+                                </button>
+                                <input
+                                  type="radio"
+                                  name="selectedAddress"
+                                  value={addr.id}
+                                  checked={selectedAddressId === addr.id}
+                                  onChange={(e) => setSelectedAddressId(e.target.value)}
+                                  className="text-stone-900 focus:ring-stone-900"
+                                />
+                              </div>
                             </div>
                             <span className="text-sm text-stone-600 mt-1">
                               {addr.district} District, {addr.province} Province
@@ -282,7 +358,7 @@ const Checkout = () => {
                       type="radio"
                       name="addressMode"
                       checked={useNewAddress}
-                      onChange={() => setUseNewAddress(true)}
+                      onChange={() => { setUseNewAddress(true); if (!province) setProvince('Bagmati'); }}
                       className="text-stone-900 focus:ring-stone-900"
                     />
                     <span className="text-sm font-medium text-stone-700">Ship to a New Address</span>
@@ -304,12 +380,19 @@ const Checkout = () => {
                     <div className="grid gap-4 sm:grid-cols-2">
                       <div>
                         <label className="block text-xs font-semibold text-stone-600 uppercase mb-1">Province *</label>
-                        <input
-                          type="text"
+                        <CustomSelect
                           value={province}
-                          onChange={e => setProvince(e.target.value)}
-                          placeholder="e.g. Bagmati Province"
-                          className="w-full rounded-lg border border-stone-200 bg-white px-3 py-2 text-sm focus:border-stone-400 focus:outline-none focus:ring-1 focus:ring-stone-400"
+                          onChange={setProvince}
+                          placeholder="Select province"
+                          options={[
+                            { value: 'Koshi', label: 'Koshi' },
+                            { value: 'Madhesh', label: 'Madhesh' },
+                            { value: 'Bagmati', label: 'Bagmati' },
+                            { value: 'Gandaki', label: 'Gandaki' },
+                            { value: 'Lumbini', label: 'Lumbini' },
+                            { value: 'Karnali', label: 'Karnali' },
+                            { value: 'Sudurpashchim', label: 'Sudurpashchim' },
+                          ]}
                         />
                       </div>
                       <div>
@@ -415,23 +498,36 @@ const Checkout = () => {
             <div className="rounded-lg border border-stone-200 bg-white p-6 sticky top-8">
               <h3 className="font-semibold text-stone-900 mb-4">Summary</h3>
               <div className="space-y-3">
-                <div className="flex justify-between text-stone-600">
-                  <span>Subtotal</span>
-                  <span>NPR {formatPrice(subtotal)}</span>
-                </div>
-                <div className="flex justify-between text-stone-600">
-                  <span>Shipping</span>
-                  <span>{shipping > 0 ? `NPR ${formatPrice(shipping)}` : 'Free'}</span>
-                </div>
-                <div className="border-t border-stone-200 pt-3 flex justify-between font-semibold text-stone-900">
-                  <span>Total</span>
-                  <span>NPR {formatPrice(total)}</span>
-                </div>
+                {addressPicked && (
+                  <>
+                    <div className="flex justify-between text-stone-600">
+                      <span>Subtotal</span>
+                      <span>NPR {formatPrice(subtotal)}</span>
+                    </div>
+                    <div className="flex justify-between text-stone-600">
+                      <span>Shipping</span>
+                      <span>
+                        {shippingCost === null
+                          ? 'Calculating...'
+                          : shipping > 0
+                            ? `NPR ${formatPrice(shipping)}`
+                            : 'Free'}
+                      </span>
+                    </div>
+                    <div className="border-t border-stone-200 pt-3 flex justify-between font-semibold text-stone-900">
+                      <span>Total</span>
+                      <span>NPR {formatPrice(total)}</span>
+                    </div>
+                  </>
+                )}
+                {!addressPicked && hasPhysicalItems() && (
+                  <p className="text-xs text-stone-400">Select a shipping address to see total</p>
+                )}
               </div>
 
               <button
                 onClick={handlePlaceOrder}
-                disabled={submitting}
+                disabled={submitting || !addressPicked}
                 className="mt-6 w-full rounded-lg bg-[#000] px-4 py-3 text-sm font-semibold text-white hover:bg-stone-800 transition-colors disabled:opacity-50"
               >
                 {submitting ? 'Processing...' : 'Place Order →'}

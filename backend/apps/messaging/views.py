@@ -32,6 +32,7 @@ class MessageListCreateView(APIView):
     def get(self, request):
         commission_id = request.query_params.get('commission_id')
         artwork_id = request.query_params.get('artwork_id')
+        user_id = request.query_params.get('user_id')
 
         if commission_id:
             commission, error = _get_participant_commission(request.user, commission_id)
@@ -51,6 +52,12 @@ class MessageListCreateView(APIView):
                 return Response({'error': 'You do not have access to this conversation.'}, status=status.HTTP_403_FORBIDDEN)
 
             messages = Message.objects.filter(artwork_id=artwork_id).select_related('sender', 'receiver')
+        elif user_id:
+            # Return all messages between current user and specified user (commission + inquiry)
+            messages = Message.objects.filter(
+                Q(sender=request.user, receiver_id=user_id) |
+                Q(sender_id=user_id, receiver=request.user)
+            ).select_related('sender', 'receiver', 'artwork')
         else:
             # Return all messages for the user (inquiries + commission messages)
             messages = Message.objects.filter(
@@ -73,6 +80,38 @@ class MessageListCreateView(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         data = serializer.validated_data
+        body = data.get('body', '').strip()
+        attachment = data.get('attachment')
+
+        # Determine message type
+        if attachment:
+            content_type = getattr(attachment, 'content_type', '')
+            if content_type.startswith('image/'):
+                message_type = 'image'
+            else:
+                message_type = 'file'
+        else:
+            message_type = 'text'
+
+        # Direct message via receiver_id (for merged conversations)
+        if data.get('receiver_id') and not data.get('artwork_id') and not data.get('commission_id'):
+            from apps.users.models import User
+            try:
+                receiver = User.objects.get(id=data['receiver_id'])
+            except User.DoesNotExist:
+                return Response({'error': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+            message = Message.objects.create(
+                sender=request.user,
+                receiver=receiver,
+                body=body,
+                message_type=message_type,
+                attachment=attachment,
+            )
+            return Response(
+                MessageSerializer(message, context={'request': request}).data,
+                status=status.HTTP_201_CREATED,
+            )
 
         # Artwork inquiry
         if data.get('artwork_id'):
@@ -82,7 +121,6 @@ class MessageListCreateView(APIView):
                 return Response({'error': 'Artwork not found.'}, status=status.HTTP_404_NOT_FOUND)
 
             if artwork.artist_id == request.user.id:
-                # Artist replying to an existing inquiry thread — find the buyer
                 last_msg = (
                     Message.objects
                     .filter(artwork=artwork)
@@ -100,14 +138,16 @@ class MessageListCreateView(APIView):
                 sender=request.user,
                 receiver=receiver,
                 artwork=artwork,
-                body=data['body'],
+                body=body,
+                message_type=message_type,
+                attachment=attachment,
             )
             return Response(
                 MessageSerializer(message, context={'request': request}).data,
                 status=status.HTTP_201_CREATED,
             )
 
-        # Commission message (existing)
+        # Commission message
         commission, error = _get_participant_commission(request.user, data['commission_id'])
         if error:
             return error
@@ -123,12 +163,66 @@ class MessageListCreateView(APIView):
             sender=request.user,
             receiver=receiver,
             commission=commission,
-            body=data['body'],
+            body=body,
+            message_type=message_type,
+            attachment=attachment,
         )
+
+        # Attach reply_to if provided
+        reply_to_id = data.get('reply_to_id')
+        if reply_to_id:
+            try:
+                reply_msg = Message.objects.get(id=reply_to_id)
+                message.reply_to = reply_msg
+                message.save(update_fields=['reply_to'])
+            except Message.DoesNotExist:
+                pass
+
         return Response(
             MessageSerializer(message, context={'request': request}).data,
             status=status.HTTP_201_CREATED,
         )
+
+    def put(self, request):
+        """Edit a message (only own messages)."""
+        message_id = request.data.get('id') or request.query_params.get('message_id')
+        if not message_id:
+            return Response({'error': 'message_id is required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            message = Message.objects.get(id=message_id)
+        except Message.DoesNotExist:
+            return Response({'error': 'Message not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        if message.sender_id != request.user.id:
+            return Response({'error': 'You can only edit your own messages.'}, status=status.HTTP_403_FORBIDDEN)
+
+        new_body = request.data.get('body', '').strip()
+        if not new_body:
+            return Response({'error': 'Message body cannot be empty.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        message.body = new_body
+        message.edited_at = timezone.now()
+        message.save(update_fields=['body', 'edited_at'])
+
+        return Response(MessageSerializer(message, context={'request': request}).data)
+
+    def delete(self, request):
+        """Delete a message (only own messages)."""
+        message_id = request.query_params.get('message_id')
+        if not message_id:
+            return Response({'error': 'message_id is required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            message = Message.objects.get(id=message_id)
+        except Message.DoesNotExist:
+            return Response({'error': 'Message not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        if message.sender_id != request.user.id:
+            return Response({'error': 'You can only delete your own messages.'}, status=status.HTTP_403_FORBIDDEN)
+
+        message.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class UnreadCountView(APIView):
@@ -183,6 +277,18 @@ class UnreadCountView(APIView):
             'unread_commission_ids': [str(cid) for cid in commission_threads],
             'unread_artwork_ids': [str(aid) for aid in artwork_threads],
         })
+
+
+class MarkAllReadView(APIView):
+    """POST /api/messages/mark-all-read/ — mark all unread messages as read."""
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        updated = Message.objects.filter(
+            receiver=request.user,
+            read_at__isnull=True,
+        ).update(read_at=timezone.now())
+        return Response({'marked_read': updated})
 
 
 class InquiryListView(APIView):
@@ -241,3 +347,56 @@ class InquiryListView(APIView):
             })
 
         return Response(result)
+
+
+class MessageReactionView(APIView):
+    """POST/DELETE /api/messages/<uuid>/react/ — toggle reaction on a message."""
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, message_id):
+        from apps.messaging.models import MessageReaction
+
+        try:
+            message = Message.objects.get(id=message_id)
+        except Message.DoesNotExist:
+            return Response({'error': 'Message not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        emoji = request.data.get('emoji', '').strip()
+        if not emoji:
+            return Response({'error': 'Emoji is required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        reaction, created = MessageReaction.objects.get_or_create(
+            message=message,
+            user=request.user,
+            defaults={'emoji': emoji},
+        )
+
+        if not created:
+            if reaction.emoji == emoji:
+                # Same emoji — toggle off (remove)
+                reaction.delete()
+                return Response({'action': 'removed', 'emoji': emoji})
+            else:
+                # Different emoji — update
+                reaction.emoji = emoji
+                reaction.save(update_fields=['emoji'])
+                return Response({'action': 'updated', 'emoji': emoji})
+
+        return Response({'action': 'added', 'emoji': emoji}, status=status.HTTP_201_CREATED)
+
+    def delete(self, request, message_id):
+        from apps.messaging.models import MessageReaction
+
+        emoji = request.query_params.get('emoji', '').strip()
+        if not emoji:
+            return Response({'error': 'Emoji query param is required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        deleted, _ = MessageReaction.objects.filter(
+            message_id=message_id,
+            user=request.user,
+            emoji=emoji,
+        ).delete()
+
+        if deleted:
+            return Response({'action': 'removed', 'emoji': emoji})
+        return Response({'error': 'Reaction not found.'}, status=status.HTTP_404_NOT_FOUND)

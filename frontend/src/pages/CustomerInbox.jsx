@@ -2,36 +2,11 @@ import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useSidebar } from '../contexts/SidebarContext';
-import Header from '../components/Header';
-import ArtistSideNav from '../components/ArtistSideNav';
 import authFetch from '../utils/authFetch';
-import LoadingSpinner from '../components/LoadingSpinner';
 import CommissionChat from '../components/CommissionChat';
+import LoadingSpinner from '../components/LoadingSpinner';
 
-const TIME_AGO = (iso) => {
-  if (!iso) return '';
-  const diff = Date.now() - new Date(iso).getTime();
-  const mins = Math.floor(diff / 60000);
-  if (mins < 1) return 'now';
-  if (mins < 60) return `${mins}m`;
-  const hours = Math.floor(mins / 60);
-  if (hours < 24) return `${hours}h`;
-  const days = Math.floor(hours / 24);
-  if (days === 1) return '1d';
-  return `${days}d`;
-};
-
-const STATUS_COLORS = {
-  pending: 'bg-yellow-400/10 text-yellow-700 border border-yellow-300/30 backdrop-blur-sm',
-  accepted: 'bg-blue-100 text-blue-700',
-  in_progress: 'bg-purple-100 text-purple-700',
-  delivered: 'bg-orange-100 text-orange-700',
-  completed: 'bg-green-100 text-green-700',
-  cancelled: 'bg-stone-100 text-stone-600',
-  declined: 'bg-red-100 text-red-600',
-};
-
-const ArtistInbox = () => {
+const CustomerInbox = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { compact } = useSidebar();
@@ -43,9 +18,6 @@ const ArtistInbox = () => {
 
   useEffect(() => {
     fetchAll();
-    if ('Notification' in window && Notification.permission === 'default') {
-      Notification.requestPermission();
-    }
     const interval = setInterval(() => {
       if (document.visibilityState === 'visible') fetchAll();
     }, 10000);
@@ -62,7 +34,7 @@ const ArtistInbox = () => {
   const fetchAll = async () => {
     try {
       const [resCommissions, resInquiries] = await Promise.all([
-        authFetch('/api/commissions/inbox/'),
+        authFetch('/api/commissions/mine/'),
         authFetch('/api/messages/inquiries/'),
       ]);
       if (resCommissions.ok) setCommissions(await resCommissions.json());
@@ -87,12 +59,12 @@ const ArtistInbox = () => {
     const byPerson = {};
 
     for (const c of commissions) {
-      const party = c.customer;
+      const party = c.artist;
       const partyId = party?.id;
       if (!partyId) continue;
       const name = party?.first_name && party?.last_name
         ? `${party.first_name} ${party.last_name}`
-        : party?.username || 'Customer';
+        : party?.username || 'Artist';
       if (!byPerson[partyId]) {
         byPerson[partyId] = {
           partyId,
@@ -165,7 +137,7 @@ const ArtistInbox = () => {
         type: hasCommission ? 'commission' : 'inquiry',
         hasBoth: hasCommission && hasInquiry,
         title: hasCommission
-          ? (commission.title || `Commission from ${person.name}`)
+          ? (commission.title || `Commission with ${person.name}`)
           : (inquiry?.artwork?.title || 'Artwork'),
         subtitle,
         name: person.name,
@@ -195,34 +167,26 @@ const ArtistInbox = () => {
     );
   }, [commissions, inquiries, user, search]);
 
-  const totalUnread = conversations.filter((c) => c.unread).length;
-
-  if (loading) return <LoadingSpinner label="Loading inbox..." />;
+  if (loading) return <LoadingSpinner label="Loading messages..." />;
 
   return (
-    <div className="min-h-screen bg-[#faf9f7] flex flex-col">
-      <Header />
-      <div className="flex flex-1 overflow-hidden" style={{ height: 'calc(100vh - 57px)' }}>
-        <ArtistSideNav />
-
-        <main className={`${compact ? 'md:ml-16' : 'md:ml-60 xl:ml-72'} flex-1 flex overflow-hidden`}>
-          {/* ── Left: Conversation List ── */}
-          <div
-            className={`flex flex-col border-r border-stone-200 bg-white ${
-              selected ? 'hidden md:flex' : 'flex'
-            } w-full md:w-[340px] lg:w-[380px] flex-shrink-0`}
-          >
+    <div className="h-[calc(100vh-4rem)] flex bg-white">
+      {/* Sidebar */}
+      <div className={`${compact ? 'w-16' : 'w-80'} flex-shrink-0 border-r border-stone-200 flex flex-col transition-all duration-300`}>
+        {!compact && (
+          <>
             {/* Header */}
-            <div className="px-5 pt-5 pb-3">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2.5">
-                  <h1 className="text-lg font-bold text-stone-900">Messages</h1>
-                  {totalUnread > 0 && (
-                    <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-bold text-amber-700">
-                      {totalUnread}
-                    </span>
-                  )}
-                </div>
+            <div className="px-5 py-4 border-b border-stone-100">
+              <div className="flex items-center justify-between">
+                <h1 className="text-lg font-bold text-stone-900">Messages</h1>
+                {conversations.some(c => c.unreadCount > 0) && (
+                  <button
+                    onClick={handleMarkAllRead}
+                    className="text-xs text-amber-700 bg-amber-50 hover:bg-amber-100 rounded-lg px-2.5 py-1 font-medium transition-colors"
+                  >
+                    Mark all read
+                  </button>
+                )}
               </div>
               {/* Search */}
               <div className="relative">
@@ -237,16 +201,6 @@ const ArtistInbox = () => {
                   className="w-full bg-stone-100/70 border border-stone-200/50 rounded-lg py-2 pl-9 pr-4 text-sm text-stone-700 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-black/10 transition-all"
                 />
               </div>
-
-              {/* Mark All Read */}
-              {conversations.some(c => c.unreadCount > 0) && (
-                <button
-                  onClick={handleMarkAllRead}
-                  className="w-full text-xs text-amber-700 bg-amber-50 hover:bg-amber-100 rounded-lg py-1.5 font-medium transition-colors"
-                >
-                  Mark all as read
-                </button>
-              )}
             </div>
 
             {/* Conversation List */}
@@ -259,7 +213,7 @@ const ArtistInbox = () => {
                     </svg>
                   </div>
                   <p className="text-sm font-semibold text-stone-700">No conversations yet</p>
-                  <p className="text-xs text-stone-500 mt-1">Messages and inquiries will appear here</p>
+                  <p className="text-xs text-stone-500 mt-1">Start a commission or inquiry to chat</p>
                 </div>
               ) : (
                 conversations.map((conv) => {
@@ -299,28 +253,30 @@ const ArtistInbox = () => {
 
                       {/* Content */}
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between gap-2 mb-0.5">
-                          <span className={`text-sm font-semibold truncate ${conv.unread ? 'text-stone-900' : 'text-stone-700'}`}>
+                        <div className="flex items-center justify-between">
+                          <span className={`text-sm font-semibold truncate ${conv.unreadCount > 0 ? 'text-stone-900' : 'text-stone-700'}`}>
                             {conv.name}
                           </span>
-                          <span className="text-[11px] text-stone-400 flex-shrink-0">
-                            {TIME_AGO(conv.lastMessageAt)}
-                          </span>
+                          {conv.lastMessageAt && (
+                            <span className="text-[10px] text-stone-400 flex-shrink-0 ml-2">
+                              {new Date(conv.lastMessageAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                            </span>
+                          )}
                         </div>
-                        <div className="flex items-center gap-1.5">
-                          {conv.subtitle && (
-                            <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded ${STATUS_COLORS[conv.subtitle] || 'bg-stone-100 text-stone-600'}`}>
+                        <div className="flex items-center gap-1.5 mt-0.5">
+                          {conv.type === 'commission' && (
+                            <span className="text-[10px] font-medium text-stone-500 bg-stone-100 rounded px-1.5 py-0.5 flex-shrink-0 capitalize">
                               {conv.subtitle}
                             </span>
                           )}
-                          {conv.hasBoth && (
-                            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-stone-100 text-stone-500">
+                          {conv.type === 'inquiry' && (
+                            <span className="text-[10px] font-medium text-blue-600 bg-blue-50 rounded px-1.5 py-0.5 flex-shrink-0">
                               inquiry
                             </span>
                           )}
-                          <p className={`text-xs truncate ${conv.unread ? 'text-stone-700 font-medium' : 'text-stone-500'}`}>
+                          <span className={`text-xs truncate ${conv.unreadCount > 0 ? 'text-stone-700 font-medium' : 'text-stone-400'}`}>
                             {conv.lastMessage || conv.title}
-                          </p>
+                          </span>
                         </div>
                       </div>
                     </button>
@@ -328,79 +284,35 @@ const ArtistInbox = () => {
                 })
               )}
             </div>
-          </div>
+          </>
+        )}
+      </div>
 
-          {/* ── Right: Chat Panel ── */}
-          <div className={`flex-1 flex flex-col bg-[#faf9f7] ${selected ? 'flex' : 'hidden md:flex'}`}>
-            {selected ? (
-              <>
-                {/* Mobile back button */}
-                <div className="md:hidden flex items-center gap-2 px-4 py-3 border-b border-stone-200 bg-white">
-                  <button
-                    onClick={() => setSelected(null)}
-                    className="p-1 -ml-1 text-stone-600 hover:text-stone-900 transition-colors"
-                  >
-                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-                    </svg>
-                  </button>
-                  <span className="text-sm font-semibold text-stone-900 truncate">{selected.name}</span>
-                </div>
-
-                {/* Chat */}
-                <div className="flex-1 overflow-hidden flex flex-col">
-                  {selected.commissionData && (
-                    <button
-                      onClick={() => navigate(`/commissions/${selected.commissionData.id}`)}
-                      className="flex items-center justify-between px-4 py-2.5 bg-stone-50 border-b border-stone-200 hover:bg-stone-100 transition-colors text-left"
-                    >
-                      <div className="flex items-center gap-2.5 min-w-0">
-                        <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded ${STATUS_COLORS[selected.commissionData.status] || 'bg-stone-100 text-stone-600'}`}>
-                          {selected.commissionData.status?.replace(/_/g, ' ')}
-                        </span>
-                        <span className="text-sm font-medium text-stone-700 truncate">
-                          {selected.commissionData.title || 'Commission'}
-                        </span>
-                      </div>
-                      <svg className="h-4 w-4 text-stone-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                      </svg>
-                    </button>
-                  )}
-                  <div className="flex-1 overflow-hidden">
-                    {selected.artworkId ? (
-                      <CommissionChat
-                        artworkId={selected.artworkId}
-                        artist={selected.party}
-                        embedded
-                      />
-                    ) : selected.commissionData ? (
-                      <CommissionChat
-                        commission={selected.commissionData}
-                        embedded
-                      />
-                    ) : null}
-                  </div>
-                </div>
-              </>
-            ) : (
-              <div className="hidden md:flex flex-col items-center justify-center h-full text-center px-8">
-                <div className="h-16 w-16 rounded-full bg-stone-100 flex items-center justify-center text-stone-300 mb-4">
-                  <svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                  </svg>
-                </div>
-                <h3 className="text-base font-semibold text-stone-700 mb-1">Select a conversation</h3>
-                <p className="text-sm text-stone-500 max-w-xs">
-                  Choose a conversation from the left to start messaging
-                </p>
-              </div>
-            )}
+      {/* Chat Panel */}
+      <div className="flex-1 flex flex-col min-w-0">
+        {selected ? (
+          <CommissionChat
+            commission={selected.commissionData}
+            artworkId={selected.artworkId}
+            artist={selected.party}
+            embedded
+          />
+        ) : (
+          <div className="flex-1 flex flex-col items-center justify-center text-center px-4 bg-stone-50/40">
+            <div className="h-16 w-16 rounded-full bg-stone-100 flex items-center justify-center text-stone-300 mb-4">
+              <svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-semibold text-stone-800">Your Messages</h3>
+            <p className="text-sm text-stone-500 mt-1 max-w-sm">
+              Select a conversation to start chatting with an artist
+            </p>
           </div>
-        </main>
+        )}
       </div>
     </div>
   );
 };
 
-export default ArtistInbox;
+export default CustomerInbox;

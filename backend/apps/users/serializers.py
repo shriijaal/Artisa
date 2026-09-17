@@ -105,14 +105,14 @@ class ArtistProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ArtistProfile
-        fields = ('id', 'user', 'bio', 'cover_image', 'social_links', 'status', 'verified_badge', 'specialties', 'created_at', 'commission_available', 'commission_starting_price')
+        fields = ('id', 'user', 'bio', 'cover_image', 'social_links', 'status', 'verified_badge', 'specialties', 'created_at', 'commission_available', 'commission_starting_price', 'province')
         read_only_fields = ('id', 'user', 'status', 'verified_badge', 'created_at')
 
 
 class ArtistProfileUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = ArtistProfile
-        fields = ('bio', 'cover_image', 'social_links', 'specialties')
+        fields = ('bio', 'cover_image', 'social_links', 'specialties', 'province')
 
     def validate_cover_image(self, value):
         if value:

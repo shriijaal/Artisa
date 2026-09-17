@@ -7,6 +7,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from apps.commissions.models import Commission, CommissionDeliverable, CommissionReferenceImage
+from apps.commissions.utils import auto_cancel_stale_pending
 from apps.commissions.serializers import (
     CommissionCreateSerializer,
     CommissionDetailSerializer,
@@ -80,6 +81,7 @@ class MyCommissionsView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
+        auto_cancel_stale_pending()
         commissions = Commission.objects.filter(
             customer=request.user
         ).select_related('artist', 'artist__artist_profile')
@@ -96,6 +98,7 @@ class CommissionInboxView(APIView):
                 {'error': 'Artist profile required'},
                 status=status.HTTP_403_FORBIDDEN,
             )
+        auto_cancel_stale_pending()
         commissions = Commission.objects.filter(
             artist=request.user
         ).select_related('customer')
@@ -107,6 +110,7 @@ class CommissionDetailView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, commission_id):
+        auto_cancel_stale_pending()
         try:
             commission = Commission.objects.select_related(
                 'artist', 'customer'
@@ -125,6 +129,7 @@ class CommissionAcceptView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, commission_id):
+        auto_cancel_stale_pending()
         try:
             commission = Commission.objects.get(id=commission_id)
         except Commission.DoesNotExist:
