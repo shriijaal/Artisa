@@ -15,6 +15,7 @@ from .serializers import (
     AdminApplicationSerializer,
     AdminArtworkSerializer,
     AdminCategorySerializer,
+    AdminCreateVendorSerializer,
     AdminOrderSerializer,
     AdminOrderDetailSerializer,
     AdminUserSerializer,
@@ -339,3 +340,36 @@ def admin_order_update(request, order_id):
 
     order.save()
     return Response(AdminOrderDetailSerializer(order).data)
+
+
+# ─── Vendor Management ────────────────────────────────────────────────────
+
+from django.contrib.auth.hashers import make_password
+from .serializers import AdminCreateVendorSerializer
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated, IsAdmin])
+def admin_create_vendor(request):
+    serializer = AdminCreateVendorSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+
+    user = User.objects.create(
+        username=serializer.validated_data['username'],
+        email=serializer.validated_data['email'],
+        password=make_password(serializer.validated_data['password']),
+        first_name=serializer.validated_data.get('first_name', ''),
+        last_name=serializer.validated_data.get('last_name', ''),
+        role=User.Role.CUSTOMER,
+    )
+
+    ArtistProfile.objects.create(
+        user=user,
+        status=ArtistProfile.Status.APPROVED,
+        verified_badge=True,
+    )
+
+    return Response(
+        AdminUserSerializer(user).data,
+        status=status.HTTP_201_CREATED,
+    )

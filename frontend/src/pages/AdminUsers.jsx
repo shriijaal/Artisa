@@ -15,6 +15,10 @@ const AdminUsers = () => {
   const [roleFilter, setRoleFilter] = useState('');
   const [confirmModal, setConfirmModal] = useState(null);
   const [processing, setProcessing] = useState(false);
+  const [showAddVendor, setShowAddVendor] = useState(false);
+  const [vendorForm, setVendorForm] = useState({ username: '', email: '', password: '', first_name: '', last_name: '' });
+  const [vendorError, setVendorError] = useState('');
+  const [vendorSuccess, setVendorSuccess] = useState(false);
 
   const fetchUsers = useCallback(() => {
     setLoading(true);
@@ -48,6 +52,33 @@ const AdminUsers = () => {
     setConfirmModal(null);
   };
 
+  const handleCreateVendor = async (e) => {
+    e.preventDefault();
+    setVendorError('');
+    setProcessing(true);
+    try {
+      const res = await authFetch('/api/admin/vendors/create/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(vendorForm),
+      });
+      if (res.ok) {
+        const newUser = await res.json();
+        setUsers((prev) => [newUser, ...prev]);
+        setVendorSuccess(true);
+        setVendorForm({ username: '', email: '', password: '', first_name: '', last_name: '' });
+        setTimeout(() => { setShowAddVendor(false); setVendorSuccess(false); }, 1500);
+      } else {
+        const data = await res.json();
+        const firstError = Object.values(data).flat()[0];
+        setVendorError(firstError || 'Failed to create vendor.');
+      }
+    } catch {
+      setVendorError('Something went wrong.');
+    }
+    setProcessing(false);
+  };
+
   const getRole = (user) => {
     if (user.role === 'admin') return roleConfig.admin;
     if (user.is_artist) return roleConfig.artist;
@@ -68,6 +99,12 @@ const AdminUsers = () => {
             {loading ? 'Loading...' : `${users.length} user${users.length !== 1 ? 's' : ''} found`}
           </p>
         </div>
+        <button
+          onClick={() => setShowAddVendor(true)}
+          className="rounded-lg bg-stone-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-stone-800 transition-colors"
+        >
+          Add Vendor
+        </button>
       </div>
 
       {/* Filters */}
@@ -235,6 +272,71 @@ const AdminUsers = () => {
                 {processing ? 'Processing...' : (confirmModal.isActive ? 'Deactivate' : 'Activate')}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add Vendor Modal */}
+      {showAddVendor && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4" onClick={() => !processing && setShowAddVendor(false)}>
+          <div className="bg-white rounded-lg max-w-md w-full p-6" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-full bg-[#fc8d6b]/10 flex items-center justify-center">
+                <svg className="h-5 w-5 text-[#9c4327]" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zM4 19.235v-.11a6.375 6.375 0 0112.75 0v.109A12.318 12.318 0 0110.374 21c-2.331 0-4.512-.645-6.374-1.766z" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-stone-900">Add Vendor</h3>
+                <p className="text-xs text-stone-500">Create an artist/vendor account directly</p>
+              </div>
+            </div>
+
+            {vendorSuccess ? (
+              <div className="flex flex-col items-center py-6">
+                <div className="w-12 h-12 rounded-full bg-emerald-50 flex items-center justify-center mb-3">
+                  <svg className="h-6 w-6 text-emerald-600" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                  </svg>
+                </div>
+                <p className="text-sm font-medium text-stone-900">Vendor created successfully</p>
+              </div>
+            ) : (
+              <form onSubmit={handleCreateVendor} className="space-y-4">
+                {vendorError && (
+                  <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-2.5 text-sm text-red-700">{vendorError}</div>
+                )}
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-semibold text-stone-600 uppercase mb-1">First Name</label>
+                    <input type="text" value={vendorForm.first_name} onChange={e => setVendorForm(f => ({ ...f, first_name: e.target.value }))} className="w-full rounded-lg border border-stone-200 bg-white px-3 py-2 text-sm focus:border-stone-400 focus:outline-none focus:ring-1 focus:ring-stone-400" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-stone-600 uppercase mb-1">Last Name</label>
+                    <input type="text" value={vendorForm.last_name} onChange={e => setVendorForm(f => ({ ...f, last_name: e.target.value }))} className="w-full rounded-lg border border-stone-200 bg-white px-3 py-2 text-sm focus:border-stone-400 focus:outline-none focus:ring-1 focus:ring-stone-400" />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-stone-600 uppercase mb-1">Username *</label>
+                  <input type="text" required value={vendorForm.username} onChange={e => setVendorForm(f => ({ ...f, username: e.target.value }))} className="w-full rounded-lg border border-stone-200 bg-white px-3 py-2 text-sm focus:border-stone-400 focus:outline-none focus:ring-1 focus:ring-stone-400" />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-stone-600 uppercase mb-1">Email *</label>
+                  <input type="email" required value={vendorForm.email} onChange={e => setVendorForm(f => ({ ...f, email: e.target.value }))} className="w-full rounded-lg border border-stone-200 bg-white px-3 py-2 text-sm focus:border-stone-400 focus:outline-none focus:ring-1 focus:ring-stone-400" />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-stone-600 uppercase mb-1">Password *</label>
+                  <input type="password" required minLength={6} value={vendorForm.password} onChange={e => setVendorForm(f => ({ ...f, password: e.target.value }))} className="w-full rounded-lg border border-stone-200 bg-white px-3 py-2 text-sm focus:border-stone-400 focus:outline-none focus:ring-1 focus:ring-stone-400" />
+                  <p className="text-[11px] text-stone-400 mt-1">Minimum 6 characters</p>
+                </div>
+                <div className="flex justify-end gap-3 pt-2">
+                  <button type="button" onClick={() => setShowAddVendor(false)} disabled={processing} className="px-4 py-2 text-sm font-medium text-stone-600 hover:text-stone-900 rounded-lg hover:bg-stone-100 transition disabled:opacity-50">Cancel</button>
+                  <button type="submit" disabled={processing} className="px-4 py-2 text-sm font-medium text-white bg-stone-900 rounded-lg hover:bg-stone-800 transition disabled:opacity-50">
+                    {processing ? 'Creating...' : 'Create Vendor'}
+                  </button>
+                </div>
+              </form>
+            )}
           </div>
         </div>
       )}

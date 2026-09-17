@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from django.contrib.auth import get_user_model
 from apps.users.models import User, ArtistProfile, ArtistApplication
 from apps.artworks.models import Artwork, Category
 from apps.orders.models import Order, OrderItem, OrderShipment, ShippingAddress
@@ -120,6 +121,26 @@ class AdminOrderItemSerializer(serializers.ModelSerializer):
             }
         except OrderShipment.DoesNotExist:
             return None
+
+
+class AdminCreateVendorSerializer(serializers.Serializer):
+    username = serializers.CharField(max_length=150)
+    email = serializers.EmailField()
+    password = serializers.CharField(write_only=True, min_length=6)
+    first_name = serializers.CharField(max_length=150, required=False, default='')
+    last_name = serializers.CharField(max_length=150, required=False, default='')
+
+    def validate_username(self, value):
+        User = get_user_model()
+        if User.objects.filter(username=value).exists():
+            raise serializers.ValidationError('Username already exists.')
+        return value
+
+    def validate_email(self, value):
+        User = get_user_model()
+        if User.objects.filter(email=value).exists():
+            raise serializers.ValidationError('Email already exists.')
+        return value
 
 
 class AdminOrderDetailSerializer(serializers.ModelSerializer):
