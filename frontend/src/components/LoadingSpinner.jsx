@@ -1,21 +1,18 @@
+import { Arc } from 'loading-dev';
+
 /**
  * LoadingSpinner - Replaces plain "Loading..." text across all pages.
  * Usage: <LoadingSpinner /> for full-page or <LoadingSpinner size="sm" /> for inline.
+ * Spinner: loading.dev Arc in brand terracotta; reduced-motion handled by the library.
  */
 const LoadingSpinner = ({ size = 'md', fullPage = true, label = 'Loading...' }) => {
-  const sizeClasses = {
-    sm: 'h-5 w-5 border-2',
-    md: 'h-10 w-10 border-[3px]',
-    lg: 'h-14 w-14 border-4',
-  };
+  const sizePx = { sm: 18, md: 40, lg: 56 }[size] ?? 40;
 
   const spinner = (
     <div className="flex flex-col items-center gap-3">
-      <div
-        className={`${sizeClasses[size]} rounded-full border-stone-200 border-t-stone-900 animate-spin`}
-        role="status"
-        aria-label={label}
-      />
+      <span role="status" aria-label={label} className="inline-flex">
+        <Arc size={sizePx} color="#9c4327" />
+      </span>
       {size !== 'sm' && (
         <p className="text-sm text-stone-500 font-medium">{label}</p>
       )}
