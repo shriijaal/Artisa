@@ -27,6 +27,8 @@ from apps.core.email import (
     send_commission_revision_email,
     send_commission_cancelled_email,
 )
+from apps.notifications.models import Notification
+from apps.notifications.utils import create_notification
 
 logger = logging.getLogger(__name__)
 
@@ -54,6 +56,14 @@ class CommissionCreateView(APIView):
             pass  # Never block commission creation on tracking failure
 
         send_new_commission_email(commission)
+        create_notification(
+            recipient=commission.artist,
+            actor=request.user,
+            kind=Notification.Kind.COMMISSION_NEW,
+            title='New commission request',
+            body=f'{request.user.username} sent you a commission request: {commission.title}',
+            link=f'/commissions/{commission.id}',
+        )
         return Response(
             CommissionDetailSerializer(commission).data,
             status=status.HTTP_201_CREATED,
@@ -146,6 +156,14 @@ class CommissionAcceptView(APIView):
         commission.response_at = timezone.now()
         commission.save()
         send_commission_accepted_email(commission)
+        create_notification(
+            recipient=commission.customer,
+            actor=request.user,
+            kind=Notification.Kind.COMMISSION_ACCEPTED,
+            title='Commission accepted',
+            body=f'{request.user.username} accepted your commission request: {commission.title}',
+            link=f'/commissions/{commission.id}',
+        )
         return Response(CommissionDetailSerializer(commission).data)
 
 
@@ -171,6 +189,14 @@ class CommissionStartView(APIView):
         commission.status = Commission.Status.IN_PROGRESS
         commission.save()
         send_commission_started_email(commission)
+        create_notification(
+            recipient=commission.customer,
+            actor=request.user,
+            kind=Notification.Kind.COMMISSION_STARTED,
+            title='Commission started',
+            body=f'{request.user.username} started working on: {commission.title}',
+            link=f'/commissions/{commission.id}',
+        )
         return Response(CommissionDetailSerializer(commission).data)
 
 
@@ -203,6 +229,14 @@ class CommissionDeclineView(APIView):
         commission.response_at = timezone.now()
         commission.save()
         send_commission_declined_email(commission)
+        create_notification(
+            recipient=commission.customer,
+            actor=request.user,
+            kind=Notification.Kind.COMMISSION_DECLINED,
+            title='Commission declined',
+            body=f'{request.user.username} declined your commission request: {commission.title}',
+            link=f'/commissions/{commission.id}',
+        )
         return Response(CommissionDetailSerializer(commission).data)
 
 
@@ -241,6 +275,14 @@ class CommissionDeliverView(APIView):
         )
 
         send_commission_delivered_email(commission)
+        create_notification(
+            recipient=commission.customer,
+            actor=request.user,
+            kind=Notification.Kind.COMMISSION_DELIVERED,
+            title='Work delivered',
+            body=f'{request.user.username} delivered work for: {commission.title}',
+            link=f'/commissions/{commission.id}',
+        )
         return Response(
             CommissionDeliverableSerializer(deliverable).data,
             status=status.HTTP_201_CREATED,
@@ -269,6 +311,14 @@ class CommissionApproveView(APIView):
         commission.status = Commission.Status.COMPLETED
         commission.save()
         send_commission_completed_email(commission)
+        create_notification(
+            recipient=commission.artist,
+            actor=request.user,
+            kind=Notification.Kind.COMMISSION_COMPLETED,
+            title='Commission completed',
+            body=f'{request.user.username} approved your work on: {commission.title}',
+            link=f'/commissions/{commission.id}',
+        )
         return Response(CommissionDetailSerializer(commission).data)
 
 
@@ -301,6 +351,14 @@ class CommissionRevisionView(APIView):
         commission.status = Commission.Status.IN_PROGRESS
         commission.save()
         send_commission_revision_email(commission)
+        create_notification(
+            recipient=commission.artist,
+            actor=request.user,
+            kind=Notification.Kind.COMMISSION_REVISION,
+            title='Revision requested',
+            body=f'{request.user.username} requested a revision on: {commission.title}',
+            link=f'/commissions/{commission.id}',
+        )
         return Response(CommissionDetailSerializer(commission).data)
 
 
@@ -332,4 +390,13 @@ class CommissionCancelView(APIView):
         commission.status = Commission.Status.CANCELLED
         commission.save()
         send_commission_cancelled_email(commission, cancelled_by=request.user)
+        other_party = commission.customer if request.user == commission.artist else commission.artist
+        create_notification(
+            recipient=other_party,
+            actor=request.user,
+            kind=Notification.Kind.COMMISSION_CANCELLED,
+            title='Commission cancelled',
+            body=f'{request.user.username} cancelled the commission: {commission.title}',
+            link=f'/commissions/{commission.id}',
+        )
         return Response(CommissionDetailSerializer(commission).data)

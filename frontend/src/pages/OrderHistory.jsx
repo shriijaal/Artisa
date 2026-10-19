@@ -6,6 +6,7 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import { formatPrice } from '../utils/formatPrice';
 import { useToast } from '../components/Toast';
 import authFetch from '../utils/authFetch';
+import StatusProgressBar from '../components/StatusProgressBar';
 
 const StarRatingInput = ({ rating, onChange }) => {
   const [hover, setHover] = useState(0);
@@ -247,38 +248,45 @@ const OrderHistory = () => {
             {filteredOrders.map((order) => {
               const isExpanded = expandedOrderId === order.id;
               const currentStep = statusSteps.indexOf(order.status);
+              const itemCount = order.items?.length || 0;
+              const physicalCount = order.items?.filter(i => i.artwork?.type === 'physical').length || 0;
+              const digitalCount = order.items?.filter(i => i.artwork?.type === 'digital').length || 0;
+              const firstImg = order.items?.[0]?.artwork?.images?.[0]?.image;
               return (
                 <div key={order.id} className="rounded-lg border border-stone-200 bg-white overflow-hidden">
                   <div
                     onClick={() => setExpandedOrderId(isExpanded ? null : order.id)}
                     className="p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 cursor-pointer hover:bg-stone-50/50 transition"
                   >
-                    <div>
-                      <div className="flex items-center gap-3">
-                        <span className="font-semibold text-stone-900">#{order.id.slice(0, 8)}</span>
-                        <span className="text-sm text-stone-500">{new Date(order.created_at).toLocaleDateString()}</span>
+                    <div className="flex items-center gap-4">
+                      {firstImg ? (
+                        <img src={firstImg} alt="" className="w-14 h-14 rounded-lg object-cover flex-shrink-0" />
+                      ) : (
+                        <div className="w-14 h-14 rounded-lg bg-stone-100 flex items-center justify-center flex-shrink-0">
+                          <svg className="w-6 h-6 text-stone-300" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z" />
+                          </svg>
+                        </div>
+                      )}
+                      <div>
+                        <div className="flex items-center gap-3">
+                          <span className="font-semibold text-stone-900">#{order.id.slice(0, 8)}</span>
+                          <span className="text-sm text-stone-500">{new Date(order.created_at).toLocaleDateString()}</span>
+                        </div>
+                        <p className="text-xs text-stone-500 mt-1">
+                          {itemCount} {itemCount === 1 ? 'item' : 'items'} · {physicalCount} physical{physicalCount !== 1 ? 's' : ''}{digitalCount > 0 ? `, ${digitalCount} digital` : ''}
+                        </p>
+                        <p className="text-sm font-semibold text-stone-900 mt-1">NPR {formatPrice(order.total)}</p>
                       </div>
-                      <p className="text-sm text-stone-600 mt-1">Total: रू {formatPrice(order.total)}</p>
                     </div>
 
-                    <div className="flex items-center gap-3 flex-wrap">
-                      <span className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                        order.payment_status === 'paid'
-                          ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                          : 'bg-[#9c4327]/10 text-[#9c4327] border border-[#9c4327]/20'
-                      }`}>
-                        {order.payment_status === 'paid' ? 'Paid' : 'Unpaid'}
-                      </span>
-                      <span className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                        order.status === 'delivered' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
-                        order.status === 'shipped' ? 'bg-blue-50 text-blue-700 border border-blue-200' :
-                        order.status === 'processing' ? 'bg-indigo-50 text-indigo-700 border border-indigo-200' :
-                        order.status === 'cancelled' ? 'bg-stone-100 text-stone-500 border border-stone-200' :
-                        order.status === 'pending' ? 'bg-[#9c4327]/10 text-[#9c4327] border border-[#9c4327]/20' :
-                        'bg-stone-50 text-stone-700 border border-stone-200'
-                      }`}>
-                        {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
-                      </span>
+                    <div className="flex items-center gap-4 flex-wrap">
+                      <div className="min-w-[5.5rem]">
+                        <StatusProgressBar value={order.payment_status} kind="payment" variant="compact" />
+                      </div>
+                      <div className="min-w-[7rem] max-w-[10rem] flex-1">
+                        <StatusProgressBar value={order.status} kind="order" variant="full" />
+                      </div>
 
                       {order.payment_status === 'pending' && (
                         <button
@@ -340,24 +348,26 @@ const OrderHistory = () => {
                     <div className="border-t border-stone-100 bg-stone-50/30 p-5 space-y-5">
                       {/* Status Timeline */}
                       {order.status !== 'cancelled' && (
-                        <div className="flex items-center justify-center gap-1 py-2">
+                        <div className="flex items-center justify-center gap-0 py-2">
                           {statusSteps.map((step, idx) => {
                             const isComplete = idx <= currentStep;
                             const isCurrent = idx === currentStep;
                             return (
                               <div key={step} className="flex items-center">
-                                <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium ${
-                                  isCurrent ? 'bg-[#9c4327]/10 text-[#9c4327] font-semibold' :
-                                  isComplete ? 'bg-emerald-50 text-emerald-700' :
-                                  'bg-stone-100 text-stone-400'
-                                }`}>
-                                  {isComplete && !isCurrent ? (
-                                    <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
-                                  ) : null}
-                                  <span className="capitalize">{step}</span>
+                                <div className="flex flex-col items-center">
+                                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold border-2 ${
+                                    isCurrent ? 'bg-[#9c4327] text-white border-[#9c4327]' :
+                                    isComplete ? 'bg-emerald-500 text-white border-emerald-500' :
+                                    'bg-white text-stone-400 border-stone-200'
+                                  }`}>
+                                    {isComplete && !isCurrent ? (
+                                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
+                                    ) : idx + 1}
+                                  </div>
+                                  <span className={`text-[10px] mt-1 capitalize ${isCurrent ? 'text-[#9c4327] font-semibold' : isComplete ? 'text-emerald-600' : 'text-stone-400'}`}>{step}</span>
                                 </div>
                                 {idx < 3 && (
-                                  <div className={`w-8 h-px ${idx < currentStep ? 'bg-emerald-300' : 'bg-stone-200'}`} />
+                                  <div className={`w-16 h-0.5 mx-1 ${idx < currentStep ? 'bg-emerald-400' : 'bg-stone-200'}`} />
                                 )}
                               </div>
                             );
@@ -385,34 +395,41 @@ const OrderHistory = () => {
                       {/* Items */}
                       <div>
                         <h4 className="text-xs font-semibold text-stone-600 uppercase tracking-wide mb-3">Items</h4>
-                        <div className="divide-y divide-stone-100 bg-white border border-stone-200 rounded-lg overflow-hidden">
+                        <div className="divide-y divide-stone-100 bg-white border border-stone-200 rounded-xl overflow-hidden">
                           {order.items.map((item) => {
                             const img = item.artwork?.images?.[0]?.image;
                             return (
                               <div key={item.id} className="p-4 flex flex-col sm:flex-row justify-between sm:items-center gap-4">
                                 <div className="flex items-center gap-3">
                                   {img ? (
-                                    <img src={img} alt={item.artwork.title} className="w-12 h-12 rounded object-cover flex-shrink-0" />
+                                    <img src={img} alt={item.artwork.title} className="w-12 h-12 rounded-lg object-cover flex-shrink-0" />
                                   ) : (
-                                    <div className="w-12 h-12 rounded bg-stone-100 flex items-center justify-center text-stone-400 text-xs flex-shrink-0">No img</div>
+                                    <div className="w-12 h-12 rounded-lg bg-stone-100 flex items-center justify-center text-stone-400 text-xs flex-shrink-0">No img</div>
                                   )}
                                   <div>
-                                    <h5 className="font-medium text-stone-900">{item.artwork.title}</h5>
-                                    <p className="text-xs text-stone-500">{item.artwork.type.toUpperCase()} · @{item.artwork.artist?.username}</p>
+                                    <h5 className="text-[13px] font-semibold text-stone-900">{item.artwork.title}</h5>
+                                    <div className="flex items-center gap-2 mt-0.5">
+                                      <div className="h-4 w-4 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
+                                        <span className="text-[7px] font-bold text-amber-700">{item.artwork.artist?.username?.charAt(0).toUpperCase()}</span>
+                                      </div>
+                                      <span className="text-[12px] text-stone-500">@{item.artwork.artist?.username}</span>
+                                      <span className="text-stone-300">·</span>
+                                      <span className="text-[9px] font-bold uppercase tracking-wider text-stone-400">{item.artwork.type}</span>
+                                    </div>
                                   </div>
                                 </div>
 
                                 <div className="flex items-center gap-4 self-end sm:self-center flex-wrap">
                                   <div className="text-right">
-                                    <span className="text-sm text-stone-500">{item.quantity} x</span>
-                                    <span className="font-semibold text-stone-900 ml-2">रू {formatPrice(item.price)}</span>
+                                    <span className="text-[13px] text-stone-500">{item.quantity} x</span>
+                                    <span className="font-semibold text-stone-900 text-[13px] ml-2">NPR {formatPrice(item.price)}</span>
                                   </div>
 
                                   {item.artwork.type === 'physical' && item.shipment && (
-                                    <div className="rounded-lg bg-stone-50 px-3 py-1.5 border border-stone-200 text-xs">
-                                      <span className="font-semibold text-stone-700 block">Shipment: {item.shipment.status.toUpperCase()}</span>
+                                    <div className="rounded-full bg-stone-50 px-3 py-1 border border-stone-200 text-[11px]">
+                                      <span className="font-semibold text-stone-700">Shipment: {item.shipment.status.toUpperCase()}</span>
                                       {item.shipment.tracking_number && (
-                                        <span className="text-stone-500 font-mono block mt-0.5">Tracking: {item.shipment.tracking_number}</span>
+                                        <span className="text-stone-500 font-mono ml-1.5">Tracking: {item.shipment.tracking_number}</span>
                                       )}
                                     </div>
                                   )}
@@ -433,12 +450,14 @@ const OrderHistory = () => {
                                           const url = window.URL.createObjectURL(blob);
                                           const a = document.createElement('a');
                                           a.href = url;
-                                          a.download = item.artwork.title || 'download';
+                                          const cd = fileRes.headers.get('content-disposition') || '';
+                                          const fnameMatch = cd.match(/filename="?([^";]+)"?/);
+                                          a.download = fnameMatch?.[1] || item.artwork.title || 'download';
                                           a.click();
                                           window.URL.revokeObjectURL(url);
                                         } catch { addToast('Download failed.', 'error'); }
                                       }}
-                                      className="text-xs font-semibold text-white bg-[#000] hover:bg-stone-800 px-3 py-1.5 rounded-lg transition cursor-pointer"
+                                      className="text-[12px] font-medium text-white bg-stone-900 hover:bg-stone-800 px-3 py-1.5 rounded-lg transition cursor-pointer"
                                     >
                                       Download
                                     </button>
@@ -452,28 +471,28 @@ const OrderHistory = () => {
                                         setReviewRating(0);
                                         setReviewComment('');
                                       }}
-                                      className="text-xs font-semibold text-[#9c4327] border border-[#9c4327]/30 bg-[#9c4327]/5 hover:bg-[#9c4327]/10 px-3 py-1.5 rounded-lg transition cursor-pointer"
+                                      className="text-[12px] font-medium text-stone-600 border border-stone-200 bg-stone-50 hover:bg-stone-100 px-3 py-1.5 rounded-lg transition cursor-pointer"
                                     >
                                       {reviewingItemId === item.id ? 'Cancel' : 'Write Review'}
                                     </button>
                                   )}
                                   {reviewedItems.has(item.id) && (
-                                    <span className="text-xs font-medium text-green-600 bg-green-50 border border-green-200 px-3 py-1.5 rounded-lg">
+                                    <span className="text-[11px] font-medium text-emerald-600 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-full">
                                       Reviewed
                                     </span>
                                   )}
                                 </div>
 
                                 {reviewingItemId === item.id && (
-                                  <div className="mt-4 rounded-lg border border-stone-200 bg-white p-4 w-full">
-                                    <p className="text-xs font-semibold text-stone-700 mb-2">Your Rating</p>
+                                  <div className="mt-4 rounded-xl border border-stone-200 bg-white p-4 w-full">
+                                    <p className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-2">Your Rating</p>
                                     <StarRatingInput rating={reviewRating} onChange={setReviewRating} />
                                     <textarea
                                       value={reviewComment}
                                       onChange={(e) => setReviewComment(e.target.value)}
                                       placeholder="Share your experience with this artwork..."
                                       rows={3}
-                                      className="w-full mt-3 rounded-lg border border-stone-200 bg-white px-4 py-3 text-sm text-stone-900 placeholder-stone-400 focus:border-stone-400 focus:outline-none focus:ring-1 focus:ring-stone-400"
+                                      className="w-full mt-3 rounded-lg border border-stone-200 bg-white px-4 py-3 text-[13px] text-stone-900 placeholder-stone-400 focus:border-stone-400 focus:outline-none focus:ring-1 focus:ring-stone-400"
                                     />
                                     <button
                                       onClick={(e) => {
@@ -481,7 +500,7 @@ const OrderHistory = () => {
                                         handleSubmitReview(item.id);
                                       }}
                                       disabled={!reviewRating || !reviewComment.trim() || submittingReview}
-                                      className="mt-3 rounded-lg bg-[#000] px-5 py-2 text-sm font-semibold text-white hover:bg-stone-800 transition disabled:opacity-40 disabled:cursor-not-allowed"
+                                      className="mt-3 rounded-lg bg-stone-900 px-5 py-2 text-[13px] font-medium text-white hover:bg-stone-800 transition disabled:opacity-40 disabled:cursor-not-allowed"
                                     >
                                       {submittingReview ? 'Submitting...' : 'Submit Review'}
                                     </button>

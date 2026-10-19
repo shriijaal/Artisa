@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { formatPrice } from '../utils/formatPrice';
 import authFetch from '../utils/authFetch';
+import ProtectedImage from './ProtectedImage';
 
 const SkeletonCard = () => (
   <div className="flex-shrink-0 w-64">
@@ -125,7 +126,7 @@ const RecommendedCarousel = ({ title, subtitle, endpoint, limit = 8 }) => {
             >
               <div className="aspect-[4/5] overflow-hidden bg-stone-100 rounded-lg border border-stone-200 transition-all duration-300 hover:-translate-y-1 relative">
                   {primaryImage ? (
-                    <img
+                    <ProtectedImage
                       src={primaryImage.image}
                       alt={artwork.title}
                       className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500"

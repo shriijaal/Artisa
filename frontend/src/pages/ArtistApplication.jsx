@@ -1,10 +1,12 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import Header from '../components/Header';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { useToast } from '../components/Toast';
 import authFetch from '../utils/authFetch';
+import RichTextEditor from '../components/editor/RichTextEditor';
+import RichTextView from '../components/editor/RichTextView';
 
 const STEPS = ['About You', 'Portfolio', 'Details', 'Review'];
 
@@ -424,11 +426,9 @@ function StepDetails({ formData, setFormData, categories, toggleSpecialty }) {
       {/* Bio */}
       <div className="mt-6">
         <label className="block text-sm font-medium text-stone-700 mb-1">Bio</label>
-        <textarea
-          rows={4}
+        <RichTextEditor
           value={formData.bio}
-          onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
-          className="w-full rounded-lg border border-stone-200 bg-white px-4 py-3 text-sm text-stone-900 placeholder-stone-400 focus:border-stone-400 focus:outline-none focus:ring-1 focus:ring-stone-400 resize-none"
+          onChange={(html) => setFormData((prev) => ({ ...prev, bio: html }))}
           placeholder="A short bio about yourself — your medium, style, and what inspires you..."
         />
         <p className="mt-1 text-xs text-stone-400">This will be shown on your public profile.</p>
@@ -517,7 +517,7 @@ function StepReview({ formData, categories, previews }) {
         {formData.bio && (
           <div className="p-4 rounded-lg bg-stone-50">
             <h3 className="text-xs font-semibold uppercase tracking-wide text-stone-500 mb-2">Bio</h3>
-            <p className="text-sm text-stone-700 whitespace-pre-wrap">{formData.bio}</p>
+            <RichTextView html={formData.bio} className="text-stone-700" />
           </div>
         )}
 
@@ -795,7 +795,7 @@ function SubmittedDetails({ application, getCategoryName, openSections, toggleSe
 
       {application.bio && (
         <Section title="Bio" sectionKey="bio">
-          <p className="text-sm text-stone-700 leading-relaxed whitespace-pre-wrap">{application.bio}</p>
+          <RichTextView html={application.bio} className="text-stone-700" />
         </Section>
       )}
 

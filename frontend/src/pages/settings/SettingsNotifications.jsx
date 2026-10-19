@@ -1,21 +1,67 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useToast } from '../../components/Toast';
+import authFetch from '../../utils/authFetch';
+
+const FIELD_MAP = {
+  emailCommissionUpdates: 'email_commission_updates',
+  emailOrderUpdates: 'email_order_updates',
+  emailApplicationUpdates: 'email_application_updates',
+  pushNewMessages: 'push_new_messages',
+};
 
 const SettingsNotifications = () => {
   const { addToast } = useToast();
   const [settings, setSettings] = useState({
+    emailCommissionUpdates: true,
     emailOrderUpdates: true,
-    emailNewMessages: true,
-    emailPromotional: false,
-    emailArtistUpdates: true,
-    pushOrderUpdates: true,
+    emailApplicationUpdates: true,
     pushNewMessages: true,
-    pushPromotional: false,
   });
 
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await authFetch('/api/auth/me/');
+        if (res.ok) {
+          const d = await res.json();
+          if (!cancelled) {
+            setSettings({
+              emailCommissionUpdates: d.email_commission_updates ?? true,
+              emailOrderUpdates: d.email_order_updates ?? true,
+              emailApplicationUpdates: d.email_application_updates ?? true,
+              pushNewMessages: d.push_new_messages ?? true,
+            });
+          }
+        }
+      } catch { /* keep defaults */ }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  const save = async (key, value) => {
+    const prev = settings;
+    setSettings({ ...settings, [key]: value });
+    try {
+      const res = await authFetch('/api/auth/me/', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ [FIELD_MAP[key]]: value }),
+      });
+      if (res.ok) {
+        addToast('Settings saved', 'success');
+      } else {
+        setSettings(prev);
+        addToast('Could not save settings', 'error');
+      }
+    } catch {
+      setSettings(prev);
+      addToast('Could not save settings', 'error');
+    }
+  };
+
   const handleToggle = (key) => {
-    setSettings({ ...settings, [key]: !settings[key] });
-    addToast('Notification preferences saved', 'success');
+    save(key, !settings[key]);
   };
 
   const Section = ({ title, items }) => (
@@ -29,6 +75,7 @@ const SettingsNotifications = () => {
               <p className="text-xs text-stone-500">{item.desc}</p>
             </div>
             <button onClick={() => handleToggle(item.key)}
+              aria-pressed={settings[item.key]}
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${settings[item.key] ? 'bg-stone-900' : 'bg-stone-200'}`}>
               <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${settings[item.key] ? 'translate-x-6' : 'translate-x-1'}`} />
             </button>
@@ -44,16 +91,13 @@ const SettingsNotifications = () => {
       <p className="text-sm text-stone-500 mb-8">Choose what notifications you receive and how.</p>
 
       <Section title="Email Notifications" items={[
-        { key: 'emailOrderUpdates', label: 'Order updates', desc: 'Shipping status, delivery confirmations' },
-        { key: 'emailNewMessages', label: 'New messages', desc: 'When someone sends you a message' },
-        { key: 'emailArtistUpdates', label: 'Artist updates', desc: 'Application status, earnings notifications' },
-        { key: 'emailPromotional', label: 'Promotional emails', desc: 'New features, marketplace highlights' },
+        { key: 'emailCommissionUpdates', label: 'Commission updates', desc: 'Requests, acceptances, deliveries, cancellations' },
+        { key: 'emailOrderUpdates', label: 'Order updates', desc: 'Confirmations, payments, shipping, delivery' },
+        { key: 'emailApplicationUpdates', label: 'Artist application updates', desc: 'Approval or rejection of your application' },
       ]} />
 
       <Section title="Push Notifications" items={[
-        { key: 'pushOrderUpdates', label: 'Order updates', desc: 'Real-time order status changes' },
-        { key: 'pushNewMessages', label: 'New messages', desc: 'Instant message notifications' },
-        { key: 'pushPromotional', label: 'Promotional notifications', desc: 'Recommendations and announcements' },
+        { key: 'pushNewMessages', label: 'New messages', desc: 'Desktop alert when a message arrives while the tab is hidden' },
       ]} />
     </div>
   );

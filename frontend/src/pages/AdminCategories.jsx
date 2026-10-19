@@ -63,12 +63,12 @@ const AdminCategories = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-stone-900 tracking-tight">Categories</h1>
+          <h1 className="text-2xl font-semibold text-stone-900 tracking-tight">Categories</h1>
           <p className="text-sm text-stone-500 mt-1">Manage marketplace categories</p>
         </div>
         <button
           onClick={() => { setShowForm(!showForm); setEditCategory(null); setForm({ name: '', slug: '', description: '', parent: '' }); }}
-          className="px-4 py-2.5 text-sm font-medium text-white bg-black rounded-lg hover:bg-stone-800 transition-colors"
+          className="px-4 py-2.5 text-sm font-medium text-white bg-stone-900 rounded-lg hover:bg-stone-800 transition-colors"
         >
           {showForm ? 'Cancel' : 'Add Category'}
         </button>
@@ -76,40 +76,40 @@ const AdminCategories = () => {
 
       {/* Form */}
       {showForm && (
-        <form onSubmit={handleSubmit} className="bg-white rounded-lg border border-stone-200 p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="bg-white rounded-xl border border-stone-200 p-6 space-y-4">
           <h3 className="text-sm font-semibold text-stone-900">{editCategory ? 'Edit Category' : 'New Category'}</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-medium text-stone-500 mb-1">Name</label>
+              <label className="block text-xs font-medium text-stone-500 uppercase tracking-wider mb-1.5">Name</label>
               <input
                 required
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
-                className="w-full px-3 py-2 rounded-lg border border-stone-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
+                className="w-full px-3 py-2 rounded-lg border border-stone-200 text-sm focus:outline-none focus:border-stone-400 focus:ring-1 focus:ring-stone-400"
                 placeholder="Category name"
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-stone-500 mb-1">Slug</label>
+              <label className="block text-xs font-medium text-stone-500 uppercase tracking-wider mb-1.5">Slug</label>
               <input
                 value={form.slug}
                 onChange={(e) => setForm({ ...form, slug: e.target.value })}
-                className="w-full px-3 py-2 rounded-lg border border-stone-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
+                className="w-full px-3 py-2 rounded-lg border border-stone-200 text-sm focus:outline-none focus:border-stone-400 focus:ring-1 focus:ring-stone-400"
                 placeholder="auto-generated from name"
               />
             </div>
           </div>
           <div>
-            <label className="block text-xs font-medium text-stone-500 mb-1">Description</label>
+            <label className="block text-xs font-medium text-stone-500 uppercase tracking-wider mb-1.5">Description</label>
             <input
               value={form.description}
               onChange={(e) => setForm({ ...form, description: e.target.value })}
-              className="w-full px-3 py-2 rounded-lg border border-stone-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
+              className="w-full px-3 py-2 rounded-lg border border-stone-200 text-sm focus:outline-none focus:border-stone-400 focus:ring-1 focus:ring-stone-400"
               placeholder="Optional description"
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-stone-500 mb-1">Parent Category</label>
+            <label className="block text-xs font-medium text-stone-500 uppercase tracking-wider mb-1.5">Parent Category</label>
             <CustomSelect
               value={form.parent}
               onChange={(val) => setForm({ ...form, parent: val })}
@@ -123,7 +123,7 @@ const AdminCategories = () => {
           </div>
           <button
             type="submit"
-            className="px-4 py-2 text-sm font-medium text-white bg-black rounded-lg hover:bg-stone-800"
+            className="px-4 py-2 text-sm font-medium text-white bg-stone-900 rounded-lg hover:bg-stone-800"
           >
             {editCategory ? 'Save Changes' : 'Create Category'}
           </button>
@@ -140,18 +140,18 @@ const AdminCategories = () => {
           placeholder="Search categories..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-stone-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+          className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-stone-200 bg-white text-sm focus:outline-none focus:border-stone-400 focus:ring-1 focus:ring-stone-400 transition"
         />
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-lg border border-stone-200 overflow-hidden">
+      <div className="bg-white rounded-xl border border-stone-200 overflow-hidden">
         {loading ? (
           <div className="flex items-center justify-center h-48">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-600" />
+            <div className="animate-spin rounded-full h-8 w-8 border-2 border-stone-200 border-t-stone-900" />
           </div>
         ) : categories.length === 0 ? (
-          <div className="text-center py-12 text-stone-500 text-sm">No categories found</div>
+          <div className="text-center py-12 text-sm text-stone-500">No categories found</div>
         ) : (
           <ResizableTable
             columns={[
@@ -159,11 +159,11 @@ const AdminCategories = () => {
               { key: 'parent', label: 'Parent', width: 160 },
               { key: 'subcategories', label: 'Subcategories', width: 300 },
               { key: 'artworks', label: 'Artworks', width: 100 },
-              { key: 'actions', label: 'Actions', width: 120 },
+              { key: 'actions', label: 'Actions', width: 120, align: 'left' },
             ]}
           >
             {categories.map((cat) => (
-              <tr key={cat.id} className="hover:bg-stone-50">
+              <tr key={cat.id} className="hover:bg-stone-50/60 transition-colors">
                 <td className="px-4 py-4 text-sm font-medium text-stone-900">{cat.name}</td>
                 <td className="px-4 py-4 text-sm text-stone-500">{cat.parent ? categories.find((c) => c.id === cat.parent)?.name || 'None' : 'None'}</td>
                 <td className="px-4 py-4 text-sm text-stone-500">
@@ -173,10 +173,10 @@ const AdminCategories = () => {
                     <span className="text-stone-300">None</span>
                   )}
                 </td>
-                <td className="px-4 py-4 text-sm text-stone-500">{cat.artwork_count}</td>
-                <td className="px-4 py-4 text-right">
-                  <div className="flex items-center justify-end gap-2">
-                    <button onClick={() => startEdit(cat)} className="text-xs text-amber-600 hover:text-amber-700 font-medium">Edit</button>
+                <td className="px-4 py-4 text-sm text-stone-500 tabular-nums">{cat.artwork_count}</td>
+                <td className="px-4 py-4 text-left">
+                  <div className="flex items-center gap-2">
+                    <button onClick={() => startEdit(cat)} className="text-xs text-stone-600 hover:text-stone-900 font-medium">Edit</button>
                     <button onClick={() => handleDelete(cat.id)} className="text-xs text-red-600 hover:text-red-700 font-medium">Delete</button>
                   </div>
                 </td>

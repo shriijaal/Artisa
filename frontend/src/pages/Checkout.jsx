@@ -5,6 +5,7 @@ import Header from '../components/Header';
 import LoadingSpinner from '../components/LoadingSpinner';
 import CustomSelect from '../components/CustomSelect';
 import { formatPrice } from '../utils/formatPrice';
+import { PROVINCES, getDistrictsForProvince } from '../utils/nepalLocations';
 import { useToast } from '../components/Toast';
 import authFetch from '../utils/authFetch';
 
@@ -382,27 +383,22 @@ const Checkout = () => {
                         <label className="block text-xs font-semibold text-stone-600 uppercase mb-1">Province *</label>
                         <CustomSelect
                           value={province}
-                          onChange={setProvince}
+                          onChange={(value) => {
+                            setProvince(value);
+                            setDistrict('');
+                          }}
                           placeholder="Select province"
-                          options={[
-                            { value: 'Koshi', label: 'Koshi' },
-                            { value: 'Madhesh', label: 'Madhesh' },
-                            { value: 'Bagmati', label: 'Bagmati' },
-                            { value: 'Gandaki', label: 'Gandaki' },
-                            { value: 'Lumbini', label: 'Lumbini' },
-                            { value: 'Karnali', label: 'Karnali' },
-                            { value: 'Sudurpashchim', label: 'Sudurpashchim' },
-                          ]}
+                          options={PROVINCES.map((p) => ({ value: p, label: p }))}
                         />
                       </div>
                       <div>
-                        <label className="block text-xs font-semibold text-stone-600 uppercase mb-1">District</label>
-                        <input
-                          type="text"
+                        <label className="block text-xs font-semibold text-stone-600 uppercase mb-1">District *</label>
+                        <CustomSelect
                           value={district}
-                          onChange={e => setDistrict(e.target.value)}
-                          placeholder="e.g. Kathmandu"
-                          className="w-full rounded-lg border border-stone-200 bg-white px-3 py-2 text-sm focus:border-stone-400 focus:outline-none focus:ring-1 focus:ring-stone-400"
+                          onChange={setDistrict}
+                          disabled={!province}
+                          placeholder={province ? 'Select district' : 'Select province first'}
+                          options={getDistrictsForProvince(province).map((d) => ({ value: d, label: d }))}
                         />
                       </div>
                     </div>

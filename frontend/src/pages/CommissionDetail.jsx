@@ -52,10 +52,10 @@ const StatusTimeline = ({ currentStatus }) => {
   if (terminalStatuses.includes(currentStatus)) {
     const cfg = STATUS_CONFIG[currentStatus];
     return (
-      <div className={`rounded-lg border px-4 py-3 flex items-center gap-3 ${cfg.color}`}>
+      <div className={`rounded-full border px-4 py-2 flex items-center gap-3 ${cfg.color}`}>
         <div>
-          <p className="font-semibold text-sm">{cfg.label}</p>
-          <p className="text-xs opacity-80">{cfg.description}</p>
+          <p className="font-semibold text-[13px]">{cfg.label}</p>
+          <p className="text-[11px] opacity-80">{cfg.description}</p>
         </div>
       </div>
     );
@@ -69,25 +69,26 @@ const StatusTimeline = ({ currentStatus }) => {
         const cfg = STATUS_CONFIG[step];
         const isDone = idx < currentIdx;
         const isActive = idx === currentIdx;
-        const isFuture = idx > currentIdx;
 
         return (
           <div key={step} className="flex items-center flex-1 last:flex-none">
             <div className="flex flex-col items-center">
               <div
-                className={`h-8 w-8 rounded-full flex items-center justify-center text-xs font-bold border-2 transition-all ${
+                className={`h-7 w-7 rounded-full flex items-center justify-center text-[10px] font-bold border-[1.5px] transition-all ${
                   isDone
                     ? 'bg-emerald-500 border-emerald-500 text-white'
                     : isActive
-                    ? 'bg-amber-500 border-amber-500 text-white shadow-md shadow-amber-200'
+                    ? 'bg-stone-900 border-stone-900 text-white'
                     : 'bg-white border-stone-200 text-stone-300'
                 }`}
               >
-                {isDone ? '✓' : idx + 1}
+                {isDone ? (
+                  <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
+                ) : idx + 1}
               </div>
               <span
-                className={`mt-1 text-xs font-medium whitespace-nowrap ${
-                  isDone ? 'text-emerald-600' : isActive ? 'text-amber-600' : 'text-stone-300'
+                className={`mt-1 text-[9px] font-bold uppercase tracking-wider whitespace-nowrap ${
+                  isDone ? 'text-emerald-600' : isActive ? 'text-stone-900' : 'text-stone-300'
                 }`}
               >
                 {cfg.label}
@@ -95,7 +96,7 @@ const StatusTimeline = ({ currentStatus }) => {
             </div>
             {idx < STATUS_STEPS.length - 1 && (
               <div
-                className={`flex-1 h-0.5 mx-1 -mt-5 transition-all ${
+                className={`flex-1 h-px mx-1 -mt-4 transition-all ${
                   isDone ? 'bg-emerald-400' : 'bg-stone-200'
                 }`}
               />
@@ -113,10 +114,10 @@ const DeliverableCard = ({ deliverable }) => {
   const isZip = /\.zip(\?|$)/i.test(deliverable.file);
 
   return (
-    <div className="flex items-center justify-between rounded-lg border border-stone-200 bg-stone-50 p-4 hover:border-stone-300 transition">
+    <div className="flex items-center justify-between rounded-xl border border-stone-200 bg-stone-50/50 p-4">
       <div className="flex items-center gap-3">
         <div
-          className={`h-10 w-10 rounded-lg flex items-center justify-center text-lg flex-shrink-0 ${
+          className={`h-10 w-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
             isImage
               ? 'bg-blue-100'
               : isPdf
@@ -141,11 +142,11 @@ const DeliverableCard = ({ deliverable }) => {
           )}
         </div>
         <div>
-          <p className="text-sm font-semibold text-stone-900">Revision {deliverable.revision_number}</p>
+          <p className="text-[13px] font-semibold text-stone-900">Revision {deliverable.revision_number}</p>
           {deliverable.notes && (
-            <p className="text-xs text-stone-500 mt-0.5 max-w-xs line-clamp-1">{deliverable.notes}</p>
+            <p className="text-[11px] text-stone-500 mt-0.5 max-w-xs line-clamp-1">{deliverable.notes}</p>
           )}
-          <p className="text-xs text-stone-400 mt-0.5">
+          <p className="text-[10px] text-stone-400 mt-0.5">
             {new Date(deliverable.created_at).toLocaleDateString('en-US', {
               day: 'numeric',
               month: 'short',
@@ -160,7 +161,7 @@ const DeliverableCard = ({ deliverable }) => {
         href={deliverable.file}
         target="_blank"
         rel="noopener noreferrer"
-        className="flex items-center gap-1.5 rounded-lg bg-[#000] px-3 py-2 text-xs font-semibold text-white hover:bg-stone-800 transition flex-shrink-0"
+        className="flex items-center gap-1.5 rounded-lg bg-stone-900 px-3 py-2 text-[12px] font-medium text-white hover:bg-stone-800 transition flex-shrink-0"
       >
         <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -312,21 +313,21 @@ const CommissionDetail = () => {
           <div>
             <button
               onClick={() => navigate(-1)}
-              className="flex items-center gap-1.5 text-xs font-medium text-stone-500 hover:text-stone-700 transition mb-3"
+              className="flex items-center gap-1.5 text-[11px] font-medium text-stone-400 hover:text-stone-600 transition mb-3"
             >
               <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
               </svg>
               Back
             </button>
-            <h1 className="text-2xl font-bold text-stone-900">
+            <h1 className="text-xl font-bold text-stone-900 tracking-tight">
               {commission.title}
             </h1>
-            <p className="text-sm text-stone-500 mt-1">
+            <p className="text-[12px] text-stone-400 mt-1">
               Created {new Date(commission.created_at).toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })}
             </p>
           </div>
-          <span className={`inline-flex items-center gap-1.5 rounded-md border px-3 py-1 text-xs font-semibold flex-shrink-0 ${statusConfig.color}`}>
+          <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-bold tracking-wider flex-shrink-0 ${statusConfig.color}`}>
             {statusConfig.label}
           </span>
         </div>
@@ -335,10 +336,10 @@ const CommissionDetail = () => {
         <div className="flex border-b border-stone-200 gap-6">
           <button
             onClick={() => setActiveTab('details')}
-            className={`pb-3 text-sm font-semibold border-b-2 transition -mb-px flex items-center gap-2 ${
+            className={`pb-3 text-[13px] font-semibold border-b-2 transition -mb-px flex items-center gap-2 ${
               activeTab === 'details'
                 ? 'border-stone-900 text-stone-900'
-                : 'border-transparent text-stone-500 hover:text-stone-700'
+                : 'border-transparent text-stone-400 hover:text-stone-600'
             }`}
           >
             <span>Details & Actions</span>
@@ -348,15 +349,15 @@ const CommissionDetail = () => {
               setActiveTab('messages');
               setUnreadCount(0);
             }}
-            className={`pb-3 text-sm font-semibold border-b-2 transition -mb-px flex items-center gap-2 ${
+            className={`pb-3 text-[13px] font-semibold border-b-2 transition -mb-px flex items-center gap-2 ${
               activeTab === 'messages'
                 ? 'border-stone-900 text-stone-900'
-                : 'border-transparent text-stone-500 hover:text-stone-700'
+                : 'border-transparent text-stone-400 hover:text-stone-600'
             }`}
           >
             <span>Messages</span>
             {unreadCount > 0 && (
-              <span className="inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-bold bg-stone-900 text-white rounded-full min-w-5">
+              <span className="inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] font-bold bg-stone-900 text-white rounded-full min-w-5">
                 {unreadCount}
               </span>
             )}
@@ -372,23 +373,23 @@ const CommissionDetail = () => {
         ) : (
           <>
         {/* Status Timeline */}
-            <div className="rounded-lg border border-stone-200 bg-white p-5">
-          <p className="text-xs font-semibold text-stone-500 uppercase tracking-wider mb-4">Progress</p>
+            <div className="rounded-xl border border-stone-200 bg-white p-5">
+          <p className="text-[9px] font-bold text-stone-400 uppercase tracking-wider mb-4">Progress</p>
           <StatusTimeline currentStatus={commission.status} />
-          <p className="mt-4 text-xs text-stone-500 text-center">{statusConfig.description}</p>
+          <p className="mt-4 text-[11px] text-stone-400 text-center">{statusConfig.description}</p>
         </div>
 
         {/* Overdue Banner */}
         {daysUntilDeadline !== null && daysUntilDeadline < 0 && !['completed', 'cancelled', 'declined'].includes(commission.status) && (
-          <div className="rounded-lg border border-red-200 bg-red-50 p-4 flex items-start gap-3">
+          <div className="rounded-xl border border-red-200 bg-red-50 p-4 flex items-start gap-3">
             <div className="h-8 w-8 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0 mt-0.5">
               <svg className="h-4 w-4 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
               </svg>
             </div>
             <div>
-              <p className="text-sm font-semibold text-red-800">This commission is overdue</p>
-              <p className="text-xs text-red-600 mt-0.5">
+              <p className="text-[13px] font-semibold text-red-800">This commission is overdue</p>
+              <p className="text-[11px] text-red-600 mt-0.5">
                 Deadline was {new Date(commission.deadline).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
                 {commission.status === 'pending' && ' — the artist has not responded yet. This commission may be auto-cancelled soon.'}
               </p>
@@ -397,22 +398,21 @@ const CommissionDetail = () => {
         )}
 
         {/* Parties */}
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-3">
           {[
             { label: 'Customer', party: commission.customer },
             { label: 'Artist', party: commission.artist },
           ].map(({ label, party }) => (
-            <div key={label} className="rounded-lg border border-stone-200 bg-white p-4">
-              <p className="text-xs font-semibold text-stone-400 uppercase tracking-wider mb-2">{label}</p>
+            <div key={label} className="rounded-xl border border-stone-200 bg-white p-4">
+              <p className="text-[9px] font-bold text-stone-400 uppercase tracking-wider mb-2.5">{label}</p>
               <div className="flex items-center gap-3">
-                <div className="h-9 w-9 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center flex-shrink-0">
-                  <span className="text-sm font-bold text-white">
+                <div className="h-9 w-9 rounded-full bg-stone-900 flex items-center justify-center flex-shrink-0">
+                  <span className="text-[11px] font-bold text-white">
                     {party?.username?.charAt(0).toUpperCase()}
                   </span>
                 </div>
                 <div className="min-w-0">
-                  <p className="text-sm font-semibold text-stone-900 truncate">{party?.username}</p>
-                  <p className="text-xs text-stone-400 truncate">{party?.email}</p>
+                  <p className="text-[13px] font-semibold text-stone-900 truncate">{party?.username}</p>
                 </div>
               </div>
             </div>
@@ -420,24 +420,24 @@ const CommissionDetail = () => {
         </div>
 
         {/* Details Card */}
-        <div className="rounded-lg border border-stone-200 bg-white p-6 space-y-5">
-          <h2 className="text-sm font-semibold text-stone-500 uppercase tracking-wider">Brief</h2>
-          <p className="text-stone-700 whitespace-pre-wrap text-sm leading-relaxed">{commission.description}</p>
+        <div className="rounded-xl border border-stone-200 bg-white p-6 space-y-5">
+          <h2 className="text-[9px] font-bold text-stone-400 uppercase tracking-wider">Brief</h2>
+          <p className="text-stone-600 whitespace-pre-wrap text-[13px] leading-[1.7]">{commission.description}</p>
 
           {/* Key Metrics */}
           <div className="grid grid-cols-3 gap-4 pt-4 border-t border-stone-100">
             <div className="text-center">
-              <p className="text-xs text-stone-400 mb-1">Budget Range</p>
-              <p className="text-sm font-bold text-stone-900">
-                Rs.{Number(commission.budget_min).toLocaleString()}
+              <p className="text-[9px] font-bold uppercase tracking-wider text-stone-400 mb-1">Budget Range</p>
+              <p className="text-[13px] font-bold text-stone-900">
+                NPR {Number(commission.budget_min).toLocaleString()}
               </p>
-              <p className="text-xs text-stone-500">
-                — Rs.{Number(commission.budget_max).toLocaleString()}
+              <p className="text-[11px] text-stone-400">
+                — NPR {Number(commission.budget_max).toLocaleString()}
               </p>
             </div>
             <div className="text-center">
-              <p className="text-xs text-stone-400 mb-1">Deadline</p>
-              <p className={`text-sm font-bold ${
+              <p className="text-[9px] font-bold uppercase tracking-wider text-stone-400 mb-1">Deadline</p>
+              <p className={`text-[13px] font-bold ${
                 daysUntilDeadline !== null && daysUntilDeadline <= 3 && !['completed','cancelled','declined'].includes(commission.status)
                   ? 'text-red-600'
                   : 'text-stone-900'
@@ -445,7 +445,7 @@ const CommissionDetail = () => {
                 {commission.deadline}
               </p>
               {daysUntilDeadline !== null && !['completed','cancelled','declined'].includes(commission.status) && (
-                <p className={`text-xs ${daysUntilDeadline <= 3 ? 'text-red-500' : 'text-stone-500'}`}>
+                <p className={`text-[11px] ${daysUntilDeadline <= 3 ? 'text-red-500' : 'text-stone-400'}`}>
                   {daysUntilDeadline > 0
                     ? `${daysUntilDeadline} day${daysUntilDeadline !== 1 ? 's' : ''} left`
                     : daysUntilDeadline === 0
@@ -455,11 +455,11 @@ const CommissionDetail = () => {
               )}
             </div>
             <div className="text-center">
-              <p className="text-xs text-stone-400 mb-1">Revisions</p>
-              <p className="text-sm font-bold text-stone-900">
+              <p className="text-[9px] font-bold uppercase tracking-wider text-stone-400 mb-1">Revisions</p>
+              <p className="text-[13px] font-bold text-stone-900">
                 {commission.current_revision}/{commission.revision_limit}
               </p>
-              <p className="text-xs text-stone-500">
+              <p className="text-[11px] text-stone-400">
                 {commission.revision_limit - commission.current_revision} remaining
               </p>
             </div>
@@ -467,16 +467,16 @@ const CommissionDetail = () => {
 
           {/* Decline Reason */}
           {commission.rejection_reason && (
-            <div className="rounded-lg bg-red-50 border border-red-200 p-4">
-              <p className="text-xs font-semibold text-red-600 mb-1">Decline Reason</p>
-              <p className="text-sm text-red-700">{commission.rejection_reason}</p>
+            <div className="rounded-xl bg-red-50 border border-red-200 p-4">
+              <p className="text-[11px] font-bold text-red-500 uppercase tracking-wider mb-1">Decline Reason</p>
+              <p className="text-[13px] text-red-700">{commission.rejection_reason}</p>
             </div>
           )}
 
           {/* Reference Images */}
           {commission.reference_image_objects?.length > 0 && (
             <div className="pt-4 border-t border-stone-100">
-              <p className="text-xs font-semibold text-stone-500 uppercase tracking-wider mb-3">Reference Images</p>
+              <p className="text-[9px] font-bold text-stone-400 uppercase tracking-wider mb-3">Reference Images</p>
               <div className="flex flex-wrap gap-2">
                 {commission.reference_image_objects.map((ref) => (
                   <a key={ref.id} href={ref.image} target="_blank" rel="noopener noreferrer">
@@ -494,7 +494,7 @@ const CommissionDetail = () => {
           {/* Fallback: URL-based reference images */}
           {commission.reference_image_objects?.length === 0 && commission.reference_images?.length > 0 && (
             <div className="pt-4 border-t border-stone-100">
-              <p className="text-xs font-semibold text-stone-500 uppercase tracking-wider mb-3">Reference Images</p>
+              <p className="text-[9px] font-bold text-stone-400 uppercase tracking-wider mb-3">Reference Images</p>
               <div className="flex flex-wrap gap-2">
                 {commission.reference_images.map((url, i) => (
                   <a key={i} href={url} target="_blank" rel="noopener noreferrer">
@@ -512,8 +512,8 @@ const CommissionDetail = () => {
 
         {/* Deliverables */}
         {commission.deliverables?.length > 0 && (
-            <div className="rounded-lg border border-stone-200 bg-white p-6">
-            <h2 className="text-sm font-semibold text-stone-500 uppercase tracking-wider mb-4">
+            <div className="rounded-xl border border-stone-200 bg-white p-6">
+            <h2 className="text-[9px] font-bold text-stone-400 uppercase tracking-wider mb-4">
               Deliverables ({commission.deliverables.length})
             </h2>
             <div className="space-y-3">
@@ -529,21 +529,21 @@ const CommissionDetail = () => {
 
           {/* Artist — Pending: Accept or Decline */}
           {isArtist && commission.status === 'pending' && (
-        <div className="rounded-lg border border-stone-200 bg-white p-5">
-              <h3 className="text-sm font-semibold text-stone-700 mb-1">Respond to Request</h3>
-              <p className="text-xs text-stone-500 mb-4">Review the brief above before accepting or declining.</p>
+        <div className="rounded-xl border border-stone-200 bg-white p-5">
+              <h3 className="text-[13px] font-semibold text-stone-800 mb-1">Respond to Request</h3>
+              <p className="text-[11px] text-stone-400 mb-4">Review the brief above before accepting or declining.</p>
               <div className="flex gap-3">
                 <button
                   onClick={() => handleAction('accept')}
                   disabled={actionLoading}
-                  className="flex-1 rounded-lg bg-emerald-600 px-4 py-3 text-sm font-semibold text-white hover:bg-emerald-700 transition disabled:opacity-50"
+                  className="flex-1 rounded-lg bg-emerald-600 px-4 py-2.5 text-[13px] font-medium text-white hover:bg-emerald-700 transition disabled:opacity-50"
                 >
                   {actionLoading ? 'Processing...' : 'Accept Commission'}
                 </button>
                 <button
                   onClick={() => setShowDeclineModal(true)}
                   disabled={actionLoading}
-                  className="flex-1 rounded-lg border border-red-200 bg-white px-4 py-3 text-sm font-semibold text-red-600 hover:bg-red-50 transition disabled:opacity-50"
+                  className="flex-1 rounded-lg border border-stone-200 bg-white px-4 py-2.5 text-[13px] font-medium text-stone-600 hover:bg-stone-50 transition disabled:opacity-50"
                 >
                   Decline
                 </button>
@@ -553,13 +553,13 @@ const CommissionDetail = () => {
 
           {/* Artist — Accepted: Start Work */}
           {isArtist && commission.status === 'accepted' && (
-            <div className="rounded-lg border border-blue-100 bg-blue-50 p-5">
-              <h3 className="text-sm font-semibold text-blue-800 mb-1">Ready to start?</h3>
-              <p className="text-xs text-blue-600 mb-4">Click below to mark this commission as in progress and let the customer know you've started.</p>
+            <div className="rounded-xl border border-blue-200 bg-blue-50 p-5">
+              <h3 className="text-[13px] font-semibold text-blue-800 mb-1">Ready to start?</h3>
+              <p className="text-[11px] text-blue-600 mb-4">Click below to mark this commission as in progress and let the customer know you've started.</p>
               <button
                 onClick={() => handleAction('start')}
                 disabled={actionLoading}
-                className="w-full rounded-lg bg-blue-600 px-4 py-3 text-sm font-semibold text-white hover:bg-blue-700 transition disabled:opacity-50"
+                className="w-full rounded-lg bg-blue-600 px-4 py-2.5 text-[13px] font-medium text-white hover:bg-blue-700 transition disabled:opacity-50"
               >
                 {actionLoading ? 'Updating...' : 'Start Working'}
               </button>
@@ -568,14 +568,14 @@ const CommissionDetail = () => {
 
           {/* Artist — In Progress or Accepted: Upload Deliverable */}
           {isArtist && (commission.status === 'accepted' || commission.status === 'in_progress') && (
-          <div className="rounded-lg border border-stone-200 bg-white p-6">
-              <h3 className="text-sm font-semibold text-stone-800 mb-1">Upload Deliverable</h3>
-              <p className="text-xs text-stone-500 mb-4">
+          <div className="rounded-xl border border-stone-200 bg-white p-6">
+              <h3 className="text-[13px] font-semibold text-stone-800 mb-1">Upload Deliverable</h3>
+              <p className="text-[11px] text-stone-400 mb-4">
                 Supported: PDF, PNG, JPG, WEBP, ZIP (max 50 MB).
                 This is revision {commission.current_revision + 1} of {commission.revision_limit}.
               </p>
               <div className="space-y-3">
-                <label className={`block rounded-lg border-2 border-dashed p-4 cursor-pointer transition ${deliverFile ? 'border-amber-400 bg-amber-50' : 'border-stone-200 hover:border-stone-400'}`}>
+                <label className={`block rounded-xl border-2 border-dashed p-4 cursor-pointer transition ${deliverFile ? 'border-amber-400 bg-amber-50' : 'border-stone-200 hover:border-stone-400'}`}>
                   <input
                     type="file"
                     accept=".pdf,.png,.jpg,.jpeg,.webp,.zip"
@@ -597,13 +597,13 @@ const CommissionDetail = () => {
                     <div className="min-w-0">
                       {deliverFile ? (
                         <>
-                          <p className="text-sm font-semibold text-stone-900 truncate">{deliverFile.name}</p>
-                          <p className="text-xs text-stone-500">{(deliverFile.size / (1024 * 1024)).toFixed(2)} MB</p>
+                          <p className="text-[13px] font-medium text-stone-900 truncate">{deliverFile.name}</p>
+                          <p className="text-[11px] text-stone-400">{(deliverFile.size / (1024 * 1024)).toFixed(2)} MB</p>
                         </>
                       ) : (
                         <>
-                          <p className="text-sm font-medium text-stone-600">Click to choose file</p>
-                          <p className="text-xs text-stone-400">PDF, PNG, JPG, WEBP, ZIP up to 50 MB</p>
+                          <p className="text-[13px] font-medium text-stone-600">Click to choose file</p>
+                          <p className="text-[11px] text-stone-400">PDF, PNG, JPG, WEBP, ZIP up to 50 MB</p>
                         </>
                       )}
                     </div>
@@ -614,12 +614,12 @@ const CommissionDetail = () => {
                   onChange={(e) => setDeliverNotes(e.target.value)}
                   placeholder="Notes about this deliverable — what changed, what to review, etc. (optional)"
                   rows={2}
-                  className="w-full rounded-lg border border-stone-200 bg-white px-4 py-3 text-sm text-stone-900 placeholder-stone-400 focus:border-stone-400 focus:outline-none focus:ring-1 focus:ring-stone-400"
+                  className="w-full rounded-lg border border-stone-200 bg-white px-4 py-3 text-[13px] text-stone-900 placeholder-stone-400 focus:border-stone-400 focus:outline-none focus:ring-1 focus:ring-stone-400"
                 />
                 <button
                   onClick={handleDeliver}
                   disabled={actionLoading || !deliverFile}
-                  className="w-full rounded-lg bg-[#000] px-4 py-3 text-sm font-semibold text-white hover:bg-stone-800 transition disabled:opacity-50"
+                  className="w-full rounded-lg bg-stone-900 px-4 py-2.5 text-[13px] font-medium text-white hover:bg-stone-800 transition disabled:opacity-50"
                 >
                   {actionLoading ? 'Uploading...' : 'Upload Deliverable'}
                 </button>
@@ -629,9 +629,9 @@ const CommissionDetail = () => {
 
           {/* Customer — Delivered: Approve or Revision */}
           {isCustomer && commission.status === 'delivered' && (
-            <div className="rounded-lg border border-orange-100 bg-orange-50 p-5">
-              <h3 className="text-sm font-semibold text-orange-800 mb-1">Review Delivered Work</h3>
-              <p className="text-xs text-orange-700 mb-4">
+            <div className="rounded-xl border border-orange-200 bg-orange-50 p-5">
+              <h3 className="text-[13px] font-semibold text-orange-800 mb-1">Review Delivered Work</h3>
+              <p className="text-[11px] text-orange-600 mb-4">
                 The artist has submitted their work. Download the latest deliverable above and let them know your decision.
                 {commission.current_revision >= commission.revision_limit && (
                   <span className="font-semibold"> You have used all your revision requests.</span>
@@ -641,7 +641,7 @@ const CommissionDetail = () => {
                 <button
                   onClick={() => handleAction('approve')}
                   disabled={actionLoading}
-                  className="flex-1 rounded-lg bg-emerald-600 px-4 py-3 text-sm font-semibold text-white hover:bg-emerald-700 transition disabled:opacity-50"
+                  className="flex-1 rounded-lg bg-emerald-600 px-4 py-2.5 text-[13px] font-medium text-white hover:bg-emerald-700 transition disabled:opacity-50"
                 >
                   {actionLoading ? 'Processing...' : 'Approve Work'}
                 </button>
@@ -649,7 +649,7 @@ const CommissionDetail = () => {
                   <button
                     onClick={() => handleAction('revision')}
                     disabled={actionLoading}
-                    className="flex-1 rounded-lg border border-stone-200 bg-white px-4 py-3 text-sm font-semibold text-stone-700 hover:bg-stone-50 transition disabled:opacity-50"
+                    className="flex-1 rounded-lg border border-stone-200 bg-white px-4 py-2.5 text-[13px] font-medium text-stone-600 hover:bg-stone-50 transition disabled:opacity-50"
                   >
                     Request Revision ({commission.revision_limit - commission.current_revision} left)
                   </button>
@@ -660,14 +660,14 @@ const CommissionDetail = () => {
 
           {/* Completed Banner */}
           {commission.status === 'completed' && (
-            <div className="rounded-lg border border-emerald-100 bg-emerald-50 p-5 text-center">
+            <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-5 text-center">
               <div className="h-10 w-10 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-3">
                 <svg className="h-5 w-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
-              <p className="font-semibold text-emerald-800">Commission Completed!</p>
-              <p className="text-xs text-emerald-600 mt-1">This commission has been successfully delivered and approved.</p>
+              <p className="font-semibold text-[13px] text-emerald-800">Commission Completed!</p>
+              <p className="text-[11px] text-emerald-600 mt-1">This commission has been successfully delivered and approved.</p>
             </div>
           )}
 
@@ -678,25 +678,25 @@ const CommissionDetail = () => {
               {!showCancelConfirm ? (
                 <button
                   onClick={() => setShowCancelConfirm(true)}
-                  className="w-full rounded-lg border border-stone-200 bg-white px-4 py-3 text-sm font-medium text-stone-500 hover:text-red-600 hover:border-red-200 hover:bg-red-50 transition"
+                  className="w-full rounded-xl border border-stone-200 bg-white px-4 py-2.5 text-[13px] font-medium text-stone-400 hover:text-red-600 hover:border-red-200 hover:bg-red-50 transition"
                 >
                   Cancel Commission
                 </button>
               ) : (
-                <div className="rounded-lg border border-red-200 bg-red-50 p-4">
-                  <p className="text-sm font-semibold text-red-800 mb-1">Cancel this commission?</p>
-                  <p className="text-xs text-red-600 mb-4">This action cannot be undone.</p>
+                <div className="rounded-xl border border-red-200 bg-red-50 p-4">
+                  <p className="text-[13px] font-semibold text-red-800 mb-1">Cancel this commission?</p>
+                  <p className="text-[11px] text-red-600 mb-4">This action cannot be undone.</p>
                   <div className="flex gap-3">
                     <button
                       onClick={() => setShowCancelConfirm(false)}
-                      className="flex-1 rounded-lg border border-stone-200 bg-white px-4 py-2.5 text-sm font-medium text-stone-600 hover:bg-stone-50 transition"
+                      className="flex-1 rounded-lg border border-stone-200 bg-white px-4 py-2 text-[13px] font-medium text-stone-600 hover:bg-stone-50 transition"
                     >
                       Keep Commission
                     </button>
                     <button
                       onClick={() => handleAction('cancel')}
                       disabled={actionLoading}
-                      className="flex-1 rounded-lg bg-red-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-red-700 transition disabled:opacity-50"
+                      className="flex-1 rounded-lg bg-red-600 px-4 py-2 text-[13px] font-medium text-white hover:bg-red-700 transition disabled:opacity-50"
                     >
                       {actionLoading ? 'Cancelling...' : 'Yes, Cancel'}
                     </button>
@@ -712,27 +712,27 @@ const CommissionDetail = () => {
         {/* Decline Modal */}
         {showDeclineModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-            <div className="rounded-lg bg-white p-6 border border-stone-200 max-w-md w-full">
-              <h3 className="text-lg font-bold text-stone-900 mb-1">Decline Commission</h3>
-              <p className="text-sm text-stone-500 mb-4">Please provide a reason so the customer understands.</p>
+            <div className="rounded-xl bg-white p-6 border border-stone-200 max-w-md w-full">
+              <h3 className="text-[15px] font-bold text-stone-900 mb-1">Decline Commission</h3>
+              <p className="text-[12px] text-stone-400 mb-4">Please provide a reason so the customer understands.</p>
               <textarea
                 value={declineReason}
                 onChange={(e) => setDeclineReason(e.target.value)}
                 placeholder="e.g., I'm currently fully booked, or this isn't my style..."
                 rows={4}
-                className="w-full rounded-lg border border-stone-200 bg-stone-50 px-4 py-3 text-sm text-stone-900 placeholder-stone-400 focus:border-stone-400 focus:outline-none focus:ring-1 focus:ring-stone-400 mb-4"
+                className="w-full rounded-lg border border-stone-200 bg-stone-50 px-4 py-3 text-[13px] text-stone-900 placeholder-stone-400 focus:border-stone-400 focus:outline-none focus:ring-1 focus:ring-stone-400 mb-4"
               />
               <div className="flex gap-3">
                 <button
                   onClick={() => setShowDeclineModal(false)}
-                  className="flex-1 rounded-lg border border-stone-200 px-4 py-2.5 text-sm font-medium text-stone-600 hover:bg-stone-50 transition"
+                  className="flex-1 rounded-lg border border-stone-200 px-4 py-2.5 text-[13px] font-medium text-stone-600 hover:bg-stone-50 transition"
                 >
                   Go Back
                 </button>
                 <button
                   onClick={() => handleAction('decline', { rejection_reason: declineReason })}
                   disabled={!declineReason.trim() || actionLoading}
-                  className="flex-1 rounded-lg bg-red-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-red-700 transition disabled:opacity-50"
+                  className="flex-1 rounded-lg bg-red-600 px-4 py-2.5 text-[13px] font-medium text-white hover:bg-red-700 transition disabled:opacity-50"
                 >
                   {actionLoading ? 'Declining...' : 'Decline'}
                 </button>

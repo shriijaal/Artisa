@@ -52,3 +52,16 @@ coverage/
 *.egg-info/
 dist/
 build/
+
+# Root-level strays (AI tooling / installs)
+node_modules/
+.agents/
+.tools/
+skills-lock.json
+
+# Local dev logs
+frontend/build-err.txt
+frontend/build-out.txt
+
+# Local account cheat-sheet (contains dev credentials — do not commit)
+ACCOUNTS.md

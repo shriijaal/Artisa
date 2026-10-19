@@ -16,11 +16,11 @@ KHALTI_BASE_URL=https://dev.khalti.com/api/v2
 KHALTI_WEBSITE_URL=http://localhost:5173
 ```
 
-| Setting | Sandbox | Production |
-|---|---|---|
-| `KHALTI_BASE_URL` | `https://dev.khalti.com/api/v2` | `https://khalti.com/api/v2` |
-| `KHALTI_SECRET_KEY` | Live secret key from test-admin.khalti.com | Live secret key from admin.khalti.com |
-| `KHALTI_WEBSITE_URL` | `http://localhost:5173` | Your production domain |
+| Setting                | Sandbox                                    | Production                            |
+| ---------------------- | ------------------------------------------ | ------------------------------------- |
+| `KHALTI_BASE_URL`    | `https://dev.khalti.com/api/v2`          | `https://khalti.com/api/v2`         |
+| `KHALTI_SECRET_KEY`  | Live secret key from test-admin.khalti.com | Live secret key from admin.khalti.com |
+| `KHALTI_WEBSITE_URL` | `http://localhost:5173`                  | Your production domain                |
 
 ## Sandbox Test Credentials
 
@@ -76,12 +76,12 @@ The token binds together `order_id`, `artwork_id`, `user_id`, and `expiry`, so i
 
 ## Key Files
 
-| File | Purpose |
-|---|---|
-| `backend/apps/payments/khalti.py` | Khalti API client (initiate + lookup) |
-| `backend/apps/payments/views.py` | KhaltiInitiateView, KhaltiVerifyView |
-| `backend/apps/payments/models.py` | Payment model |
-| `backend/apps/orders/views.py` | Download token generation + signed file serving |
-| `frontend/src/pages/Checkout.jsx` | Checkout page with address form + Khalti redirect |
-| `frontend/src/pages/PaymentVerify.jsx` | Khalti callback handler |
-| `frontend/src/pages/OrderHistory.jsx` | Order list with signed download buttons |
+| File                                     | Purpose                                           |
+| ---------------------------------------- | ------------------------------------------------- |
+| `backend/apps/payments/khalti.py`      | Khalti API client (initiate + lookup)             |
+| `backend/apps/payments/views.py`       | KhaltiInitiateView, KhaltiVerifyView              |
+| `backend/apps/payments/models.py`      | Payment model                                     |
+| `backend/apps/orders/views.py`         | Download token generation + signed file serving   |
+| `frontend/src/pages/Checkout.jsx`      | Checkout page with address form + Khalti redirect |
+| `frontend/src/pages/PaymentVerify.jsx` | Khalti callback handler                           |
+| `frontend/src/pages/OrderHistory.jsx`  | Order list with signed download buttons           |

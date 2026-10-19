@@ -70,7 +70,7 @@ const Footer = () => {
                 <Link to="/commissions/new" className="text-sm hover:text-[#9c4327] transition-colors">Accept Commissions</Link>
               </li>
               <li>
-                <Link to="/settings/earnings" className="text-sm hover:text-[#9c4327] transition-colors">Earnings</Link>
+                <Link to="/artist/earnings" className="text-sm hover:text-[#9c4327] transition-colors">Earnings</Link>
               </li>
               <li>
                 <Link to="/my-artworks" className="text-sm hover:text-[#9c4327] transition-colors">My Artworks</Link>

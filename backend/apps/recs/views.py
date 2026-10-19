@@ -18,6 +18,15 @@ from apps.users.serializers import UserSerializer, FeaturedArtistSerializer
 logger = logging.getLogger(__name__)
 
 
+def _parse_k(raw, default, cap):
+    """Safely parse a k query param; invalid or non-positive values fall back to the default."""
+    try:
+        k = int(raw)
+    except (TypeError, ValueError):
+        return default
+    return max(1, min(k, cap))
+
+
 class InteractionCreateView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -44,15 +53,15 @@ class RecommendationArtworksView(APIView):
     permission_classes = [AllowAny]
 
     def get(self, request):
-        k = min(int(request.query_params.get('k', 8)), 20)
+        k = _parse_k(request.query_params.get('k', 8), 8, 20)
         user_id = request.user.id if request.user.is_authenticated else None
 
-        # Try cache first
+        # Try cache first (only if fresh)
         if user_id:
             cache = RecommendationCache.objects.filter(
                 user_id=user_id, target_type='artwork'
             ).first()
-            if cache and cache.target_ids:
+            if cache and cache.is_valid():
                 artwork_ids = cache.target_ids[:k]
                 artworks = Artwork.objects.filter(id__in=artwork_ids, status=Artwork.Status.PUBLISHED)
                 # Preserve ordering
@@ -94,13 +103,39 @@ class RecommendationArtistsView(APIView):
     permission_classes = [AllowAny]
 
     def get(self, request):
-        k = min(int(request.query_params.get('k', 4)), 10)
+        k = _parse_k(request.query_params.get('k', 4), 4, 10)
         user_id = request.user.id if request.user.is_authenticated else None
+
+        # Try cache first (only if fresh)
+        if user_id:
+            cache = RecommendationCache.objects.filter(
+                user_id=user_id, target_type='artist'
+            ).first()
+            if cache and cache.is_valid():
+                artist_ids = cache.target_ids[:k]
+                artists = User.objects.filter(id__in=artist_ids, artist_profile__status='approved')
+                id_order = {aid: i for i, aid in enumerate(artist_ids)}
+                artists = sorted(artists, key=lambda a: id_order.get(a.id, 999))
+                return Response(UserSerializer(artists, many=True, context={'request': request}).data)
 
         try:
             engine = get_recommendation_engine()
             artist_ids = engine.get_artist_recommendations(user_id=user_id, k=k)
             artists = User.objects.filter(id__in=artist_ids, artist_profile__status='approved')
+            id_order = {aid: i for i, aid in enumerate(artist_ids)}
+            artists = sorted(artists, key=lambda a: id_order.get(a.id, 999))
+
+            # Write back to cache for authenticated users
+            if user_id and artist_ids:
+                RecommendationCache.objects.update_or_create(
+                    user_id=user_id,
+                    target_type='artist',
+                    defaults={
+                        'target_ids': [str(aid) for aid in artist_ids],
+                        'computed_at': timezone.now(),
+                    },
+                )
+
             return Response(UserSerializer(artists, many=True, context={'request': request}).data)
         except Exception as e:
             logger.error('Artist recommendation error: %s', e)
@@ -115,7 +150,7 @@ class SimilarArtworksView(APIView):
     permission_classes = [AllowAny]
 
     def get(self, request, artwork_id):
-        k = min(int(request.query_params.get('k', 4)), 10)
+        k = _parse_k(request.query_params.get('k', 4), 4, 10)
 
         try:
             engine = get_recommendation_engine()
@@ -219,8 +254,8 @@ class TrendingView(APIView):
 
         return Response({
             'artworks': ArtworkSerializer(artworks, many=True, context={'request': request}).data,
-            'artists': UserSerializer(artists, many=True, context={'request': request}).data,
-            'categories': CategorySerializer(categories, many=True).data,
+            'artists': FeaturedArtistSerializer(artists, many=True, context={'request': request}).data,
+            'categories': CategoryWithArtworksSerializer(categories, many=True).data,
         })
 
 
@@ -258,5 +293,5 @@ class GlobalSearchView(APIView):
         return Response({
             'artworks': ArtworkSerializer(artworks, many=True, context={'request': request}).data,
             'artists': UserSerializer(artists, many=True, context={'request': request}).data,
-            'categories': CategorySerializer(categories, many=True).data,
+            'categories': CategoryWithArtworksSerializer(categories, many=True).data,
         })

@@ -5,6 +5,10 @@ import LoadingSpinner from '../../components/LoadingSpinner';
 import ImageCropModal from '../../components/ImageCropModal';
 import { useToast } from '../../components/Toast';
 import authFetch from '../../utils/authFetch';
+import CustomSelect from '../../components/CustomSelect';
+import { PROVINCES, getDistrictsForProvince } from '../../utils/nepalLocations';
+import RichTextEditor from '../../components/editor/RichTextEditor';
+import { plainTextToHtml, htmlToPlainText } from '../../components/editor/richText';
 
 const SPECIALTIES = [
   'Painting', 'Digital Art', 'Sculpture', 'Photography', 'Illustration',
@@ -45,8 +49,13 @@ const SettingsAccount = () => {
   const [specialties, setSpecialties] = useState([]);
   const [province, setProvince] = useState('');
   const [provinceDirty, setProvinceDirty] = useState(false);
+  const [district, setDistrict] = useState('');
+  const [districtDirty, setDistrictDirty] = useState(false);
   const [socialLinks, setSocialLinks] = useState({ instagram: '', website: '', facebook: '' });
   const [socialDirty, setSocialDirty] = useState(false);
+  const [commissionAvailable, setCommissionAvailable] = useState(false);
+  const [commissionStartingPrice, setCommissionStartingPrice] = useState('');
+  const [commissionDirty, setCommissionDirty] = useState(false);
 
   const [avatarFile, setAvatarFile] = useState(null);
   const [avatarPreview, setAvatarPreview] = useState(null);
@@ -66,10 +75,15 @@ const SettingsAccount = () => {
       if (resProfile.ok) {
         const d = await resProfile.json();
         setProfile(d);
-        setBio(d.bio || '');
+        setBio(plainTextToHtml(d.bio || ''));
         setSpecialties(d.specialties || []);
         setProvince(d.province || '');
+        setDistrict(d.district || '');
         setSocialLinks(d.social_links || { instagram: '', website: '', facebook: '' });
+        setCommissionAvailable(!!d.commission_available);
+        setCommissionStartingPrice(
+          d.commission_starting_price != null ? String(d.commission_starting_price).replace(/\.00$/, '') : ''
+        );
       }
       if (resUser.ok) {
         const u = await resUser.json();
@@ -151,11 +165,21 @@ const SettingsAccount = () => {
       fd.append('social_links', JSON.stringify(socialLinks));
       fd.append('specialties', JSON.stringify(specialties));
       fd.append('province', province);
+      fd.append('district', district);
+      fd.append('commission_available', commissionAvailable ? 'true' : 'false');
+      if (commissionAvailable && commissionStartingPrice !== '') {
+        fd.append('commission_starting_price', commissionStartingPrice);
+      }
       if (coverFile) fd.append('cover_image', coverFile);
       const res = await authFetch('/api/auth/artist/profile/', { method: 'PUT', body: fd });
       if (res.ok) {
         const d = await res.json();
         setProfile(d); setCoverFile(null); setCoverPreview(null); setBioDirty(false); setSocialDirty(false);
+        setProvinceDirty(false); setDistrictDirty(false); setCommissionDirty(false);
+        setCommissionAvailable(!!d.commission_available);
+        setCommissionStartingPrice(
+          d.commission_starting_price != null ? String(d.commission_starting_price).replace(/\.00$/, '') : ''
+        );
         addToast('Profile saved!', 'success');
       } else { const err = await res.json(); addToast(err.error || 'Failed', 'error'); }
     } catch { addToast('Network error', 'error'); }
@@ -243,7 +267,7 @@ const SettingsAccount = () => {
             </div>
           )}
           {isApprovedArtist && bio && (
-            <p className="text-xs text-stone-500 mt-2 line-clamp-2">{bio}</p>
+            <p className="text-xs text-stone-500 mt-2 line-clamp-2">{htmlToPlainText(bio)}</p>
           )}
         </div>
       </div>
@@ -378,9 +402,11 @@ const SettingsAccount = () => {
           {/* Bio */}
           <div className="mb-5">
             <label className="block text-sm font-medium text-stone-700 mb-2">Bio</label>
-            <textarea rows={4} value={bio} onChange={(e) => { setBio(e.target.value); setBioDirty(true); }}
-              className="w-full rounded-lg border border-stone-200 px-3 py-2.5 text-sm focus:border-stone-400 focus:outline-none focus:ring-1 focus:ring-stone-400"
-              placeholder="Tell visitors about yourself, your artistic style, and your journey..." />
+            <RichTextEditor
+              value={bio}
+              onChange={(html) => { setBio(html); setBioDirty(true); }}
+              placeholder="Tell visitors about yourself, your artistic style, and your journey..."
+            />
           </div>
 
           {/* Specialties */}
@@ -405,25 +431,85 @@ const SettingsAccount = () => {
             <p className="text-[11px] text-stone-400 mt-2">Select all that apply to your work.</p>
           </div>
 
-          {/* Province */}
-          <div className="mb-5">
-            <label className="block text-sm font-medium text-stone-700 mb-2">Province</label>
-            <select
-              value={province}
-              onChange={(e) => { setProvince(e.target.value); setProvinceDirty(true); }}
-              className="w-full rounded-lg border border-stone-200 px-3 py-2.5 text-sm focus:border-stone-400 focus:outline-none focus:ring-1 focus:ring-stone-400"
-            >
-              <option value="">Select your province</option>
-              <option value="Koshi">Koshi</option>
-              <option value="Madhesh">Madhesh</option>
-              <option value="Bagmati">Bagmati</option>
-              <option value="Gandaki">Gandaki</option>
-              <option value="Lumbini">Lumbini</option>
-              <option value="Karnali">Karnali</option>
-              <option value="Sudurpashchim">Sudurpashchim</option>
-            </select>
-            <p className="text-[11px] text-stone-400 mt-1">Used to calculate shipping costs for your buyers.</p>
+          {/* Province + District */}
+          <div className="mb-5 grid gap-4 sm:grid-cols-2">
+            <div>
+              <label className="block text-sm font-medium text-stone-700 mb-2">Province</label>
+              <CustomSelect
+                value={province}
+                onChange={(value) => {
+                  setProvince(value);
+                  setProvinceDirty(true);
+                  setDistrict('');
+                  setDistrictDirty(true);
+                }}
+                placeholder="Select your province"
+                options={PROVINCES.map((p) => ({ value: p, label: p }))}
+              />
+              <p className="text-[11px] text-stone-400 mt-1">Used to calculate shipping costs for your buyers.</p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-stone-700 mb-2">District</label>
+              <CustomSelect
+                value={district}
+                onChange={(value) => { setDistrict(value); setDistrictDirty(true); }}
+                disabled={!province}
+                placeholder={province ? 'Select district' : 'Select province first'}
+                options={getDistrictsForProvince(province).map((d) => ({ value: d, label: d }))}
+              />
+              <p className="text-[11px] text-stone-400 mt-1">Used for district-level shipment tracking.</p>
+            </div>
           </div>
+
+          {/* Commissions — approved artists only */}
+          {isApprovedArtist && (
+            <div className="mb-5 rounded-lg border border-stone-200 p-4">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-sm font-medium text-stone-700">Available for commissions</p>
+                  <p className="text-xs text-stone-400 mt-0.5">
+                    When on, customers can request commissions from your profile and the marketplace picker.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={commissionAvailable}
+                  aria-label="Available for commissions"
+                  onClick={() => {
+                    setCommissionAvailable((v) => !v);
+                    setCommissionDirty(true);
+                  }}
+                  className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors ${
+                    commissionAvailable ? 'bg-stone-900' : 'bg-stone-300'
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      commissionAvailable ? 'translate-x-6' : 'translate-x-1'
+                    }`}
+                  />
+                </button>
+              </div>
+              {commissionAvailable && (
+                <div className="mt-3">
+                  <label className="block text-xs font-medium text-stone-500 mb-1">Starting price (NPR)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="100"
+                    value={commissionStartingPrice}
+                    onChange={(e) => {
+                      setCommissionStartingPrice(e.target.value);
+                      setCommissionDirty(true);
+                    }}
+                    placeholder="3000"
+                    className="w-full rounded-lg border border-stone-200 px-3 py-2 text-sm focus:border-stone-400 focus:outline-none focus:ring-1 focus:ring-stone-400"
+                  />
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Social Links */}
           <div className="mb-5">
@@ -441,7 +527,7 @@ const SettingsAccount = () => {
             </div>
           </div>
 
-          {(bioDirty || socialDirty || coverFile || provinceDirty || specialties.length > 0) && (
+          {(bioDirty || socialDirty || coverFile || provinceDirty || districtDirty || commissionDirty || specialties.length > 0) && (
             <div className="flex justify-end pt-2 border-t border-stone-100">
               <button
                 onClick={handleSaveProfile}

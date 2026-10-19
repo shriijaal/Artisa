@@ -37,7 +37,15 @@ const MyArtworks = () => {
     }
   };
 
+  const missingDigitalFile = (artwork) =>
+    artwork.type === 'digital' && !artwork.digital_file;
+
   const handleSubmitForReview = async (id) => {
+    const artwork = artworks.find((a) => a.id === id);
+    if (artwork && missingDigitalFile(artwork)) {
+      addToast('Upload the digital file before submitting this artwork', 'error');
+      return;
+    }
     setSubmitting(true);
     try {
       const response = await authFetch(`/api/artworks/${id}/submit/`, {
@@ -49,7 +57,8 @@ const MyArtworks = () => {
         addToast('Artwork submitted for review', 'success');
         fetchArtworks();
       } else {
-        addToast('Failed to submit artwork', 'error');
+        const err = await response.json().catch(() => ({}));
+        addToast(err.error || 'Failed to submit artwork', 'error');
       }
     } catch (err) {
       console.error('Error submitting artwork:', err);
@@ -186,19 +195,19 @@ const MyArtworks = () => {
 
         {/* Content */}
         {artworks.length === 0 ? (
-          <div className="rounded-lg border border-dashed border-stone-300 bg-white p-16 text-center">
-            <div className="mx-auto mb-4 h-16 w-16 rounded-full bg-stone-100 flex items-center justify-center">
-              <svg className="h-8 w-8 text-stone-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div className="rounded-xl border border-dashed border-stone-200 bg-stone-50/50 p-20 text-center">
+            <div className="mx-auto mb-5 h-14 w-14 rounded-full bg-stone-100 flex items-center justify-center">
+              <svg className="h-7 w-7 text-stone-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
             </div>
-            <h3 className="text-lg font-semibold text-stone-700 mb-1 font-heading">Your Gallery is Empty</h3>
-            <p className="text-stone-500 text-sm max-w-xs mx-auto mb-4">
+            <h3 className="text-[15px] font-semibold text-stone-700 mb-1.5 font-heading">Your Gallery is Empty</h3>
+            <p className="text-stone-400 text-[13px] max-w-xs mx-auto leading-relaxed mb-5">
               Start building your portfolio by uploading your first original physical or digital artwork.
             </p>
             <button
               onClick={() => navigate('/artworks/create')}
-              className="rounded-lg bg-[#000] px-5 py-2.5 text-sm font-semibold text-white hover:bg-stone-800 transition"
+              className="rounded-lg bg-stone-900 px-5 py-2.5 text-[13px] font-medium text-white hover:bg-stone-800 transition"
             >
               + Create First Artwork
             </button>
@@ -215,7 +224,7 @@ const MyArtworks = () => {
                 <div
                   key={artwork.id}
                   onClick={() => navigate(`/artworks/${artwork.id}`)}
-                  className="group cursor-pointer break-inside-avoid rounded-lg overflow-hidden relative bg-stone-100 focus:outline-none focus:ring-2 focus:ring-stone-400 focus:ring-offset-2"
+                  className="group cursor-pointer break-inside-avoid rounded-xl overflow-hidden relative bg-stone-100 focus:outline-none focus:ring-2 focus:ring-stone-400 focus:ring-offset-2"
                   tabIndex={0}
                   onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); navigate(`/artworks/${artwork.id}`); } }}
                 >
@@ -235,17 +244,25 @@ const MyArtworks = () => {
                   )}
 
                   {/* Type pill */}
-                  <div className="absolute top-3 left-3 z-10">
-                    <span className="inline-flex items-center gap-1 rounded-lg bg-white/85 backdrop-blur-md px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.05em] text-stone-800 shadow-sm border border-white/40">
-                      <span className={`h-1.5 w-1.5 rounded-full ${artworkType === 'physical' ? 'bg-[#9c4327]' : 'bg-stone-500'}`} />
+                  <div className="absolute top-2.5 left-2.5 z-10 flex flex-col gap-1 items-start">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-white/90 backdrop-blur-sm px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-stone-600 shadow-sm">
+                      <span className={`h-1.5 w-1.5 rounded-full ${artworkType === 'physical' ? 'bg-stone-700' : 'bg-stone-400'}`} />
                       {artworkType === 'physical' ? 'Physical' : 'Digital'}
                     </span>
+                    {missingDigitalFile(artwork) && (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-amber-50/95 backdrop-blur-sm border border-amber-200 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-amber-700 shadow-sm">
+                        <svg className="h-2.5 w-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M5.07 19h13.86a2 2 0 001.74-3L13.74 4a2 2 0 00-3.48 0L3.34 16a2 2 0 001.73 3z" />
+                        </svg>
+                        No file
+                      </span>
+                    )}
                   </div>
 
                   {/* Status pill — show for non-published */}
                   {artwork.status !== 'published' && (
-                    <div className="absolute top-3 right-3 z-10">
-                      <span className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.05em] shadow-sm ${statusColor(artwork.status)}`}>
+                    <div className="absolute top-2.5 right-2.5 z-10">
+                      <span className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider shadow-sm ${statusColor(artwork.status)}`}>
                         {artwork.status === 'pending_review' && (
                           <span className="relative flex h-1.5 w-1.5">
                             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-400 opacity-75" />
@@ -258,15 +275,23 @@ const MyArtworks = () => {
                   )}
 
                   {/* Hover Overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col justify-end p-4">
-                    <p className="text-white text-sm font-semibold line-clamp-1 font-heading">{artwork.title}</p>
-                    <p className="text-[#fc8d6b] text-xs font-bold mt-0.5">
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col justify-end p-3.5">
+                    <p className="text-white text-[13px] font-semibold line-clamp-1">{artwork.title}</p>
+                    <p className="text-[13px] font-bold text-white/90 mt-0.5">
                       NPR {formatPrice(artwork.price)}
                     </p>
                     {artwork.status === 'draft' && artwork.rejection_reason && (
                       <p className="text-red-300 text-[10px] mt-1.5 line-clamp-2">Rejected: {artwork.rejection_reason}</p>
                     )}
                     <div className="mt-2 flex gap-1.5">
+                      {missingDigitalFile(artwork) && artwork.status === 'draft' && (
+                        <button
+                          onClick={(e) => { e.stopPropagation(); navigate(`/artworks/${artwork.id}/edit`); }}
+                          className="rounded-lg bg-amber-500 px-3 py-1.5 text-[11px] font-bold text-white hover:bg-amber-600 transition-colors"
+                        >
+                          Upload file
+                        </button>
+                      )}
                       {artwork.status === 'draft' && (
                         <>
                           <button
@@ -322,18 +347,18 @@ const MyArtworks = () => {
           </div>
         ) : (
           /* List View — compact editorial rows */
-          <div className="grid gap-px bg-stone-200 rounded-lg overflow-hidden border border-stone-200">
+          <div className="grid gap-px bg-stone-100 rounded-xl overflow-hidden border border-stone-200">
             {artworks.map((artwork) => {
               const primaryImage = artwork.images?.find((img) => img.is_primary) || artwork.images?.[0];
               return (
                 <div
                   key={artwork.id}
-                  className="group bg-white flex items-center gap-4 px-4 py-3 hover:bg-stone-50 transition-colors focus:outline-none focus:ring-2 focus:ring-inset focus:ring-stone-400"
+                  className="group bg-white flex items-center gap-5 px-5 py-3.5 hover:bg-stone-50/80 transition-colors focus:outline-none focus:ring-2 focus:ring-inset focus:ring-stone-400"
                   tabIndex={0}
                   onKeyDown={(e) => { if (e.key === 'Enter') navigate(`/artworks/${artwork.id}`); }}
                 >
                   {/* Thumbnail */}
-                  <div className="h-14 w-14 flex-shrink-0 rounded-lg overflow-hidden bg-stone-100">
+                  <div className="h-12 w-12 flex-shrink-0 rounded-lg overflow-hidden bg-stone-100">
                     {primaryImage ? (
                       <img src={primaryImage.image} alt="" className="h-full w-full object-cover" loading="lazy" />
                     ) : (
@@ -347,23 +372,29 @@ const MyArtworks = () => {
 
                   {/* Info */}
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2.5">
                       <h3
-                        className="text-sm font-semibold text-stone-900 truncate cursor-pointer hover:text-[#9c4327] transition-colors"
+                        className="text-[13px] font-semibold text-stone-900 truncate cursor-pointer hover:text-stone-600 transition-colors"
                         onClick={() => navigate(`/artworks/${artwork.id}`)}
                       >
                         {artwork.title}
                       </h3>
-                      <span className="text-[10px] font-bold uppercase tracking-[0.05em] text-stone-400">
+                      <span className="text-[9px] font-bold uppercase tracking-wider text-stone-400">
                         {artwork.type === 'physical' ? 'Physical' : 'Digital'}
                       </span>
                     </div>
                     <div className="flex items-center gap-2 mt-0.5">
-                      <span className="text-xs text-stone-500">NPR {formatPrice(artwork.price)}</span>
+                      <span className="text-[13px] text-stone-500">NPR {formatPrice(artwork.price)}</span>
+                      {missingDigitalFile(artwork) && (
+                        <>
+                          <span className="text-stone-300">·</span>
+                          <span className="text-[9px] font-bold uppercase tracking-wider text-amber-600">No digital file</span>
+                        </>
+                      )}
                       {artwork.status !== 'published' && (
                         <>
                           <span className="text-stone-300">·</span>
-                          <span className={`inline-flex items-center gap-1 rounded-full px-1.5 py-px text-[10px] font-semibold uppercase tracking-[0.03em] ${statusColor(artwork.status)}`}>
+                          <span className={`inline-flex items-center gap-1 rounded-full px-1.5 py-px text-[9px] font-bold uppercase tracking-wider ${statusColor(artwork.status)}`}>
                             {artwork.status === 'pending_review' && (
                               <span className="relative flex h-1.5 w-1.5">
                                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-400 opacity-75" />
@@ -377,7 +408,7 @@ const MyArtworks = () => {
                       {artwork.status === 'published' && (
                         <>
                           <span className="text-stone-300">·</span>
-                          <span className="text-[10px] font-semibold uppercase tracking-[0.05em] text-emerald-600">Published</span>
+                          <span className="text-[9px] font-bold uppercase tracking-wider text-emerald-600">Published</span>
                         </>
                       )}
                     </div>
@@ -390,22 +421,30 @@ const MyArtworks = () => {
                   <div className="flex items-center gap-2 flex-shrink-0">
                     <button
                       onClick={() => navigate(`/artworks/${artwork.id}/edit`)}
-                      className="rounded-lg border border-stone-200 px-3 py-1.5 text-[11px] font-medium text-stone-600 hover:bg-stone-50 transition-colors"
+                      className="rounded-lg border border-stone-200 px-3 py-1.5 text-[12px] font-medium text-stone-600 hover:bg-stone-50 transition-colors"
                     >
                       Edit
                     </button>
+                    {missingDigitalFile(artwork) && artwork.status !== 'draft' && (
+                      <button
+                        onClick={() => navigate(`/artworks/${artwork.id}/edit`)}
+                        className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-1.5 text-[12px] font-medium text-amber-700 hover:bg-amber-100 transition-colors"
+                      >
+                        Upload file
+                      </button>
+                    )}
                     {artwork.status === 'draft' && (
                       <>
                         <button
                           onClick={() => handleSubmitForReview(artwork.id)}
                           disabled={submitting}
-                          className="rounded-lg bg-[#000] px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-stone-800 disabled:opacity-50 transition-colors"
+                          className="rounded-lg bg-stone-900 px-3 py-1.5 text-[12px] font-medium text-white hover:bg-stone-800 disabled:opacity-50 transition-colors"
                         >
                           Submit
                         </button>
                         <button
                           onClick={() => deleteArtwork(artwork.id)}
-                          className="rounded-lg border border-stone-200 px-3 py-1.5 text-[11px] font-medium text-red-600 hover:bg-red-50 transition-colors"
+                          className="rounded-lg border border-stone-200 px-3 py-1.5 text-[12px] font-medium text-red-600 hover:bg-red-50 transition-colors"
                         >
                           Delete
                         </button>
@@ -415,13 +454,13 @@ const MyArtworks = () => {
                       <>
                         <button
                           onClick={() => cancelSubmission(artwork.id)}
-                          className="rounded-lg border border-stone-200 px-3 py-1.5 text-[11px] font-medium text-stone-600 hover:bg-stone-50 transition-colors"
+                          className="rounded-lg border border-stone-200 px-3 py-1.5 text-[12px] font-medium text-stone-600 hover:bg-stone-50 transition-colors"
                         >
                           Cancel
                         </button>
                         <button
                           onClick={() => deleteArtwork(artwork.id)}
-                          className="rounded-lg border border-stone-200 px-3 py-1.5 text-[11px] font-medium text-red-600 hover:bg-red-50 transition-colors"
+                          className="rounded-lg border border-stone-200 px-3 py-1.5 text-[12px] font-medium text-red-600 hover:bg-red-50 transition-colors"
                         >
                           Delete
                         </button>
@@ -430,7 +469,7 @@ const MyArtworks = () => {
                     {artwork.status === 'published' && (
                       <button
                         onClick={() => navigate(`/artworks/${artwork.id}`)}
-                        className="rounded-lg border border-stone-200 px-3 py-1.5 text-[11px] font-medium text-stone-600 hover:bg-stone-50 transition-colors"
+                        className="rounded-lg border border-stone-200 px-3 py-1.5 text-[12px] font-medium text-stone-600 hover:bg-stone-50 transition-colors"
                       >
                         View
                       </button>

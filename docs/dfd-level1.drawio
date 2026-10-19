@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2026-09-18T00:00:00.000Z" agent="5.0" version="24.0.0" type="device">
+  <diagram name="DFD Level 1" id="dfd-level1">
+    <mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="900" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        <!-- Title -->
+        <mxCell id="title" value="Artisa - DFD Level 1 (Major Processes) — Gane &amp; Sarson Notation" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=16;fontStyle=1;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="350" y="20" width="600" height="40" as="geometry"/>
+        </mxCell>
+
+        <!-- ===== EXTERNAL ENTITIES ===== -->
+
+        <!-- Customer (left) -->
+        <mxCell id="entity_customer" value="Customer" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="30" y="350" width="120" height="50" as="geometry"/>
+        </mxCell>
+
+        <!-- Artist/Vendor (top-right) -->
+        <mxCell id="entity_artist" value="Artist/Vendor" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="950" y="80" width="120" height="50" as="geometry"/>
+        </mxCell>
+
+        <!-- Admin (bottom-right) -->
+        <mxCell id="entity_admin" value="Admin" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="950" y="580" width="120" height="50" as="geometry"/>
+        </mxCell>
+
+        <!-- Khalti Gateway (right) -->
+        <mxCell id="entity_khalti" value="Khalti Gateway" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="950" y="350" width="120" height="50" as="geometry"/>
+        </mxCell>
+
+        <!-- ===== PROCESSES ===== -->
+
+        <!-- Process 1.0: User Management (Row 1, Col 1) -->
+        <mxCell id="proc1" value="1.0&#xa;User Management" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;size=0.15;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="250" y="120" width="160" height="90" as="geometry"/>
+        </mxCell>
+
+        <!-- Process 2.0: Artwork Management (Row 1, Col 2) -->
+        <mxCell id="proc2" value="2.0&#xa;Artwork Management" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;size=0.15;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="500" y="120" width="160" height="90" as="geometry"/>
+        </mxCell>
+
+        <!-- Process 3.0: Order Management (Row 1, Col 3) -->
+        <mxCell id="proc3" value="3.0&#xa;Order Management" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;size=0.15;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="750" y="120" width="160" height="90" as="geometry"/>
+        </mxCell>
+
+        <!-- Process 4.0: Commission Management (Row 2, Col 1) -->
+        <mxCell id="proc4" value="4.0&#xa;Commission Management" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;size=0.15;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="250" y="400" width="160" height="90" as="geometry"/>
+        </mxCell>
+
+        <!-- Process 5.0: Messaging System (Row 2, Col 2) -->
+        <mxCell id="proc5" value="5.0&#xa;Messaging System" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;size=0.15;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="500" y="400" width="160" height="90" as="geometry"/>
+        </mxCell>
+
+        <!-- Process 6.0: Payment Processing (Row 2, Col 3) -->
+        <mxCell id="proc6" value="6.0&#xa;Payment Processing" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;size=0.15;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="750" y="400" width="160" height="90" as="geometry"/>
+        </mxCell>
+
+        <!-- ===== DATA STORES ===== -->
+
+        <!-- D1: Users DB -->
+        <mxCell id="ds1" value="D1 Users DB" style="shape=store;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="150" y="680" width="140" height="50" as="geometry"/>
+        </mxCell>
+
+        <!-- D2: Artworks DB -->
+        <mxCell id="ds2" value="D2 Artworks DB" style="shape=store;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="350" y="680" width="140" height="50" as="geometry"/>
+        </mxCell>
+
+        <!-- D3: Orders DB -->
+        <mxCell id="ds3" value="D3 Orders DB" style="shape=store;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="550" y="680" width="140" height="50" as="geometry"/>
+        </mxCell>
+
+        <!-- D4: Commissions DB -->
+        <mxCell id="ds4" value="D4 Commissions DB" style="shape=store;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="750" y="680" width="140" height="50" as="geometry"/>
+        </mxCell>
+
+        <!-- D5: Messages DB -->
+        <mxCell id="ds5" value="D5 Messages DB" style="shape=store;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="950" y="680" width="140" height="50" as="geometry"/>
+        </mxCell>
+
+        <!-- ===== DATA FLOWS (SOLID = Inputs) ===== -->
+
+        <!-- Customer -> Process 1.0: Register / Login -->
+        <mxCell id="flow1" value="Register / Login" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontSize=10;strokeColor=#000000;strokeWidth=1;endArrow=classic;endFill=1;" edge="1" source="entity_customer" target="proc1" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Process 1.0 -> D1: Store User Data -->
+        <mxCell id="flow2" value="Store User Data" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontSize=10;strokeColor=#000000;strokeWidth=1;endArrow=classic;endFill=1;" edge="1" source="proc1" target="ds1" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Customer -> Process 2.0: Browse / Search -->
+        <mxCell id="flow3" value="Browse / Search" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontSize=10;strokeColor=#000000;strokeWidth=1;endArrow=classic;endFill=1;" edge="1" source="entity_customer" target="proc2" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Process 2.0 -> D2: Query Artworks -->
+        <mxCell id="flow4" value="Query Artworks" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontSize=10;strokeColor=#000000;strokeWidth=1;endArrow=classic;endFill=1;" edge="1" source="proc2" target="ds2" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Artist/Vendor -> Process 2.0: Upload / Edit Artwork -->
+        <mxCell id="flow5" value="Upload / Edit Artwork" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontSize=10;strokeColor=#000000;strokeWidth=1;endArrow=classic;endFill=1;" edge="1" source="entity_artist" target="proc2" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Process 2.0 -> D2: Store Artwork -->
+        <mxCell id="flow6" value="Store Artwork" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontSize=10;strokeColor=#000000;strokeWidth=1;endArrow=classic;endFill=1;" edge="1" source="proc2" target="ds2" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Customer -> Process 3.0: Place Order -->
+        <mxCell id="flow7" value="Place Order" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontSize=10;strokeColor=#000000;strokeWidth=1;endArrow=classic;endFill=1;" edge="1" source="entity_customer" target="proc3" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Process 3.0 -> D3: Create Order -->
+        <mxCell id="flow8" value="Create Order" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontSize=10;strokeColor=#000000;strokeWidth=1;endArrow=classic;endFill=1;" edge="1" source="proc3" target="ds3" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Artist/Vendor -> Process 3.0: Accept / Reject / Ship -->
+        <mxCell id="flow9" value="Accept / Reject / Ship" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontSize=10;strokeColor=#000000;strokeWidth=1;endArrow=classic;endFill=1;" edge="1" source="entity_artist" target="proc3" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Process 3.0 -> D3: Update Order Status -->
+        <mxCell id="flow10" value="Update Order Status" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontSize=10;strokeColor=#000000;strokeWidth=1;endArrow=classic;endFill=1;" edge="1" source="proc3" target="ds3" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Customer -> Process 4.0: Submit Commission -->
+        <mxCell id="flow11" value="Submit Commission" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontSize=10;strokeColor=#000000;strokeWidth=1;endArrow=classic;endFill=1;" edge="1" source="entity_customer" target="proc4" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Artist/Vendor -> Process 4.0: Accept / Deliver -->
+        <mxCell id="flow12" value="Accept / Deliver" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontSize=10;strokeColor=#000000;strokeWidth=1;endArrow=classic;endFill=1;" edge="1" source="entity_artist" target="proc4" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Process 4.0 -> D4: Store Commission -->
+        <mxCell id="flow13" value="Store Commission" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontSize=10;strokeColor=#000000;strokeWidth=1;endArrow=classic;endFill=1;" edge="1" source="proc4" target="ds4" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- ===== DATA FLOWS (DASHED = Outputs / Bidirectional) ===== -->
+
+        <!-- Customer <-> Process 5.0: Send / Receive Messages (bidirectional) -->
+        <mxCell id="flow14" value="Send / Receive Messages" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontSize=10;strokeColor=#000000;strokeWidth=1;dashed=1;endArrow=classic;endFill=1;startArrow=classic;startFill=1;" edge="1" source="entity_customer" target="proc5" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Artist/Vendor <-> Process 5.0: Send / Receive Messages (bidirectional) -->
+        <mxCell id="flow15" value="Send / Receive Messages" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontSize=10;strokeColor=#000000;strokeWidth=1;dashed=1;endArrow=classic;endFill=1;startArrow=classic;startFill=1;" edge="1" source="entity_artist" target="proc5" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Process 5.0 -> D5: Store Messages -->
+        <mxCell id="flow16" value="Store Messages" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontSize=10;strokeColor=#000000;strokeWidth=1;dashed=1;endArrow=classic;endFill=1;" edge="1" source="proc5" target="ds5" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Process 3.0 -> Process 6.0: Initiate Payment -->
+        <mxCell id="flow17" value="Initiate Payment" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontSize=10;strokeColor=#000000;strokeWidth=1;dashed=1;endArrow=classic;endFill=1;" edge="1" source="proc3" target="proc6" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Process 6.0 <-> Khalti Gateway: Process Payment (bidirectional) -->
+        <mxCell id="flow18" value="Process Payment" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontSize=10;strokeColor=#000000;strokeWidth=1;dashed=1;endArrow=classic;endFill=1;startArrow=classic;startFill=1;" edge="1" source="proc6" target="entity_khalti" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Process 6.0 -> D3: Update Payment Status -->
+        <mxCell id="flow19" value="Update Payment Status" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontSize=10;strokeColor=#000000;strokeWidth=1;dashed=1;endArrow=classic;endFill=1;" edge="1" source="proc6" target="ds3" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- ===== ADMIN DATA FLOWS (SOLID = Inputs) ===== -->
+
+        <!-- Admin -> Process 1.0: Manage Users -->
+        <mxCell id="flow20" value="Manage Users" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontSize=10;strokeColor=#000000;strokeWidth=1;endArrow=classic;endFill=1;" edge="1" source="entity_admin" target="proc1" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Admin -> Process 2.0: Approve / Reject -->
+        <mxCell id="flow21" value="Approve / Reject" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontSize=10;strokeColor=#000000;strokeWidth=1;endArrow=classic;endFill=1;" edge="1" source="entity_admin" target="proc2" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Admin -> Process 3.0: View Orders -->
+        <mxCell id="flow22" value="View Orders" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontSize=10;strokeColor=#000000;strokeWidth=1;endArrow=classic;endFill=1;" edge="1" source="entity_admin" target="proc3" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

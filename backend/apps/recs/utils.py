@@ -14,6 +14,15 @@ INTERACTION_WEIGHTS = {
 DEDUPED_TYPES = {'view', 'profile_view'}
 DEDUP_WINDOW = timedelta(hours=1)
 
+# Significant interactions invalidate cached recommendations (docs/recommendations.md)
+INVALIDATING_WEIGHT_THRESHOLD = 3.0
+
+
+def invalidate_user_cache(user):
+    """Drop cached recommendations so the next request recomputes."""
+    from apps.recs.models import RecommendationCache
+    RecommendationCache.objects.filter(user=user).delete()
+
 
 def log_interaction(user, target_type, target_id, interaction_type):
     """Create a UserInteraction with correct weight, deduplicating rapid repeat views/profile views."""
@@ -33,7 +42,7 @@ def log_interaction(user, target_type, target_id, interaction_type):
             return None
 
     try:
-        return UserInteraction.objects.create(
+        interaction = UserInteraction.objects.create(
             user=user,
             target_type=target_type,
             target_id=target_id,
@@ -42,3 +51,8 @@ def log_interaction(user, target_type, target_id, interaction_type):
         )
     except Exception:
         return None
+
+    if weight >= INVALIDATING_WEIGHT_THRESHOLD:
+        invalidate_user_cache(user)
+
+    return interaction

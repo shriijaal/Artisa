@@ -79,28 +79,14 @@ const ArtistEarnings = () => {
 
         {/* Premium Dashboard Metrics Cards */}
         <div className="grid gap-6 sm:grid-cols-2 mb-10">
-          <div className="rounded-lg border border-stone-200 bg-white p-6 flex items-center gap-4">
-            <div className="h-12 w-12 rounded-full bg-stone-100 flex items-center justify-center text-stone-700">
-              <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-            <div>
-              <span className="text-xs font-semibold text-stone-400 uppercase tracking-wider block">Total Revenue</span>
-              <span className="text-3xl font-bold text-stone-950">NPR {earningsData.total_earnings.toFixed(2)}</span>
-            </div>
+          <div className="rounded-lg border border-stone-200 bg-white p-6">
+            <span className="text-xs font-semibold text-stone-400 uppercase tracking-wider block mb-1">Total Revenue</span>
+            <span className="text-3xl font-bold text-stone-950">NPR {earningsData.total_earnings.toFixed(2)}</span>
           </div>
 
-          <div className="rounded-lg border border-stone-200 bg-white p-6 flex items-center gap-4">
-            <div className="h-12 w-12 rounded-full bg-stone-100 flex items-center justify-center text-stone-700">
-              <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-              </svg>
-            </div>
-            <div>
-              <span className="text-xs font-semibold text-stone-400 uppercase tracking-wider block">Units Sold</span>
-              <span className="text-3xl font-bold text-stone-950">{earningsData.sales_count}</span>
-            </div>
+          <div className="rounded-lg border border-stone-200 bg-white p-6">
+            <span className="text-xs font-semibold text-stone-400 uppercase tracking-wider block mb-1">Units Sold</span>
+            <span className="text-3xl font-bold text-stone-950">{earningsData.sales_count}</span>
           </div>
         </div>
 

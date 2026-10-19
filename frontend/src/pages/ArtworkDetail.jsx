@@ -9,6 +9,9 @@ import { useToast } from '../components/Toast';
 import { trackInteraction } from '../services/api';
 import authFetch from '../utils/authFetch';
 import RecommendedCarousel from '../components/RecommendedCarousel';
+import ProtectedImage from '../components/ProtectedImage';
+import RichTextView from '../components/editor/RichTextView';
+import CommissionPill from '../components/CommissionPill';
 
 const StarRating = ({ rating, size = 'sm', interactive = false, onChange }) => {
   const [hover, setHover] = useState(0);
@@ -58,6 +61,8 @@ const ArtworkDetail = () => {
   const [submittingReview, setSubmittingReview] = useState(false);
   const [purchasedItemId, setPurchasedItemId] = useState(null);
   const [hasReviewed, setHasReviewed] = useState(false);
+  const [downloadAccess, setDownloadAccess] = useState(null); // { orderId, itemId }
+  const [downloading, setDownloading] = useState(false);
   const [activeTab, setActiveTab] = useState('description');
 
   // Inquiry modal state
@@ -138,21 +143,65 @@ const ArtworkDetail = () => {
       const res = await authFetch('/api/orders/');
       if (res.ok) {
         const orders = await res.json();
+        let downloadFound = false;
         for (const order of orders) {
-          if (order.status === 'delivered' || order.status === 'completed') {
-            for (const item of order.items || []) {
-              if (item.artwork?.id === id) {
-                const alreadyReviewed = reviews.some(r => r.artwork === id);
-                if (!alreadyReviewed) {
-                  setPurchasedItemId(item.id);
-                }
-                return;
+          if (order.payment_status !== 'paid') continue;
+          for (const item of order.items || []) {
+            if (item.artwork?.id !== id) continue;
+            if (!downloadFound && item.artwork?.type === 'digital') {
+              setDownloadAccess({ orderId: order.id, itemId: item.id });
+              downloadFound = true;
+            }
+            if (order.status === 'delivered' || order.status === 'completed') {
+              const alreadyReviewed = reviews.some(r => r.artwork === id);
+              if (!alreadyReviewed && !purchasedItemId) {
+                setPurchasedItemId(item.id);
               }
             }
           }
+          if (downloadFound && purchasedItemId) return;
         }
       }
     } catch {}
+  };
+
+  const downloadDigitalFile = async () => {
+    if (!downloadAccess && !isOwner) return;
+    setDownloading(true);
+    try {
+      let fileRes;
+      if (downloadAccess) {
+        const tokenRes = await authFetch(`/api/orders/${downloadAccess.orderId}/download-token/${downloadAccess.itemId}/`, {
+          method: 'POST',
+        });
+        const tokenData = await tokenRes.json();
+        if (!tokenRes.ok) {
+          addToast(tokenData.error || 'Could not generate download link.', 'error');
+          return;
+        }
+        fileRes = await authFetch(tokenData.download_url);
+      } else {
+        fileRes = await authFetch(`/api/artworks/my-artworks/${artwork.id}/digital-file/download/`);
+      }
+      if (!fileRes.ok) {
+        const d = await fileRes.json().catch(() => ({}));
+        addToast(d.error || 'Download failed.', 'error');
+        return;
+      }
+      const blob = await fileRes.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      const cd = fileRes.headers.get('content-disposition') || '';
+      const fnameMatch = cd.match(/filename="?([^";]+)"?/);
+      a.download = fnameMatch?.[1] || artwork.title || 'download';
+      a.click();
+      window.URL.revokeObjectURL(url);
+    } catch {
+      addToast('Download failed.', 'error');
+    } finally {
+      setDownloading(false);
+    }
   };
 
   const handleSubmitReview = async (e) => {
@@ -372,6 +421,9 @@ const ArtworkDetail = () => {
   const hasMultipleImages = images.length > 1;
   const isPhysical = artwork.type === 'physical';
   const hasDimensions = isPhysical && (artwork.width || artwork.height || artwork.depth);
+  const isPublished = artwork.status === 'published';
+  const isOwner = user && artwork.artist?.id === user.id;
+  const canDownloadDigital = artwork.type === 'digital' && !!downloadAccess;
 
   return (
     <div className="min-h-screen bg-[#faf9f7]">
@@ -438,11 +490,12 @@ const ArtworkDetail = () => {
             {/* Main Image */}
             <div className="relative aspect-[4/5] overflow-hidden rounded-lg bg-stone-100">
               {currentImage ? (
-                <img
+                <ProtectedImage
                   key={currentImage.id}
                   src={currentImage.image}
                   alt={artwork.title}
                   className="absolute inset-0 h-full w-full object-cover animate-[fadeIn_0.4s_ease-out]"
+                  loading="eager"
                   style={{ animation: 'fadeIn 0.4s ease-out' }}
                 />
               ) : (
@@ -472,7 +525,7 @@ const ArtworkDetail = () => {
                         : 'opacity-40 hover:opacity-70 ring-1 ring-stone-200'
                     }`}
                   >
-                    <img
+                    <ProtectedImage
                       src={image.image}
                       alt=""
                       className="h-full w-full object-cover"
@@ -502,20 +555,27 @@ const ArtworkDetail = () => {
                       addToast('Link copied to clipboard', 'success');
                     }
                   }}
-                  className="rounded-full p-2.5 bg-stone-100 text-stone-400 hover:bg-stone-200 hover:text-stone-600 transition"
+                  disabled={!isPublished}
+                  className={`rounded-full p-2.5 transition ${
+                    !isPublished
+                      ? 'bg-stone-100 text-stone-300 cursor-not-allowed'
+                      : 'bg-stone-100 text-stone-400 hover:bg-stone-200 hover:text-stone-600'
+                  }`}
                   title="Share"
                 >
                   <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368 2.684z" />
                   </svg>
                 </button>
                 <button
                   onClick={toggleFavorite}
-                  disabled={favoriteLoading}
+                  disabled={!isPublished || favoriteLoading}
                   className={`rounded-full p-2.5 transition ${
-                    isFavorite
-                      ? 'bg-red-100 text-red-600 hover:bg-red-200'
-                      : 'bg-stone-100 text-stone-400 hover:bg-stone-200 hover:text-stone-600'
+                    !isPublished
+                      ? 'bg-stone-100 text-stone-300 cursor-not-allowed'
+                      : isFavorite
+                        ? 'bg-red-100 text-red-600 hover:bg-red-200'
+                        : 'bg-stone-100 text-stone-400 hover:bg-stone-200 hover:text-stone-600'
                   }`}
                 >
                   <svg className="h-5 w-5" fill={isFavorite ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24">
@@ -539,6 +599,13 @@ const ArtworkDetail = () => {
                 <svg className="h-4 w-4 text-emerald-500 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
                   <path fillRule="evenodd" clipRule="evenodd" d="M8.603 3.799A4.49 4.49 0 0112 2.25c1.357 0 2.573.6 3.397 1.549a4.49 4.49 0 013.498 1.307 4.491 4.491 0 011.307 3.497A4.49 4.49 0 0121.75 12a4.49 4.49 0 01-1.549 3.397 4.491 4.491 0 01-1.307 3.497 4.491 4.491 0 01-3.497 1.307A4.49 4.49 0 0112 21.75a4.49 4.49 0 01-3.397-1.549 4.49 4.49 0 01-3.498-1.306 4.491 4.491 0 01-1.307-3.498A4.49 4.49 0 012.25 12c0-1.357.6-2.573 1.549-3.397a4.49 4.49 0 011.307-3.497 4.49 4.49 0 013.497-1.307zm7.007 6.387a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z" />
                 </svg>
+              )}
+              {artwork.artist.artist_profile?.commission_available && (
+                <CommissionPill
+                  price={artwork.artist.artist_profile.commission_starting_price}
+                  estimatedDays={artwork.artist.artist_profile.commission_estimated_days}
+                  className="flex-shrink-0"
+                />
               )}
             </div>
 
@@ -605,23 +672,49 @@ const ArtworkDetail = () => {
 
             {/* Action Buttons */}
             <div className="mt-7 space-y-3">
+              {(canDownloadDigital || (isOwner && artwork.type === 'digital')) && (
+                <button
+                  onClick={downloadDigitalFile}
+                  disabled={downloading}
+                  className="w-full rounded-lg bg-[#9c4327] px-6 py-3.5 text-sm font-semibold text-white hover:bg-[#7a3520] disabled:opacity-50 transition"
+                >
+                  {downloading
+                    ? 'Preparing download...'
+                    : isOwner && !canDownloadDigital
+                      ? 'Download Your File'
+                      : 'Download Digital File'}
+                </button>
+              )}
               <button
                 onClick={isInCart ? () => navigate('/cart') : addToCart}
-                disabled={addingToCart}
+                disabled={!isPublished || addingToCart}
                 className={`w-full rounded-lg px-6 py-3.5 text-sm font-semibold transition ${
-                  isInCart
-                    ? 'bg-stone-200 text-stone-500 cursor-default'
-                    : 'bg-stone-900 text-white hover:bg-stone-800 disabled:opacity-50'
+                  !isPublished
+                    ? 'bg-stone-200 text-stone-400 cursor-not-allowed'
+                    : isInCart
+                      ? 'bg-stone-200 text-stone-500 cursor-default'
+                      : 'bg-stone-900 text-white hover:bg-stone-800 disabled:opacity-50'
                 }`}
               >
-                {addingToCart ? 'Adding...' : isInCart ? 'In Cart — View Cart' : 'Add to Cart'}
+                {!isPublished
+                  ? 'Unavailable'
+                  : addingToCart
+                    ? 'Adding...'
+                    : isInCart
+                      ? 'In Cart — View Cart'
+                      : 'Add to Cart'}
               </button>
               <button
                 onClick={() => {
                   if (!user) { navigate('/login'); return; }
                   navigate(`/checkout?buy_now=${artwork.id}`);
                 }}
-                className="w-full rounded-lg border border-stone-900 px-6 py-3.5 text-sm font-semibold text-stone-900 hover:bg-stone-900 hover:text-white transition"
+                disabled={!isPublished}
+                className={`w-full rounded-lg border px-6 py-3.5 text-sm font-semibold transition ${
+                  !isPublished
+                    ? 'border-stone-200 text-stone-400 bg-stone-100 cursor-not-allowed'
+                    : 'border-stone-900 text-stone-900 hover:bg-stone-900 hover:text-white'
+                }`}
               >
                 Purchase Now
               </button>
@@ -630,7 +723,12 @@ const ArtworkDetail = () => {
                   if (!user) { navigate('/login'); return; }
                   openInquiryModal();
                 }}
-                className="w-full text-center text-sm font-medium text-stone-500 hover:text-stone-900 transition py-1"
+                disabled={!isPublished}
+                className={`w-full text-center text-sm font-medium transition py-1 ${
+                  !isPublished
+                    ? 'text-stone-400 cursor-not-allowed'
+                    : 'text-stone-500 hover:text-stone-900'
+                }`}
               >
                 Contact for Inquiry →
               </button>
@@ -723,7 +821,7 @@ const ArtworkDetail = () => {
           <div className="py-6">
             {activeTab === 'description' ? (
               <div>
-                <p className="text-sm text-stone-700 leading-relaxed whitespace-pre-wrap">{artwork.description}</p>
+                <RichTextView html={artwork.description} />
 
                 {/* Tags — inline at bottom */}
                 {artwork.tags && artwork.tags.length > 0 && (
@@ -765,10 +863,19 @@ const ArtworkDetail = () => {
                         <path fillRule="evenodd" clipRule="evenodd" d="M8.603 3.799A4.49 4.49 0 0112 2.25c1.357 0 2.573.6 3.397 1.549a4.49 4.49 0 013.498 1.307 4.491 4.491 0 011.307 3.497A4.49 4.49 0 0121.75 12a4.49 4.49 0 01-1.549 3.397 4.491 4.491 0 01-1.307 3.497 4.491 4.491 0 01-3.497 1.307A4.49 4.49 0 0112 21.75a4.49 4.49 0 01-3.397-1.549 4.49 4.49 0 01-3.498-1.306 4.491 4.491 0 01-1.307-3.498A4.49 4.49 0 012.25 12c0-1.357.6-2.573 1.549-3.397a4.49 4.49 0 011.307-3.497 4.49 4.49 0 013.497-1.307zm7.007 6.387a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z" />
                       </svg>
                     )}
+                    {artwork.artist.artist_profile?.commission_available && (
+                      <CommissionPill
+                        price={artwork.artist.artist_profile.commission_starting_price}
+                        estimatedDays={artwork.artist.artist_profile.commission_estimated_days}
+                        className="flex-shrink-0"
+                      />
+                    )}
                   </div>
-                  <p className="mt-1 text-sm text-stone-600 leading-relaxed">
-                    {artwork.artist.artist_profile?.bio || 'No artist statement available.'}
-                  </p>
+                  <div className="mt-1 text-sm text-stone-600 leading-relaxed">
+                    {artwork.artist.artist_profile?.bio
+                      ? <RichTextView html={artwork.artist.artist_profile.bio} className="text-stone-600" />
+                      : 'No artist statement available.'}
+                  </div>
                   <button
                     onClick={() => navigate(`/artists/${artwork.artist.username}`)}
                     className="mt-3 text-sm font-medium text-stone-900 underline underline-offset-4 decoration-stone-300 hover:decoration-stone-900 transition-colors"
@@ -940,7 +1047,7 @@ const ArtworkDetail = () => {
                 <div className="flex items-center gap-4 px-6 py-4 bg-stone-50/50">
                   <div className="h-14 w-14 flex-shrink-0 overflow-hidden rounded-lg bg-stone-100">
                     {artwork.images?.[0]?.image ? (
-                      <img src={artwork.images[0].image} alt="" className="h-full w-full object-cover" />
+                      <ProtectedImage src={artwork.images[0].image} alt="" className="h-full w-full object-cover" />
                     ) : (
                       <div className="flex h-full w-full items-center justify-center text-stone-300 text-xs">?</div>
                     )}

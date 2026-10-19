@@ -1,0 +1,163 @@
+<mxfile>
+  <diagram name="DFD Level 2" id="dfd-level2">
+    <mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="900" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- Title -->
+        <mxCell id="title" value="Artisa - DFD Level 2 (Order Management Detail) — Gane &amp; Sarson Notation" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=16;fontStyle=1;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="400" y="10" width="540" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== External Entities ==================== -->
+        <mxCell id="customer" value="Customer" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="30" y="300" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="artist" value="Artist/Vendor" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="950" y="80" width="130" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="khalti" value="Khalti Gateway" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="950" y="380" width="140" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== Sub-Processes Row 1 ==================== -->
+        <mxCell id="p31" value="&lt;b&gt;3.1&lt;/b&gt;&lt;br&gt;Validate Cart Items" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;size=0.15;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="250" y="100" width="160" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="p32" value="&lt;b&gt;3.2&lt;/b&gt;&lt;br&gt;Calculate Shipping" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;size=0.15;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="500" y="100" width="160" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="p33" value="&lt;b&gt;3.3&lt;/b&gt;&lt;br&gt;Create Order" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;size=0.15;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="750" y="100" width="160" height="90" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== Sub-Processes Row 2 ==================== -->
+        <mxCell id="p34" value="&lt;b&gt;3.4&lt;/b&gt;&lt;br&gt;Process Payment" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;size=0.15;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="250" y="380" width="160" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="p35" value="&lt;b&gt;3.5&lt;/b&gt;&lt;br&gt;Update Order Status" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;size=0.15;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="500" y="380" width="160" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="p36" value="&lt;b&gt;3.6&lt;/b&gt;&lt;br&gt;Send Notifications" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;size=0.15;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="750" y="380" width="160" height="90" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== Data Stores ==================== -->
+        <mxCell id="d1" value="D1 Cart DB" style="shape=store;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="100" y="650" width="130" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="d2" value="D2 Artworks DB" style="shape=store;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="280" y="650" width="130" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="d3" value="D3 Orders DB" style="shape=store;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="460" y="650" width="130" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="d4" value="D4 OrderItems DB" style="shape=store;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="640" y="650" width="130" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="d5" value="D5 Shipping Rates DB" style="shape=store;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="820" y="650" width="160" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="d6" value="D6 Payments DB" style="shape=store;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="1020" y="650" width="140" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== Data Flows: Solid (inputs) ==================== -->
+
+        <!-- Customer -> 3.1: Submit Cart -->
+        <mxCell id="f1" value="Submit Cart" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontSize=9;" edge="1" source="customer" target="p31" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- 3.1 -> D1: Read Cart Items -->
+        <mxCell id="f2" value="Read Cart Items" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;exitX=0.25;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;fontSize=9;" edge="1" source="p31" target="d1" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- 3.1 -> D2: Verify Stock -->
+        <mxCell id="f3" value="Verify Stock" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;fontSize=9;" edge="1" source="p31" target="d2" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- 3.1 -> 3.2: Valid Items -->
+        <mxCell id="f4" value="Valid Items" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontSize=9;" edge="1" source="p31" target="p32" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- 3.2 -> D5: Query Rates -->
+        <mxCell id="f5" value="Query Rates" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;exitX=0.75;exitY=1;exitDx=0;exitDy=0;entryX=0.25;entryY=0;entryDx=0;entryDy=0;fontSize=9;" edge="1" source="p32" target="d5" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- 3.2 -> 3.3: Shipping Cost -->
+        <mxCell id="f6" value="Shipping Cost" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontSize=9;" edge="1" source="p32" target="p33" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- 3.3 -> D3: Save Order -->
+        <mxCell id="f7" value="Save Order" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;exitX=0.25;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;fontSize=9;" edge="1" source="p33" target="d3" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- 3.3 -> D4: Save Order Items -->
+        <mxCell id="f8" value="Save Order Items" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;fontSize=9;" edge="1" source="p33" target="d4" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- 3.3 -> D1: Clear Cart -->
+        <mxCell id="f9" value="Clear Cart" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;exitX=0;exitY=1;exitDx=0;exitDy=0;entryX=1;entryY=0;entryDx=0;entryDy=0;fontSize=9;" edge="1" source="p33" target="d1" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- 3.3 -> 3.4: Order Created -->
+        <mxCell id="f10" value="Order Created" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;exitX=0;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0;entryDx=0;entryDy=0;fontSize=9;" edge="1" source="p33" target="p34" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- 3.4 -> Khalti: Initiate Payment -->
+        <mxCell id="f11" value="Initiate Payment" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontSize=9;" edge="1" source="p34" target="khalti" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Khalti -> 3.4: Payment URL (solid - input to process) -->
+        <mxCell id="f12" value="Payment URL" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;exitX=0;exitY=1;exitDx=0;exitDy=0;entryX=1;entryY=1;entryDx=0;entryDy=0;fontSize=9;" edge="1" source="khalti" target="p34" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- 3.4 -> D6: Save Payment Record -->
+        <mxCell id="f13" value="Save Payment Record" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.25;entryY=0;entryDx=0;entryDy=0;fontSize=9;" edge="1" source="p34" target="d6" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- 3.4 -> 3.5: Payment Verified -->
+        <mxCell id="f14" value="Payment Verified" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontSize=9;" edge="1" source="p34" target="p35" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- 3.5 -> D3: Update to Processing -->
+        <mxCell id="f15" value="Update to Processing" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;exitX=0;exitY=1;exitDx=0;exitDy=0;entryX=1;entryY=0;entryDx=0;entryDy=0;fontSize=9;" edge="1" source="p35" target="d3" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- 3.5 -> 3.6: Order Confirmed -->
+        <mxCell id="f16" value="Order Confirmed" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontSize=9;" edge="1" source="p35" target="p36" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== Data Flows: Dashed (outputs) ==================== -->
+
+        <!-- 3.6 -> Customer: Confirmation Email (dashed) -->
+        <mxCell id="f17" value="Confirmation Email" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;dashed=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0;entryDx=0;entryDy=0;fontSize=9;" edge="1" source="p36" target="customer" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- 3.6 -> Artist/Vendor: New Order Alert (dashed) -->
+        <mxCell id="f18" value="New Order Alert" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;dashed=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=1;entryDx=0;entryDy=0;fontSize=9;" edge="1" source="p36" target="artist" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

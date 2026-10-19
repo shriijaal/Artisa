@@ -30,6 +30,19 @@ def auto_cancel_stale_pending():
         commission.rejection_reason = 'Auto-cancelled: artist did not respond within the allowed time.'
         commission.save()
         try:
+            from apps.notifications.models import Notification
+            from apps.notifications.utils import create_notification
+            create_notification(
+                recipient=commission.customer,
+                actor=None,
+                kind=Notification.Kind.COMMISSION_CANCELLED,
+                title='Commission auto-cancelled',
+                body=f'"{commission.title}" was cancelled because the artist did not respond in time',
+                link=f'/commissions/{commission.id}',
+            )
+        except Exception:
+            logger.warning(f'Failed to create auto-cancel notification for commission {commission.id}')
+        try:
             from apps.core.email import _send
             from django.conf import settings
             _send(

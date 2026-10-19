@@ -18,22 +18,22 @@ flowchart TD
     System[Artisa System]
     Khalti[Khalti Payment Gateway]
     Email[Email Service]
-    
+  
     User -->|Register/Login| System
     User -->|Browse Artworks| System
     User -->|Place Order| System
     User -->|Request Commission| System
     User -->|Send Messages| System
     User -->|Write Reviews| System
-    
+  
     System -->|Display Recommendations| User
     System -->|Order Confirmations| User
     System -->|Commission Updates| User
     System -->|Messages| User
-    
+  
     System -->|Payment Request| Khalti
     Khalti -->|Payment Response| System
-    
+  
     System -->|Notifications| Email
     Email -->|Delivery Status| System
 ```
@@ -50,24 +50,24 @@ flowchart TD
     ArtistProfile[Artist Profile Service]
     ArtistDB[(Artist Database)]
     Email[Email Service]
-    
+  
     User -->|Register Data| Auth
     Auth -->|Validate| Auth
     Auth -->|Store User| UserDB
     UserDB -->|Confirmation| Auth
     Auth -->|Send Welcome Email| Email
     Auth -->|Success Response| User
-    
+  
     User -->|Login Credentials| Auth
     Auth -->|Verify| UserDB
     UserDB -->|User Data| Auth
     Auth -->|JWT Token| User
-    
+  
     User -->|Artist Application| ArtistProfile
     ArtistProfile -->|Store Application| ArtistDB
     ArtistDB -->|Application Status| ArtistProfile
     ArtistProfile -->|Status Update| User
-    
+  
     User -->|Profile Update| ArtistProfile
     ArtistProfile -->|Update Profile| ArtistDB
     ArtistDB -->|Confirmation| ArtistProfile
@@ -92,12 +92,12 @@ flowchart TD
     PaymentDB[(Payment Database)]
     Email[Email Service]
     Artist[Artist]
-    
+  
     Customer -->|Add to Cart| Cart
     Cart -->|Store Item| CartDB
     CartDB -->|Confirmation| Cart
     Cart -->|Updated Cart| Customer
-    
+  
     Customer -->|Checkout| Order
     Order -->|Get Cart Items| CartDB
     CartDB -->|Cart Data| Order
@@ -105,7 +105,7 @@ flowchart TD
     Inventory -->|Stock Status| ArtworkDB
     ArtworkDB -->|Availability| Inventory
     Inventory -->|Stock Info| Order
-    
+  
     Order -->|Create Order| OrderDB
     OrderDB -->|Order ID| Order
     Order -->|Initiate Payment| Payment
@@ -114,7 +114,7 @@ flowchart TD
     Payment -->|Store Transaction| PaymentDB
     PaymentDB -->|Payment Status| Payment
     Payment -->|Payment Result| Order
-    
+  
     Order -->|Update Order Status| OrderDB
     OrderDB -->|Order Confirmation| Order
     Order -->|Send Confirmation Email| Email
@@ -140,30 +140,30 @@ flowchart TD
     PaymentDB[(Payment Database)]
     Khalti[Khalti Payment Gateway]
     Email[Email Service]
-    
+  
     Customer -->|Submit Request| Commission
     Commission -->|Store Request| CommissionDB
     CommissionDB -->|Request ID| Commission
     Commission -->|Notification| Artist
     Commission -->|Request Confirmation| Customer
-    
+  
     Artist -->|Accept/Reject| Commission
     Commission -->|Update Status| CommissionDB
     CommissionDB -->|Status Update| Commission
     Commission -->|Status Notification| Customer
-    
+  
     Customer -->|Send Message| Message
     Artist -->|Send Message| Message
     Message -->|Store Message| MessageDB
     MessageDB -->|Message Confirmation| Message
     Message -->|New Message| Customer
     Message -->|New Message| Artist
-    
+  
     Artist -->|Submit Deliverable| Deliverable
     Deliverable -->|Store File| FileDB
     Deliverable -->|Link to Commission| CommissionDB
     Deliverable -->|Deliverable Notification| Customer
-    
+  
     Customer -->|Approve Deliverable| Commission
     Commission -->|Update Status| CommissionDB
     Commission -->|Initiate Payment| Payment
@@ -190,23 +190,23 @@ flowchart TD
     Khalti[Khalti Payment Gateway]
     Bank[Bank / Khalti System]
     Email[Email Service]
-    
+  
     Order -->|Payment Initiation| Payment
     Payment -->|Create Payment Record| PaymentDB
     PaymentDB -->|Payment ID| Payment
     Payment -->|Redirect to Khalti| User
-    
+  
     User -->|Payment Details| Khalti
     Khalti -->|Process Payment| Bank
     Bank -->|Bank Response| Khalti
     Khalti -->|Payment Result| User
-    
+  
     User -->|Return to App| Payment
     Payment -->|Verify Transaction| Khalti
     Khalti -->|Transaction Status| Payment
     Payment -->|Update Payment Status| PaymentDB
     PaymentDB -->|Status Confirmation| Payment
-    
+  
     Payment -->|Update Order Status| OrderDB
     OrderDB -->|Order Update| Payment
     Payment -->|Send Receipt Email| Email
@@ -229,7 +229,7 @@ flowchart TD
     RecCache[(Recommendation Cache)]
     ArtworkDB[(Artwork Database)]
     UserDB[(User Database)]
-    
+  
     User -->|Browse / View / Favorite| Frontend
     Frontend -->|Log Interaction| API
     API -->|Store Interaction| Interaction
@@ -237,30 +237,30 @@ flowchart TD
     InteractionDB -->|Confirmation| Interaction
     Interaction -->|Success| API
     API -->|Continue| Frontend
-    
+  
     User -->|Request Recommendations| Frontend
     Frontend -->|Get Recommendations| API
     API -->|Check Cache| RecCache
     RecCache -->|Cache Hit/Miss| API
-    
+  
     API -->|Fetch User Data| UserDB
     UserDB -->|User Profile| API
     API -->|Fetch Interaction History| InteractionDB
     InteractionDB -->|User Interactions| API
     API -->|Fetch Artwork Data| ArtworkDB
     ArtworkDB -->|Artwork Metadata| API
-    
+  
     API -->|Compute Recommendations| RecEngine
     RecEngine -->|CBF Score Calculation| RecEngine
     RecEngine -->|CF Score Calculation| RecEngine
     RecEngine -->|Hybrid Merge| RecEngine
     RecEngine -->|Ranked Recommendations| API
-    
+  
     API -->|Update Cache| RecCache
     RecCache -->|Cached Results| API
     API -->|Recommendations| Frontend
     Frontend -->|Display Recommendations| User
-    
+  
     API -->|Schedule Recomputation| RecEngine
     RecEngine -->|Background Job| RecEngine
     RecEngine -->|Update All Caches| RecCache
@@ -272,40 +272,41 @@ flowchart TD
 
 ### Data Stores
 
-| Data Store | Description | Key Fields |
-|------------|-------------|------------|
-| User Database | Stores user accounts, profiles, authentication data | user_id, username, email, role, artist_profile |
-| Artist Database | Stores artist profiles, applications, verification data | artist_id, user_id, status, portfolio_samples |
-| Cart Database | Stores user shopping cart items | cart_item_id, user_id, artwork_id, quantity |
-| Order Database | Stores orders, order items, shipping info | order_id, customer_id, status, total |
-| Artwork Database | Stores artworks, categories, tags, images | artwork_id, artist_id, title, price, status |
-| Payment Database | Stores payment transactions, Khalti integration | payment_id, transaction_id, amount, status |
-| Commission Database | Stores commission requests, deliverables | commission_id, customer_id, artist_id, status |
-| Message Database | Stores user-to-user messages | message_id, sender_id, receiver_id, body |
-| Interaction Database | Stores user interaction data for recommendations | interaction_id, user_id, target_type, interaction_type |
-| Recommendation Cache | Stores pre-computed recommendations | cache_id, user_id, target_ids, computed_at |
-| File Database | Stores uploaded files (images, digital files) | file_id, artwork_id, file_path, file_type |
+| Data Store           | Description                                             | Key Fields                                             |
+| -------------------- | ------------------------------------------------------- | ------------------------------------------------------ |
+| User Database        | Stores user accounts, profiles, authentication data     | user_id, username, email, role, artist_profile         |
+| Artist Database      | Stores artist profiles, applications, verification data | artist_id, user_id, status, portfolio_samples          |
+| Cart Database        | Stores user shopping cart items                         | cart_item_id, user_id, artwork_id, quantity            |
+| Order Database       | Stores orders, order items, shipping info               | order_id, customer_id, status, total                   |
+| Artwork Database     | Stores artworks, categories, tags, images               | artwork_id, artist_id, title, price, status            |
+| Payment Database     | Stores payment transactions, Khalti integration         | payment_id, transaction_id, amount, status             |
+| Commission Database  | Stores commission requests, deliverables                | commission_id, customer_id, artist_id, status          |
+| Message Database     | Stores user-to-user messages                            | message_id, sender_id, receiver_id, body               |
+| Interaction Database | Stores user interaction data for recommendations        | interaction_id, user_id, target_type, interaction_type |
+| Recommendation Cache | Stores pre-computed recommendations                     | cache_id, user_id, target_ids, computed_at             |
+| File Database        | Stores uploaded files (images, digital files)           | file_id, artwork_id, file_path, file_type              |
 
 ### Data Flows
 
-| Data Flow | Source | Destination | Description |
-|-----------|--------|-------------|-------------|
-| Register Data | User | Auth Service | User registration information |
-| JWT Token | Auth Service | User | Authentication token |
-| Cart Data | Cart Database | Order Service | Items to be purchased |
-| Payment Request | Payment Service | Khalti | Initiate payment transaction |
-| Payment Response | Khalti | Payment Service | Payment completion status |
-| Order Confirmation | Order Service | User | Order details and status |
-| Commission Request | Customer | Commission Service | New commission request details |
-| Deliverable File | Artist | Deliverable Service | Commission deliverable file |
-| Recommendation Data | Recommendation Engine | API | Ranked list of recommended items |
-| Interaction Log | Frontend | Interaction Service | User activity for recommendations |
+| Data Flow           | Source                | Destination         | Description                       |
+| ------------------- | --------------------- | ------------------- | --------------------------------- |
+| Register Data       | User                  | Auth Service        | User registration information     |
+| JWT Token           | Auth Service          | User                | Authentication token              |
+| Cart Data           | Cart Database         | Order Service       | Items to be purchased             |
+| Payment Request     | Payment Service       | Khalti              | Initiate payment transaction      |
+| Payment Response    | Khalti                | Payment Service     | Payment completion status         |
+| Order Confirmation  | Order Service         | User                | Order details and status          |
+| Commission Request  | Customer              | Commission Service  | New commission request details    |
+| Deliverable File    | Artist                | Deliverable Service | Commission deliverable file       |
+| Recommendation Data | Recommendation Engine | API                 | Ranked list of recommended items  |
+| Interaction Log     | Frontend              | Interaction Service | User activity for recommendations |
 
 ---
 
 ## Process Descriptions
 
 ### User Management Process
+
 1. User submits registration data
 2. Auth service validates input
 3. User stored in database
@@ -314,6 +315,7 @@ flowchart TD
 6. For artist application: profile created, stored, status tracked
 
 ### Order Processing Process
+
 1. User adds items to cart
 2. Cart service stores items
 3. User initiates checkout
@@ -326,6 +328,7 @@ flowchart TD
 10. Artist notified of new order
 
 ### Commission Workflow Process
+
 1. Customer submits commission request
 2. Commission stored in database
 3. Artist notified of request
@@ -338,6 +341,7 @@ flowchart TD
 10. Artist paid
 
 ### Payment Processing Process
+
 1. Order service initiates payment
 2. Payment record created
 3. User redirected to Khalti
@@ -350,6 +354,7 @@ flowchart TD
 10. Receipt email sent
 
 ### Recommendation Process
+
 1. User interacts with platform (view, favorite, purchase)
 2. Interaction logged to database
 3. User requests recommendations
@@ -367,6 +372,7 @@ flowchart TD
 ## Security Considerations
 
 ### Data Flow Security
+
 - All API calls authenticated via JWT
 - Sensitive data encrypted in transit (HTTPS)
 - Payment data handled by Khalti (PCI compliance)
@@ -374,6 +380,7 @@ flowchart TD
 - File uploads validated for type and size
 
 ### Access Control
+
 - Role-based access control (RBAC)
 - Artist-specific data protected
 - Admin-only access to verification documents
@@ -385,18 +392,21 @@ flowchart TD
 ## Performance Considerations
 
 ### Caching Strategy
+
 - Recommendation cache pre-computed
 - Artwork data cached for marketplace
 - User session data cached
 - Static assets CDN cached
 
 ### Database Optimization
+
 - Indexes on frequently queried fields
 - Connection pooling
 - Query optimization for recommendations
 - Separate read replicas for heavy read operations
 
 ### Background Processing
+
 - Recommendation computation as background job
 - Email sending via queue
 - File processing (thumbnails) async
@@ -407,6 +417,7 @@ flowchart TD
 ## Error Handling
 
 ### Data Flow Errors
+
 - Payment failures: retry logic, user notification
 - Stock shortages: real-time validation, user notification
 - API failures: graceful degradation, error logging
@@ -414,6 +425,7 @@ flowchart TD
 - File upload failures: validation, user feedback
 
 ### Recovery Mechanisms
+
 - Transaction rollback on payment failure
 - Order status reconciliation
 - Interaction data replay for recommendations

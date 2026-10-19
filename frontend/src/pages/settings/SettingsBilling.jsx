@@ -59,7 +59,7 @@ const SettingsBilling = () => {
         ) : (
           <div className="divide-y divide-stone-100">
             {paidOrders.map((order) => (
-              <div key={order.id} className="px-6 py-4 flex items-center justify-between hover:bg-stone-50 transition">
+              <div key={order.id} className="px-6 py-4 flex items-center justify-between hover:bg-stone-50/60 transition">
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2 mb-0.5">
                     <span className="text-sm font-mono text-stone-600">#{String(order.id).slice(0, 8)}</span>

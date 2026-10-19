@@ -3,6 +3,7 @@ from decimal import Decimal
 import hashlib
 import hmac
 import time
+import uuid
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
@@ -28,6 +29,8 @@ from apps.core.email import (
     send_order_cancelled_email,
     send_order_rejected_email,
 )
+from apps.notifications.models import Notification
+from apps.notifications.utils import create_notification
 
 DEFAULT_SHIPPING_COST = Decimal('200.00')
 
@@ -281,6 +284,24 @@ def orders(request):
         cart_items.delete()
 
         send_order_confirmation_email(order)
+        create_notification(
+            recipient=order.customer,
+            actor=request.user,
+            kind=Notification.Kind.ORDER_NEW,
+            title='Order placed',
+            body=f'Your order #{str(order.id)[:8]} was placed successfully',
+            link='/orders',
+            allow_self=True,
+        )
+        for artist in {item.artist for item in order.items.all()}:
+            create_notification(
+                recipient=artist,
+                actor=request.user,
+                kind=Notification.Kind.ORDER_NEW,
+                title='New order received',
+                body=f'{request.user.username} placed an order containing your artwork',
+                link='/artist/orders',
+            )
         return Response(OrderSerializer(order).data, status=status.HTTP_201_CREATED)
 
 
@@ -315,10 +336,21 @@ def mock_pay_order(request, order_id):
         return Response({'message': 'Order is already paid'}, status=status.HTTP_400_BAD_REQUEST)
         
     order.payment_status = Order.PaymentStatus.PAID
-    order.status = Order.Status.PROCESSING
-    order.save()
-    
+    order.save(update_fields=['payment_status'])
+    maybe_deliver_digital_order(order)
+    if order.status == Order.Status.PENDING:
+        order.status = Order.Status.PROCESSING
+        order.save(update_fields=['status'])
     send_payment_confirmation_email(order)
+    create_notification(
+        recipient=order.customer,
+        actor=request.user,
+        kind=Notification.Kind.PAYMENT_CONFIRMED,
+        title='Payment confirmed',
+        body=f'Your payment for order #{str(order.id)[:8]} was confirmed',
+        link='/orders',
+        allow_self=True,
+    )
 
     # Log purchase interactions
     from apps.recs.utils import log_interaction
@@ -362,6 +394,15 @@ def cancel_order(request, order_id):
     order.save()
 
     send_order_cancelled_email(order, cancelled_by=request.user)
+    for artist in {item.artist for item in order.items.all()}:
+        create_notification(
+            recipient=artist,
+            actor=request.user,
+            kind=Notification.Kind.ORDER_CANCELLED,
+            title='Order cancelled',
+            body=f'Order #{str(order.id)[:8]} was cancelled by {request.user.username}',
+            link='/artist/orders',
+        )
     return Response({'message': 'Order cancelled successfully'})
 
 
@@ -386,6 +427,15 @@ def artist_accept_order(request, order_id):
 
     order.status = Order.Status.PROCESSING
     order.save()
+
+    create_notification(
+        recipient=order.customer,
+        actor=request.user,
+        kind=Notification.Kind.ORDER_ACCEPTED,
+        title='Order accepted',
+        body=f'{request.user.username} accepted your order #{str(order.id)[:8]}',
+        link='/orders',
+    )
 
     return Response({'message': 'Order accepted successfully', 'status': order.status})
 
@@ -423,6 +473,14 @@ def artist_reject_order(request, order_id):
     order.save()
 
     send_order_rejected_email(order, artist=request.user, reason=reason)
+    create_notification(
+        recipient=order.customer,
+        actor=request.user,
+        kind=Notification.Kind.ORDER_REJECTED,
+        title='Order rejected',
+        body=f'{request.user.username} rejected your order #{str(order.id)[:8]}: {reason}',
+        link='/orders',
+    )
     return Response({'message': 'Order rejected successfully'})
 
 
@@ -449,6 +507,9 @@ def update_shipment(request, shipment_id):
     
     if shipment_status not in OrderShipment.Status.values:
         return Response({'error': 'Invalid status'}, status=status.HTTP_400_BAD_REQUEST)
+    
+    if shipment_status == OrderShipment.Status.SHIPPED and not shipment.tracking_number:
+        tracking_number = f'ART-{uuid.uuid4().hex[:8].upper()}'
         
     shipment.tracking_number = tracking_number
     shipment.status = shipment_status
@@ -469,10 +530,26 @@ def update_shipment(request, shipment_id):
         order.status = Order.Status.DELIVERED
         order.save()
         send_delivery_notification_email(order, shipment)
+        create_notification(
+            recipient=order.customer,
+            actor=request.user,
+            kind=Notification.Kind.ORDER_DELIVERED,
+            title='Order delivered',
+            body=f'Order #{str(order.id)[:8]} has been delivered',
+            link='/orders',
+        )
     elif all(s and s.status in [OrderShipment.Status.SHIPPED, OrderShipment.Status.DELIVERED] for s in shipments):
         order.status = Order.Status.SHIPPED
         order.save()
         send_shipping_notification_email(order, shipment)
+        create_notification(
+            recipient=order.customer,
+            actor=request.user,
+            kind=Notification.Kind.ORDER_SHIPPED,
+            title='Order shipped',
+            body=f'Order #{str(order.id)[:8]} has been shipped',
+            link='/orders',
+        )
         
     return Response(OrderShipmentSerializer(shipment).data)
 
@@ -507,10 +584,23 @@ def artist_earnings(request):
 
 # --- SECURE DIGITAL DOWNLOAD VIEWS ---
 
-def _generate_download_token(order_id, artwork_id, user_id):
-    """Generate an HMAC-signed, time-limited download token."""
+def maybe_deliver_digital_order(order):
+    """Mark pure-digital paid orders as delivered immediately (no shipping)."""
+    items = list(order.items.select_related('artwork'))
+    if not items:
+        return False
+    if all(item.artwork.type == Artwork.Type.DIGITAL for item in items):
+        if order.status != Order.Status.DELIVERED:
+            order.status = Order.Status.DELIVERED
+            order.save(update_fields=['status'])
+        return True
+    return False
+
+
+def _generate_download_token(order_id, item_id, user_id):
+    """Generate an HMAC-signed, time-limited download token bound to order item."""
     expiry = int(time.time()) + settings.DOWNLOAD_TOKEN_EXPIRY_SECONDS
-    payload = f'{order_id}:{artwork_id}:{user_id}:{expiry}'
+    payload = f'{order_id}:{item_id}:{user_id}:{expiry}'
     sig = hmac.new(
         settings.DOWNLOAD_TOKEN_SECRET.encode(),
         payload.encode(),
@@ -519,7 +609,7 @@ def _generate_download_token(order_id, artwork_id, user_id):
     return f'{expiry}.{sig}'
 
 
-def _verify_download_token(order_id, artwork_id, user_id, token):
+def _verify_download_token(order_id, item_id, user_id, token):
     """Verify a download token. Returns True if valid and not expired."""
     try:
         expiry_str, sig = token.split('.', 1)
@@ -530,7 +620,7 @@ def _verify_download_token(order_id, artwork_id, user_id, token):
     if time.time() > expiry:
         return False
 
-    expected_payload = f'{order_id}:{artwork_id}:{user_id}:{expiry}'
+    expected_payload = f'{order_id}:{item_id}:{user_id}:{expiry}'
     expected_sig = hmac.new(
         settings.DOWNLOAD_TOKEN_SECRET.encode(),
         expected_payload.encode(),
@@ -560,9 +650,12 @@ def generate_download_token(request, order_id, item_id):
         return Response({'error': 'Artwork is not digital'}, status=status.HTTP_400_BAD_REQUEST)
 
     if not hasattr(order_item.artwork, 'digital_file'):
-        return Response({'error': 'No digital file available'}, status=status.HTTP_404_NOT_FOUND)
+        return Response(
+            {'error': 'The artist has not uploaded a file for this artwork yet. Please contact support.'},
+            status=status.HTTP_404_NOT_FOUND
+        )
 
-    token = _generate_download_token(str(order_id), str(order_item.artwork.id), str(request.user.id))
+    token = _generate_download_token(str(order_id), str(item_id), str(request.user.id))
 
     return Response({
         'token': token,

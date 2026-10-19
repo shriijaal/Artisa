@@ -66,7 +66,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 )
 
         elif msg_type == 'typing':
-            # Typing indicator
+            # Typing indicator (suppressed if the sender has them turned off)
+            if not self.user.typing_indicators:
+                return
             await self.channel_layer.group_send(
                 self.room_group_name,
                 {
@@ -81,7 +83,10 @@ class ChatConsumer(AsyncWebsocketConsumer):
             # Mark messages as read
             message_ids = data.get('message_ids', [])
             if message_ids:
-                await self.mark_messages_read(message_ids)
+                sender_ids = await self.mark_messages_read(message_ids)
+                # Receipts are suppressed when the reader has them turned off
+                if not self.user.read_receipts:
+                    return
                 await self.channel_layer.group_send(
                     self.room_group_name,
                     {
@@ -90,6 +95,17 @@ class ChatConsumer(AsyncWebsocketConsumer):
                         'reader_id': self.user_id,
                     }
                 )
+                # Receipts must also reach the senders so their chat can flip ticks
+                for sender_id in sender_ids:
+                    if sender_id != self.user_id:
+                        await self.channel_layer.group_send(
+                            f'user_{sender_id}',
+                            {
+                                'type': 'messages_read',
+                                'message_ids': message_ids,
+                                'reader_id': self.user_id,
+                            }
+                        )
 
     # --- Group message handlers ---
 
@@ -134,7 +150,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         from apps.messaging.models import Message
         from apps.users.models import User
 
-        sender_id = data.get('sender_id')
+        sender_id = self.user.id  # authenticated sender — never trust the payload
         receiver_id = data.get('receiver_id')
         body = data.get('body', '').strip()
         commission_id = data.get('commission_id')
@@ -159,6 +175,22 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 commission = Commission.objects.get(id=commission_id)
             except Commission.DoesNotExist:
                 pass
+            else:
+                if commission.status in ('cancelled', 'declined'):
+                    return None
+                # Only commission participants may send — and only to each other
+                if self.user.id not in (commission.customer_id, commission.artist_id):
+                    return None
+                counterparty_id = (
+                    commission.artist_id
+                    if self.user.id == commission.customer_id
+                    else commission.customer_id
+                )
+                if str(receiver_id) != str(counterparty_id):
+                    # Payload disagrees with the commission — trust the commission
+                    receiver = User.objects.filter(id=counterparty_id).first()
+                    if receiver is None:
+                        return None
 
         artwork = None
         if artwork_id:
@@ -173,6 +205,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 reply_to = Message.objects.get(id=reply_to_id)
             except Message.DoesNotExist:
                 pass
+
+        if commission is None:
+            from apps.messaging.views import _contact_allowed
+            if not _contact_allowed(self.user, receiver):
+                return None
 
         message = Message.objects.create(
             sender_id=sender_id,
@@ -192,11 +229,14 @@ class ChatConsumer(AsyncWebsocketConsumer):
     @database_sync_to_async
     def mark_messages_read(self, message_ids):
         from apps.messaging.models import Message
-        Message.objects.filter(
+        messages = Message.objects.filter(
             id__in=message_ids,
             receiver=self.user,
             read_at__isnull=True,
-        ).update(read_at=timezone.now())
+        )
+        sender_ids = [str(sid) for sid in messages.values_list('sender_id', flat=True).distinct()]
+        messages.update(read_at=timezone.now())
+        return sender_ids
 
     @database_sync_to_async
     def set_user_online(self, online):

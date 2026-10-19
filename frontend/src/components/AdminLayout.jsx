@@ -15,24 +15,24 @@ const AdminLayout = () => {
       {/* Sidebar */}
       <aside className="w-64 bg-white border-r border-stone-200 flex flex-col">
         <div className="p-6 border-b border-stone-200">
-          <h1 className="text-lg font-bold text-stone-900 tracking-tight font-heading">Artisa</h1>
+          <h1 className="text-base font-semibold text-stone-900 tracking-tight">Artisa</h1>
           <p className="text-xs text-stone-500 mt-0.5">Admin Dashboard</p>
         </div>
-        <nav className="flex-1 p-4 space-y-1">
+        <nav className="flex-1 p-4 space-y-0.5">
           {navItems.map((item) => (
             <NavLink
               key={item.to}
               to={item.to}
               end={item.end}
               className={({ isActive }) =>
-                `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                `flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                   isActive
                     ? 'bg-stone-100 text-stone-900'
                     : 'text-stone-600 hover:bg-stone-50 hover:text-stone-900'
                 }`
               }
             >
-              <svg className="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+              <svg className="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" d={item.icon} />
               </svg>
               {item.label}
@@ -42,9 +42,9 @@ const AdminLayout = () => {
         <div className="p-4 border-t border-stone-200">
           <NavLink
             to="/"
-            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-stone-500 hover:bg-stone-50 hover:text-stone-700 transition-colors"
+            className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-stone-500 hover:bg-stone-50 hover:text-stone-700 transition-colors"
           >
-            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
             </svg>
             Back to Site

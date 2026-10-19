@@ -1,6 +1,8 @@
 from rest_framework import serializers
 
 from apps.artworks.models import Artwork, ArtworkImage, ArtworkTag, DigitalFile, Category
+from apps.artworks.html_sanitizer import clean_rich_text
+from apps.artworks.watermark import artwork_image_url
 from apps.users.serializers import UserSerializer
 from apps.users.utils import validate_image_file, validate_file_type
 
@@ -36,7 +38,7 @@ class CategoryWithArtworksSerializer(serializers.ModelSerializer):
             result.append({
                 'id': str(art.id),
                 'title': art.title,
-                'image': primary_image.image.url if primary_image and primary_image.image else None,
+                'image': artwork_image_url(primary_image.id, size='thumb') if primary_image else None,
             })
         return result
 
@@ -56,10 +58,19 @@ class ArtworkTagSerializer(serializers.ModelSerializer):
 
 
 class ArtworkImageSerializer(serializers.ModelSerializer):
+    image = serializers.SerializerMethodField()
+    thumbnail = serializers.SerializerMethodField()
+
     class Meta:
         model = ArtworkImage
         fields = ('id', 'image', 'thumbnail', 'is_primary')
-        read_only_fields = ('id', 'thumbnail')
+        read_only_fields = ('id', 'image', 'thumbnail', 'is_primary')
+
+    def get_image(self, obj):
+        return artwork_image_url(obj.id, size='full')
+
+    def get_thumbnail(self, obj):
+        return artwork_image_url(obj.id, size='thumb')
 
     def validate_image(self, value):
         if value:
@@ -118,6 +129,16 @@ class ArtworkCreateSerializer(serializers.ModelSerializer):
             'stock', 'tags', 'originality_declaration'
         )
 
+    def validate_description(self, value):
+        cleaned = clean_rich_text(value)
+        if not cleaned:
+            import re
+            text_only = re.sub(r'<[^>]+>', '', value or '').strip()
+            if not text_only:
+                raise serializers.ValidationError('Description is required.')
+            return text_only
+        return cleaned
+
     def validate_originality_declaration(self, value):
         if not value:
             raise serializers.ValidationError("You must confirm the artwork is original.")
@@ -157,6 +178,16 @@ class ArtworkUpdateSerializer(serializers.ModelSerializer):
             'title', 'description', 'price', 'type', 'category_id',
             'stock', 'tags'
         )
+
+    def validate_description(self, value):
+        cleaned = clean_rich_text(value)
+        if value and str(value).strip() and not cleaned:
+            import re
+            text_only = re.sub(r'<[^>]+>', '', value).strip()
+            if not text_only:
+                raise serializers.ValidationError('Description cannot be empty.')
+            return text_only
+        return cleaned
 
     def validate_stock(self, value):
         if value is not None and value < 0:

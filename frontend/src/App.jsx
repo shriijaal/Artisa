@@ -7,6 +7,8 @@ import AdminRoute from './components/AdminRoute'
 import AdminLayout from './components/AdminLayout'
 import Login from './pages/Login'
 import Register from './pages/Register'
+import ForgotPassword from './pages/ForgotPassword'
+import ResetPassword from './pages/ResetPassword'
 import ArtistApplication from './pages/ArtistApplication'
 import PublicArtistProfile from './pages/PublicArtistProfile'
 import CreateArtwork from './pages/CreateArtwork'
@@ -62,6 +64,8 @@ function App() {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password/:uid/:token" element={<ResetPassword />} />
           <Route path="/marketplace" element={<Marketplace />} />
           <Route path="/artists" element={<Artists />} />
           <Route path="/commissions/landing" element={<CommissionLanding />} />

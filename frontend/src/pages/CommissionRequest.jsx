@@ -1,28 +1,39 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
+import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import Header from '../components/Header';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { useToast } from '../components/Toast';
 import authFetch from '../utils/authFetch';
+import { htmlToPlainText } from '../components/editor/richText';
+
+const CATEGORY_LABELS = {
+  portrait: 'Portrait',
+  illustration: 'Illustration',
+  thangka: 'Thangka',
+  physical: 'Physical Art',
+};
 
 const CommissionRequest = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { user } = useAuth();
   const { addToast } = useToast();
 
   const artistId = searchParams.get('artist');
   const artistUsername = searchParams.get('username');
+  const category = (searchParams.get('category') || '').toLowerCase();
+  const categoryLabel = CATEGORY_LABELS[category] || '';
 
   const [artist, setArtist] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!!(artistId || artistUsername));
+  const [pickingArtist, setPickingArtist] = useState(!(artistId || artistUsername));
+  const [artistOptions, setArtistOptions] = useState([]);
+  const [artistsLoading, setArtistsLoading] = useState(!(artistId || artistUsername));
   const [submitting, setSubmitting] = useState(false);
   const [refUploading, setRefUploading] = useState(false);
   const [referenceImages, setReferenceImages] = useState([]);
 
   const [form, setForm] = useState({
-    title: '',
+    title: categoryLabel ? `${categoryLabel} commission` : '',
     description: '',
     budget_min: '',
     budget_max: '',
@@ -30,14 +41,28 @@ const CommissionRequest = () => {
   });
 
   useEffect(() => {
-    if (!artistId && !artistUsername) {
-      navigate('/marketplace');
+    if (artistId || artistUsername) {
+      setPickingArtist(false);
+      setArtistsLoading(false);
+      fetchArtist();
       return;
     }
-    fetchArtist();
+    setPickingArtist(true);
+    setLoading(false);
+    fetchArtistOptions();
   }, [artistId, artistUsername]);
 
+  useEffect(() => {
+    if (categoryLabel) {
+      setForm((f) => ({
+        ...f,
+        title: f.title || `${categoryLabel} commission`,
+      }));
+    }
+  }, [categoryLabel]);
+
   const fetchArtist = async () => {
+    setLoading(true);
     try {
       const identifier = artistUsername || artistId;
       const response = await fetch(`/api/auth/artists/${identifier}/`);
@@ -45,14 +70,51 @@ const CommissionRequest = () => {
         setArtist(await response.json());
       } else {
         addToast('Artist not found', 'error');
-        navigate('/marketplace');
+        navigate('/artists?commission_available=true');
       }
     } catch {
       addToast('Failed to load artist', 'error');
-      navigate('/marketplace');
+      navigate('/artists?commission_available=true');
     } finally {
       setLoading(false);
     }
+  };
+
+  const fetchArtistOptions = async () => {
+    setArtistsLoading(true);
+    try {
+      const response = await fetch('/api/auth/artists/list/?commission_available=true&sort=rating&page=1');
+      if (response.ok) {
+        const data = await response.json();
+        setArtistOptions(data.results || []);
+      } else {
+        addToast('Failed to load artists', 'error');
+      }
+    } catch {
+      addToast('Failed to load artists', 'error');
+    } finally {
+      setArtistsLoading(false);
+    }
+  };
+
+  const pickArtist = (a) => {
+    setArtist({
+      user: {
+        id: a.id,
+        username: a.username,
+        first_name: a.first_name,
+        last_name: a.last_name,
+        avatar: a.avatar,
+      },
+      bio: a.bio,
+      verified_badge: a.verified_badge,
+      commission_starting_price: a.commission_starting_price,
+    });
+    setPickingArtist(false);
+    navigate(
+      `/commissions/new?artist=${a.id}&username=${a.username}${category ? `&category=${category}` : ''}`,
+      { replace: true }
+    );
   };
 
   const handleChange = (e) => {
@@ -97,6 +159,10 @@ const CommissionRequest = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (!artist && !artistId && !artistUsername) {
+      addToast('Select an artist first', 'error');
+      return;
+    }
     if (!form.title.trim()) {
       addToast('Title is required', 'error');
       return;
@@ -154,7 +220,83 @@ const CommissionRequest = () => {
   };
 
   if (loading) return <LoadingSpinner label="Loading artist info..." />;
-  if (!artist) return null;
+
+  if (pickingArtist || !artist) {
+    return (
+      <div className="min-h-screen bg-[#faf9f7]">
+        <Header />
+        <main className="mx-auto max-w-3xl px-6 py-12">
+          <h1 className="text-3xl font-bold text-stone-900 mb-2">
+            Request a Commission
+          </h1>
+          <p className="text-sm text-stone-500 mb-8">
+            {categoryLabel
+              ? `Step 1 — choose an artist for your ${categoryLabel.toLowerCase()} piece.`
+              : 'Step 1 — choose an artist who is open for commissions.'}
+          </p>
+
+          {categoryLabel && (
+            <span className="inline-flex items-center rounded-full bg-amber-50 border border-amber-200 px-3 py-1 text-xs font-semibold text-amber-800 mb-6">
+              {categoryLabel}
+            </span>
+          )}
+
+          {artistsLoading ? (
+            <LoadingSpinner label="Loading artists..." />
+          ) : artistOptions.length === 0 ? (
+            <div className="rounded-lg border border-stone-200 bg-white p-8 text-center">
+              <p className="text-sm text-stone-500 mb-4">No artists are open for commissions right now.</p>
+              <Link to="/artists" className="text-sm font-semibold text-[#9c4327] hover:underline">
+                Browse all artists
+              </Link>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {artistOptions.map((a) => (
+                <button
+                  key={a.id}
+                  type="button"
+                  onClick={() => pickArtist(a)}
+                  className="rounded-lg border border-stone-200 bg-white p-4 text-left hover:border-stone-400 hover:shadow-sm transition"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="h-12 w-12 rounded-full overflow-hidden bg-gradient-to-br from-amber-400 to-amber-600 flex-shrink-0">
+                      {a.avatar ? (
+                        <img src={a.avatar} alt="" className="h-full w-full object-cover" />
+                      ) : (
+                        <span className="flex h-full w-full items-center justify-center text-lg font-bold text-white">
+                          {(a.first_name || a.username || '?').charAt(0).toUpperCase()}
+                        </span>
+                      )}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-semibold text-stone-900 truncate">
+                        {a.first_name || a.username}
+                        {a.last_name ? ` ${a.last_name}` : ''}
+                      </p>
+                      <p className="text-xs text-stone-500 truncate">@{a.username}</p>
+                    </div>
+                    {a.verified_badge && (
+                      <span className="ml-auto shrink-0 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-700">
+                        Verified
+                      </span>
+                    )}
+                  </div>
+                  {a.bio && (
+                    <p className="mt-2 text-xs text-stone-500 line-clamp-2">{a.bio}</p>
+                  )}
+                  <p className="mt-2 text-xs font-semibold text-[#9c4327]">
+                    {a.artwork_count} artwork{a.artwork_count !== 1 ? 's' : ''}
+                    {a.avg_rating ? ` · ★ ${a.avg_rating}` : ''}
+                  </p>
+                </button>
+              ))}
+            </div>
+          )}
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#faf9f7]">
@@ -163,6 +305,13 @@ const CommissionRequest = () => {
         <h1 className="text-3xl font-bold text-stone-900 mb-8">
           Request a Commission
         </h1>
+
+        {/* Category chip */}
+        {categoryLabel && (
+          <span className="inline-flex items-center rounded-full bg-amber-50 border border-amber-200 px-3 py-1 text-xs font-semibold text-amber-800 mb-4">
+            {categoryLabel}
+          </span>
+        )}
 
         {/* Artist Card (read-only) */}
         <div className="rounded-lg border border-stone-200 bg-white p-6 mb-8">
@@ -194,7 +343,7 @@ const CommissionRequest = () => {
                 )}
               </div>
               <p className="text-sm text-stone-500">@{artist.user?.username}</p>
-              {artist.bio && <p className="text-sm text-stone-600 mt-1 line-clamp-2">{artist.bio}</p>}
+              {artist.bio && <p className="text-sm text-stone-600 mt-1 line-clamp-2">{htmlToPlainText(artist.bio)}</p>}
             </div>
           </div>
         </div>

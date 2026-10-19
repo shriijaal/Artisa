@@ -1,7 +1,15 @@
 import uuid
+from datetime import timedelta
 
 from django.db import models
 from django.conf import settings
+from django.utils import timezone
+
+# Cache TTLs per docs/recommendations.md
+CACHE_TTL = {
+    'artwork': timedelta(hours=24),
+    'artist': timedelta(hours=48),
+}
 
 
 class UserInteraction(models.Model):
@@ -45,6 +53,13 @@ class RecommendationCache(models.Model):
     target_type = models.CharField(max_length=20)  # 'artwork' or 'artist'
     target_ids = models.JSONField(default=list)  # List of UUIDs
     computed_at = models.DateTimeField(auto_now=True)
+
+    def is_valid(self):
+        """Fresh within the TTL for this target type and non-empty."""
+        ttl = CACHE_TTL.get(self.target_type, CACHE_TTL['artwork'])
+        if not self.target_ids:
+            return False
+        return timezone.now() - self.computed_at <= ttl
 
     def __str__(self):
         return f"Recommendations for {self.user.username} ({self.target_type})"

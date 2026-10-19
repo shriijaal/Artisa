@@ -8,6 +8,8 @@ from rest_framework import status
 from django.db import transaction
 
 from apps.orders.models import Order, OrderItem
+from apps.notifications.models import Notification
+from apps.notifications.utils import create_notification
 from apps.payments.models import Payment
 from apps.payments.khalti import initiate_khalti_payment, verify_khalti_payment
 
@@ -92,6 +94,7 @@ class KhaltiInitiateView(APIView):
             customer_info=customer_info,
             return_url=return_url,
             product_details=product_details if product_details else None,
+            amount_breakdown=amount_breakdown,
         )
 
         if 'pidx' in khalti_res and 'payment_url' in khalti_res:
@@ -157,6 +160,12 @@ class KhaltiVerifyView(APIView):
                     order.payment_status = Order.PaymentStatus.PAID
                     order.save(update_fields=['payment_status'])
 
+                    from apps.orders.views import maybe_deliver_digital_order
+                    maybe_deliver_digital_order(order)
+                    if order.status == Order.Status.PENDING:
+                        order.status = Order.Status.PROCESSING
+                        order.save(update_fields=['status'])
+
                     from apps.recs.utils import log_interaction
                     for item in order.items.all():
                         log_interaction(
@@ -165,6 +174,16 @@ class KhaltiVerifyView(APIView):
                             target_id=item.artwork.id,
                             interaction_type='purchase',
                         )
+
+                    create_notification(
+                        recipient=order.customer,
+                        actor=request.user,
+                        kind=Notification.Kind.PAYMENT_CONFIRMED,
+                        title='Payment confirmed',
+                        body=f'Your payment for order #{str(order.id)[:8]} was confirmed',
+                        link='/orders',
+                        allow_self=True,
+                    )
                 except Order.DoesNotExist:
                     logger.error('Order %s not found during payment verification', payment.payable_id)
 

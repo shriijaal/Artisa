@@ -8,6 +8,8 @@ import ArtistSideNav from './ArtistSideNav';
 import LoadingSpinner from './LoadingSpinner';
 import { useToast } from './Toast';
 import authFetch from '../utils/authFetch';
+import RichTextEditor from './editor/RichTextEditor';
+import { sanitizeHtml } from './editor/sanitizeHtml';
 
 const ArtworkForm = ({ mode = 'create', artworkId = null, initialData = null }) => {
   const { user } = useAuth();
@@ -35,6 +37,7 @@ const ArtworkForm = ({ mode = 'create', artworkId = null, initialData = null }) 
   const [imagePreviews, setImagePreviews] = useState([]);
   const [existingImages, setExistingImages] = useState([]);
   const [digitalFile, setDigitalFile] = useState(null);
+  const [existingDigitalFile, setExistingDigitalFile] = useState(null);
   const [dragOver, setDragOver] = useState(false);
   const [tagInput, setTagInput] = useState('');
   const [dragImageIdx, setDragImageIdx] = useState(null);
@@ -73,6 +76,7 @@ const ArtworkForm = ({ mode = 'create', artworkId = null, initialData = null }) 
           originality_declaration: true,
         });
         setExistingImages(d.images || []);
+        setExistingDigitalFile(d.digital_file || null);
       } else {
         addToast('Artwork not found', 'error');
         navigate('/my-artworks');
@@ -146,19 +150,24 @@ const ArtworkForm = ({ mode = 'create', artworkId = null, initialData = null }) 
     setError('');
 
     if (!formData.title.trim()) { setError('Title is required'); return; }
-    if (!formData.description.trim()) { setError('Description is required'); return; }
+    const descriptionHtml = sanitizeHtml(formData.description);
+    const descriptionText = descriptionHtml.replace(/<[^>]*>/g, ' ').replace(/&nbsp;/g, ' ').trim();
+    if (!descriptionText) { setError('Description is required'); return; }
     if (!formData.price || parseFloat(formData.price) <= 0) { setError('Price must be greater than 0'); return; }
     if (!formData.category_id) { setError('Category is required'); return; }
     if (mode === 'create' && images.length === 0) { setError('At least one image is required'); return; }
     if (mode === 'create' && !formData.originality_declaration) { setError('You must declare this is your original work'); return; }
-    if (formData.type === 'digital' && mode === 'create' && !digitalFile) { setError('Digital file is required for digital artworks'); return; }
+    if (formData.type === 'digital' && !digitalFile && !existingDigitalFile) {
+      setError('Digital file is required for digital artworks');
+      return;
+    }
 
     setSubmitting(true);
 
     try {
       const artworkData = {
         title: formData.title.trim(),
-        description: formData.description.trim(),
+        description: descriptionHtml,
         price: parseFloat(formData.price),
         type: formData.type,
         category_id: formData.category_id,
@@ -199,11 +208,17 @@ const ArtworkForm = ({ mode = 'create', artworkId = null, initialData = null }) 
         }
       }
 
-      if (formData.type === 'digital' && digitalFile && mode === 'create') {
+      if (formData.type === 'digital' && digitalFile) {
         setSubmitStep('Uploading digital file...');
         const fd = new FormData();
         fd.append('file', digitalFile);
-        await authFetch(`/api/artworks/my-artworks/${artwork.id}/digital-file/`, { method: 'POST', body: fd });
+        const fileRes = await authFetch(`/api/artworks/my-artworks/${artwork.id}/digital-file/`, { method: 'POST', body: fd });
+        if (!fileRes.ok) {
+          const err = await fileRes.json().catch(() => ({}));
+          throw new Error(err.error || 'Failed to upload digital file');
+        }
+        setExistingDigitalFile(await fileRes.json());
+        setDigitalFile(null);
       }
 
       setSubmitStep('Done!');
@@ -259,10 +274,14 @@ const ArtworkForm = ({ mode = 'create', artworkId = null, initialData = null }) 
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-stone-700 mb-1.5">Description *</label>
-                    <textarea rows={5} value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                      className="w-full rounded-lg border border-stone-200 px-4 py-2.5 text-sm focus:border-stone-400 focus:outline-none focus:ring-1 focus:ring-stone-400"
-                      placeholder="Materials, dimensions, story behind the piece..." required />
-                    <p className="mt-1 text-[11px] text-stone-400">{formData.description.length} characters</p>
+                    <RichTextEditor
+                      value={formData.description}
+                      onChange={(html) => setFormData((prev) => ({ ...prev, description: html }))}
+                      placeholder="Materials, dimensions, story behind the piece..."
+                    />
+                    <p className="mt-1 text-[11px] text-stone-400">
+                      Bold, headings, lists, links, quote, code, spoiler &amp; alignment supported
+                    </p>
                   </div>
                 </div>
               </div>
@@ -379,7 +398,15 @@ const ArtworkForm = ({ mode = 'create', artworkId = null, initialData = null }) 
               {/* Digital File (conditional) */}
               {formData.type === 'digital' && (
                 <div className="rounded-xl border border-stone-200 bg-white p-6">
-                  <h3 className="text-sm font-bold uppercase tracking-widest text-stone-400 mb-4">Digital File {mode === 'create' ? '*' : ''}</h3>
+                  <h3 className="text-sm font-bold uppercase tracking-widest text-stone-400 mb-4">Digital File {mode === 'create' || !existingDigitalFile ? '*' : ''}</h3>
+                  {existingDigitalFile && !digitalFile && (
+                    <div className="mb-3 flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2">
+                      <svg className="h-4 w-4 text-emerald-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <p className="text-xs font-medium text-emerald-800">File uploaded. Buyers can download this after purchase.</p>
+                    </div>
+                  )}
                   <div onDragOver={handleDragOver} onDragLeave={handleDragLeave}
                     onDrop={(e) => { e.preventDefault(); e.stopPropagation(); setDragOver(false); const f = e.dataTransfer.files[0]; if (f) setDigitalFile(f); }}
                     onClick={() => document.getElementById('digital-file-input')?.click()}
@@ -401,7 +428,9 @@ const ArtworkForm = ({ mode = 'create', artworkId = null, initialData = null }) 
                         <svg className="h-8 w-8 mx-auto text-stone-300 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                           <path strokeLinecap="round" strokeLinejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                         </svg>
-                        <p className="text-sm text-stone-600">Drag & drop or click to upload</p>
+                        <p className="text-sm text-stone-600">
+                          {existingDigitalFile ? 'Click to replace the uploaded file' : 'Drag & drop or click to upload'}
+                        </p>
                         <p className="text-xs text-stone-400 mt-1">ZIP, RAR, PDF, JPG, PNG</p>
                       </>
                     )}

@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useToast } from '../../components/Toast';
+import authFetch from '../../utils/authFetch';
 
 const SettingsMessaging = () => {
   const { addToast } = useToast();
@@ -9,9 +10,53 @@ const SettingsMessaging = () => {
     typingIndicators: true,
   });
 
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await authFetch('/api/auth/me/');
+        if (res.ok) {
+          const d = await res.json();
+          if (!cancelled) {
+            setSettings({
+              allowInquiries: d.allow_inquiries || 'everyone',
+              readReceipts: d.read_receipts ?? true,
+              typingIndicators: d.typing_indicators ?? true,
+            });
+          }
+        }
+      } catch { /* keep defaults */ }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  const save = async (key, value) => {
+    const prev = settings;
+    setSettings({ ...settings, [key]: value });
+    const payload =
+      key === 'allowInquiries' ? { allow_inquiries: value }
+      : key === 'readReceipts' ? { read_receipts: value }
+      : { typing_indicators: value };
+    try {
+      const res = await authFetch('/api/auth/me/', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (res.ok) {
+        addToast('Settings saved', 'success');
+      } else {
+        setSettings(prev);
+        addToast('Could not save settings', 'error');
+      }
+    } catch {
+      setSettings(prev);
+      addToast('Could not save settings', 'error');
+    }
+  };
+
   const handleToggle = (key) => {
-    setSettings({ ...settings, [key]: !settings[key] });
-    addToast('Settings saved', 'success');
+    save(key, !settings[key]);
   };
 
   return (
@@ -30,7 +75,7 @@ const SettingsMessaging = () => {
           ].map((opt) => (
             <label key={opt.value} className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition ${settings.allowInquiries === opt.value ? 'border-stone-900 bg-stone-50' : 'border-stone-200 hover:bg-stone-50'}`}>
               <input type="radio" name="inquiries" value={opt.value} checked={settings.allowInquiries === opt.value}
-                onChange={() => { setSettings({ ...settings, allowInquiries: opt.value }); addToast('Settings saved', 'success'); }}
+                onChange={() => save('allowInquiries', opt.value)}
                 className="text-stone-900 focus:ring-stone-400" />
               <div>
                 <p className="text-sm font-medium text-stone-900">{opt.label}</p>

@@ -11,6 +11,8 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 from apps.users.models import User, ArtistProfile, ArtistApplication, Favorite
+from apps.artworks.watermark import artwork_image_url
+from apps.artworks.html_sanitizer import strip_html
 from apps.users.serializers import (
     ArtistApplicationAdminSerializer,
     ArtistApplicationSerializer,
@@ -325,7 +327,7 @@ def artists_list(request):
             sample_map[art.artist_id].append({
                 'id': str(art.id),
                 'title': art.title,
-                'image': img.image.url if img and img.image else None,
+                'image': artwork_image_url(img.id, size='thumb') if img and img.image else None,
                 'price': str(art.price),
                 'category': art.category.name if art.category else None,
             })
@@ -339,7 +341,7 @@ def artists_list(request):
             'first_name': artist.first_name,
             'last_name': artist.last_name,
             'avatar': artist.avatar.url if artist.avatar else None,
-            'bio': profile.bio[:120] if profile.bio else '',
+            'bio': strip_html(profile.bio, limit=120),
             'cover_image': profile.cover_image.url if profile.cover_image else None,
             'verified_badge': profile.verified_badge,
             'artwork_count': artist.artwork_count,

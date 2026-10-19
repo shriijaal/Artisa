@@ -1,3 +1,5 @@
+import logging
+
 from django.db.models import Q
 from django.utils import timezone
 from rest_framework import status
@@ -7,8 +9,49 @@ from rest_framework.views import APIView
 
 from apps.commissions.models import Commission
 from apps.artworks.models import Artwork
+from apps.artworks.watermark import artwork_image_url
 from apps.messaging.models import Message
 from apps.messaging.serializers import MessageCreateSerializer, MessageSerializer
+
+
+logger = logging.getLogger(__name__)
+
+
+def _broadcast_messages_read(message_ids, reader_id, sender_ids):
+    """Push read receipts to the reader's tabs and to each sender's chat."""
+    try:
+        from asgiref.sync import async_to_sync
+        from channels.layers import get_channel_layer
+
+        channel_layer = get_channel_layer()
+        if channel_layer is None:
+            return
+        payload = {
+            'type': 'messages_read',
+            'message_ids': [str(mid) for mid in message_ids],
+            'reader_id': str(reader_id),
+        }
+        groups = {f'user_{reader_id}'}
+        groups.update(f'user_{sid}' for sid in sender_ids if sid is not None and str(sid) != str(reader_id))
+        for group in groups:
+            async_to_sync(channel_layer.group_send)(group, payload)
+    except Exception:  # receipts must never break the read itself
+        logger.warning('messages_read broadcast failed', exc_info=True)
+
+
+def _contact_allowed(sender, receiver):
+    """Enforce receiver's allow_inquiries pref — only blocks brand-new contacts."""
+    if receiver.allow_inquiries == 'everyone':
+        return True
+    existing = Message.objects.filter(
+        Q(sender=sender, receiver=receiver) | Q(sender=receiver, receiver=sender)
+    ).exists()
+    if existing:
+        return True
+    if receiver.allow_inquiries == 'nobody':
+        return False
+    profile = getattr(sender, 'artist_profile', None)
+    return bool(profile and profile.status == 'approved')
 
 
 def _get_participant_commission(user, commission_id):
@@ -69,7 +112,14 @@ class MessageListCreateView(APIView):
             messages = messages.filter(created_at__gt=after)
 
         unread = messages.filter(receiver=request.user, read_at__isnull=True)
-        unread.update(read_at=timezone.now())
+        to_mark = list(unread.values_list('id', flat=True))
+        if to_mark:
+            sender_ids = list(
+                unread.values_list('sender_id', flat=True).distinct()
+            )
+            unread.update(read_at=timezone.now())
+            if request.user.read_receipts:
+                _broadcast_messages_read(to_mark, request.user.id, sender_ids)
 
         serializer = MessageSerializer(messages, many=True, context={'request': request})
         return Response(serializer.data)
@@ -100,6 +150,12 @@ class MessageListCreateView(APIView):
                 receiver = User.objects.get(id=data['receiver_id'])
             except User.DoesNotExist:
                 return Response({'error': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+            if not _contact_allowed(request.user, receiver):
+                return Response(
+                    {'error': 'This user is not accepting messages.'},
+                    status=status.HTTP_403_FORBIDDEN,
+                )
 
             message = Message.objects.create(
                 sender=request.user,
@@ -133,6 +189,12 @@ class MessageListCreateView(APIView):
                 receiver = last_msg.sender
             else:
                 receiver = artwork.artist
+
+            if not _contact_allowed(request.user, receiver):
+                return Response(
+                    {'error': 'This user is not accepting inquiries.'},
+                    status=status.HTTP_403_FORBIDDEN,
+                )
 
             message = Message.objects.create(
                 sender=request.user,
@@ -333,7 +395,7 @@ class InquiryListView(APIView):
                 artwork_data = {
                     'id': str(last_msg.artwork.id),
                     'title': last_msg.artwork.title,
-                    'image': primary_image.image.url if primary_image and primary_image.image else None,
+                    'image': artwork_image_url(primary_image.id, size='thumb') if primary_image and primary_image.image else None,
                 }
 
             result.append({

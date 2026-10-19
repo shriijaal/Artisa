@@ -19,7 +19,7 @@ from scipy.sparse import csr_matrix
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
-from django.db.models import Count
+from django.db.models import Count, Sum
 from django.utils import timezone
 
 logger = logging.getLogger(__name__)
@@ -31,14 +31,14 @@ _engine_loaded_at = 0
 ENGINE_TTL_SECONDS = 300  # 5 minutes
 
 
-def get_recommendation_engine(alpha=0.6):
+def get_recommendation_engine():
     """Return a cached RecommendationEngine singleton, rebuilding if stale."""
     global _engine_instance, _engine_loaded_at
     now = time.monotonic()
     if _engine_instance is None or (now - _engine_loaded_at) > ENGINE_TTL_SECONDS:
         with _engine_lock:
             if _engine_instance is None or (time.monotonic() - _engine_loaded_at) > ENGINE_TTL_SECONDS:
-                _engine_instance = RecommendationEngine(alpha=alpha)
+                _engine_instance = RecommendationEngine()
                 _engine_loaded_at = time.monotonic()
                 logger.info('RecommendationEngine rebuilt (age=0s)')
     return _engine_instance
@@ -60,8 +60,7 @@ def _discretize_price(price):
 class RecommendationEngine:
     """Stateless engine that computes recommendations on the fly from DB data."""
 
-    def __init__(self, alpha=0.6):
-        self.alpha = alpha
+    def __init__(self):
         self._load_data()
 
     def _load_data(self):
@@ -78,10 +77,10 @@ class RecommendationEngine:
         self.artwork_ids = [a.id for a in self.artworks]
         self.artwork_idx = {aid: i for i, aid in enumerate(self.artwork_ids)}
 
-        # Tag corpus for TF-IDF
+        # Tag corpus for TF-IDF (uses prefetch_related cache — no per-artwork query)
         self.tag_corpus = []
         for artwork in self.artworks:
-            tags = list(artwork.tags.values_list('tag', flat=True))
+            tags = [t.tag for t in artwork.tags.all()]
             self.tag_corpus.append(' '.join(tags) if tags else '')
 
         # Category vocabulary
@@ -164,6 +163,7 @@ class RecommendationEngine:
         if not self.interactions:
             self.cf_sim = None
             self.user_interactions = None
+            self.user_idx = {}
             return
 
         user_ids = sorted(set(row[0] for row in self.interactions))
@@ -175,6 +175,7 @@ class RecommendationEngine:
         if n_users == 0 or n_items == 0:
             self.cf_sim = None
             self.user_interactions = None
+            self.user_idx = {}
             return
 
         rows, cols, data = [], [], []
@@ -187,6 +188,7 @@ class RecommendationEngine:
         if not data:
             self.cf_sim = None
             self.user_interactions = None
+            self.user_idx = {}
             return
 
         self.user_interactions = csr_matrix(
@@ -219,11 +221,14 @@ class RecommendationEngine:
             row[1] for row in self.interactions if row[0] == user_id
         )
 
-    def get_artwork_recommendations(self, user_id=None, k=8):
+    def get_artwork_recommendations(self, user_id=None, k=8, exclude_from_history=None):
         """
         Get top-k artwork recommendations.
         For authenticated users: hybrid CBF + CF.
         For guests: trending (most interacted).
+        exclude_from_history: artwork IDs to treat as unseen (held-out eval items) —
+        removed from the interacted set AND zeroed in the user profile vector,
+        so they become candidates without leaking into scoring.
         Returns list of artwork UUIDs.
         """
         if not self.artwork_ids:
@@ -232,15 +237,25 @@ class RecommendationEngine:
         if user_id is None:
             return self._get_trending_artworks(k)
 
-        interacted = self._get_user_interacted_ids(user_id)
+        held_out = set(exclude_from_history) if exclude_from_history else set()
+        interacted = self._get_user_interacted_ids(user_id) - held_out
 
         # Build user profile vector from interactions
         if user_id in self.user_idx and self.user_interactions is not None:
             user_row = self.user_interactions[self.user_idx[user_id]].toarray().flatten()
+            if held_out:
+                for aid in held_out:
+                    idx = self.artwork_idx.get(aid)
+                    if idx is not None:
+                        user_row[idx] = 0.0
             alpha = self.get_dynamic_alpha(user_id)
         else:
             user_row = None
             alpha = 1.0  # Pure CBF for users with no interaction matrix row
+
+        # Cold-start: logged-in user with no history → trending (not zero-score ties)
+        if user_row is None and not interacted:
+            return self._get_trending_artworks(k)
 
         scores = np.zeros(len(self.artwork_ids))
 
@@ -294,6 +309,16 @@ class RecommendationEngine:
                 if len(result) >= k:
                     break
 
+        # Still short (trending already seen): fill with most recent unseen artworks
+        if len(result) < k:
+            existing = set(result)
+            for a in sorted(self.artworks, key=lambda x: x.created_at, reverse=True):
+                if a.id not in interacted and a.id not in existing:
+                    result.append(a.id)
+                    existing.add(a.id)
+                if len(result) >= k:
+                    break
+
         return result
 
     def get_artist_recommendations(self, user_id=None, k=4):
@@ -302,12 +327,13 @@ class RecommendationEngine:
         Based on category overlap + interaction patterns.
         Returns list of user IDs (artists).
         """
-        from apps.users.models import User, ArtistProfile
-        from apps.recs.models import UserInteraction
+        from apps.users.models import User
 
-        approved_artists = User.objects.filter(
-            artist_profile__status='approved'
-        ).values_list('id', flat=True)
+        approved_artists = list(
+            User.objects.filter(
+                artist_profile__status='approved'
+            ).values_list('id', flat=True)
+        )
 
         if not approved_artists:
             return []
@@ -315,15 +341,28 @@ class RecommendationEngine:
         interacted_artwork_ids = self._get_user_interacted_ids(user_id) if user_id else set()
 
         if not interacted_artwork_ids:
-            # For guests: return most active artists
-            return list(
-                UserInteraction.objects.filter(
-                    target_type='artwork',
-                    interaction_type__in=['view', 'favorite'],
-                ).values('target_id')
-                .annotate(cnt=Count('id'))
-                .order_by('-cnt')[:k * 3]
-            )[:k] if False else list(approved_artists[:k])
+            # For guests: rank approved artists by interaction weight on their artworks,
+            # backfilled by published-artwork count then join date
+            from apps.artworks.models import Artwork
+
+            weights = {}
+            for _, target_id, weight in self.interactions:
+                art_idx = self.artwork_idx.get(target_id)
+                if art_idx is not None:
+                    aid = self.artworks[art_idx].artist_id
+                    weights[aid] = weights.get(aid, 0.0) + weight
+
+            artwork_counts = dict(
+                Artwork.objects.filter(status=Artwork.Status.PUBLISHED)
+                .values_list('artist_id')
+                .annotate(c=Count('id'))
+            )
+            ranked = sorted(
+                approved_artists,
+                key=lambda x: (weights.get(x, 0.0), artwork_counts.get(x, 0)),
+                reverse=True,
+            )
+            return ranked[:k]
 
         # Find artists whose artworks the user interacted with
         from apps.artworks.models import Artwork
@@ -346,7 +385,36 @@ class RecommendationEngine:
             artist_scores[artist_id] = overlap
 
         ranked = sorted(artist_scores.items(), key=lambda x: x[1], reverse=True)
-        return [aid for aid, _ in ranked[:k]]
+        result = [aid for aid, _ in ranked[:k]]
+
+        # Backfill tier 1: un-interacted approved artists by engagement, then artwork count
+        if len(result) < k:
+            weights = {}
+            for _, target_id, weight in self.interactions:
+                art_idx = self.artwork_idx.get(target_id)
+                if art_idx is not None:
+                    aid = self.artworks[art_idx].artist_id
+                    weights[aid] = weights.get(aid, 0.0) + weight
+            artwork_counts = dict(
+                Artwork.objects.filter(status=Artwork.Status.PUBLISHED)
+                .values_list('artist_id')
+                .annotate(c=Count('id'))
+            )
+            by_popularity = sorted(
+                approved_artists,
+                key=lambda x: (weights.get(x, 0.0), artwork_counts.get(x, 0)),
+                reverse=True,
+            )
+            result += [
+                a for a in by_popularity
+                if a not in result and a not in interacted_artist_ids
+            ][:k - len(result)]
+
+        # Backfill tier 2: any approved artist not already listed (better full than short)
+        if len(result) < k:
+            result += [a for a in approved_artists if a not in result][:k - len(result)]
+
+        return result[:k]
 
     def get_similar_artworks(self, artwork_id, k=4):
         """Get top-k artworks similar to a given artwork using CBF."""
@@ -376,7 +444,7 @@ class RecommendationEngine:
                 created_at__gte=cutoff,
             )
             .values('target_id')
-            .annotate(total_weight=Count('id'))
+            .annotate(total_weight=Sum('weight'))
             .order_by('-total_weight')[:k]
         )
 

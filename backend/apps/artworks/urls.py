@@ -10,12 +10,14 @@ from apps.artworks.views import (
     delete_artwork_image,
     my_artworks,
     published_artworks,
+    serve_artwork_image,
     set_primary_image,
     submit_artwork,
     download_digital_file,
 )
 
 urlpatterns = [
+    path('image/<uuid:image_id>/', serve_artwork_image, name='serve_artwork_image'),
     path('categories/', category_list, name='category_list'),
     path('published/', published_artworks, name='published_artworks'),
     path('published/<uuid:artwork_id>/', artwork_detail_public, name='artwork_detail_public'),

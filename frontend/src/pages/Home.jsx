@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import CommissionPill from '../components/CommissionPill';
 import { formatPrice } from '../utils/formatPrice';
 import authFetch from '../utils/authFetch';
 
@@ -14,6 +15,110 @@ const CATEGORY_COLORS = [
   { bg: 'bg-violet-50', text: 'text-violet-700', border: 'border-violet-200', hoverBg: 'hover:bg-violet-100' },
   { bg: 'bg-orange-50', text: 'text-orange-700', border: 'border-orange-200', hoverBg: 'hover:bg-orange-100' },
 ];
+
+const COMMISSION_DECK = [
+  {
+    title: 'Portrait',
+    slug: 'portrait',
+    blurb: 'Capture a likeness with timeless detail.',
+    img: 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?auto=format&fit=crop&w=400&h=560&q=80',
+    rest: 'rotate-[-8deg] -translate-x-2 translate-y-2',
+    fan: 'group-hover/deck:-translate-x-[5.5rem] group-hover/deck:-rotate-[14deg] group-hover/deck:-translate-y-2',
+    z: 'z-40',
+    tint: 'from-rose-500/40',
+    bar: 'bg-rose-500',
+  },
+  {
+    title: 'Illustration',
+    slug: 'illustration',
+    blurb: 'Bold digital art with a modern edge.',
+    img: 'https://images.unsplash.com/photo-1541961017774-22349e4a1262?auto=format&fit=crop&w=400&h=560&q=80',
+    rest: 'rotate-[5deg] -translate-x-1',
+    fan: 'group-hover/deck:-translate-x-[1.75rem] group-hover/deck:-rotate-[5deg]',
+    z: 'z-30',
+    tint: 'from-sky-500/40',
+    bar: 'bg-sky-500',
+  },
+  {
+    title: 'Thangka',
+    slug: 'thangka',
+    blurb: 'Sacred Himalayan brushwork by masters.',
+    img: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?auto=format&fit=crop&w=400&h=560&q=80',
+    rest: 'rotate-[-4deg] translate-x-1',
+    fan: 'group-hover/deck:translate-x-[1.75rem] group-hover/deck:rotate-[5deg]',
+    z: 'z-20',
+    tint: 'from-amber-500/40',
+    bar: 'bg-amber-500',
+  },
+  {
+    title: 'Physical',
+    slug: 'physical',
+    blurb: 'Handcrafted pieces for your walls.',
+    img: 'https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?auto=format&fit=crop&w=400&h=560&q=80',
+    rest: 'rotate-[8deg] translate-x-2 translate-y-1',
+    fan: 'group-hover/deck:translate-x-[5.5rem] group-hover/deck:rotate-[14deg] group-hover/deck:-translate-y-2',
+    z: 'z-10',
+    tint: 'from-emerald-500/40',
+    bar: 'bg-emerald-500',
+  },
+];
+
+const CommissionFlipCard = ({ card, index }) => {
+  const navigate = useNavigate();
+
+  return (
+    <button
+      type="button"
+      aria-label={`Request a ${card.title} commission`}
+      onClick={() => navigate(`/commissions/new?category=${card.slug}`)}
+      style={{ transitionDelay: `${index * 70}ms` }}
+      className={`absolute left-1/2 top-1/2 -ml-20 -mt-28 w-40 h-56 [perspective:1200px] rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/70 group/card hover:z-50 cursor-pointer motion-reduce:transition-none ${card.z} ${card.rest} ${card.fan} transition-transform duration-500 ease-out`}
+    >
+      {/* impeccable-disable-next-line bounce-easing: intentional card-flip momentum overshoot (~5deg), user-chosen */}
+      <div className="relative w-full h-full [transform-style:preserve-3d] [will-change:transform] transition-transform duration-[650ms] ease-[cubic-bezier(0.22,1.3,0.36,1)] motion-reduce:transition-none group-hover/card:-translate-y-1.5 group-hover/card:scale-[1.04] group-hover/card:[transform:rotateY(180deg)] group-focus-visible/card:[transform:rotateY(180deg)]">
+        <div className="absolute inset-0 rounded-xl overflow-hidden border border-white/20 shadow-xl shadow-black/40 transition-shadow duration-500 group-hover/card:shadow-2xl bg-stone-800 [backface-visibility:hidden]">
+          <img
+            src={card.img}
+            alt=""
+            width={400}
+            height={560}
+            className="absolute inset-0 w-full h-full object-cover"
+            draggable={false}
+          />
+          <div className={`absolute inset-0 bg-gradient-to-t ${card.tint} to-transparent opacity-40`} />
+          <div className="absolute inset-y-0 -left-2/3 w-1/2 -skew-x-[20deg] bg-gradient-to-r from-transparent via-white/30 to-transparent opacity-0 group-hover/card:opacity-70 group-hover/card:translate-x-[340%] transition-all duration-[900ms] delay-150 ease-out pointer-events-none motion-reduce:hidden" />
+          <div className="absolute inset-x-0 bottom-0 p-4 text-left">
+            <p className="text-white font-semibold text-sm">{card.title}</p>
+            <p className="text-white/70 text-[11px]">{card.blurb}</p>
+          </div>
+        </div>
+        <div className="absolute inset-0 rounded-xl overflow-hidden border border-white/20 shadow-xl shadow-black/40 transition-shadow duration-500 group-hover/card:shadow-2xl bg-gradient-to-br from-stone-800 to-stone-900 [backface-visibility:hidden] [transform:rotateY(180deg)]">
+          <div className="absolute inset-0 p-4 flex flex-col justify-between text-left">
+            <div className={`h-1.5 w-10 rounded-full ${card.bar}`} />
+            <div>
+              <p className="text-white font-semibold text-sm">{card.title}</p>
+              <p className="text-stone-300 text-[11px] mt-1 leading-relaxed">{card.blurb}</p>
+            </div>
+            <p className="text-amber-400 text-[10px] uppercase tracking-widest font-semibold">
+              Request
+            </p>
+          </div>
+        </div>
+      </div>
+    </button>
+  );
+};
+
+const CommissionCardDeck = () => (
+  <div className="group/deck relative mx-auto lg:mx-0 w-[22rem] h-72 flex-shrink-0 [perspective:1200px]">
+    <div className="absolute left-1/2 top-1/2 w-64 h-64 -translate-x-1/2 -translate-y-1/2 bg-amber-500 rounded-full blur-3xl opacity-20 transition-opacity duration-700 group-hover/deck:opacity-40" />
+    <div className="absolute inset-0">
+      {COMMISSION_DECK.map((card, index) => (
+        <CommissionFlipCard key={card.title} card={card} index={index} />
+      ))}
+    </div>
+  </div>
+);
 
 const Home = () => {
   const [data, setData] = useState(null);
@@ -600,6 +705,13 @@ const Home = () => {
                       : artist.username}
                   </h3>
                   <p className="text-xs text-stone-500 mt-0.5">@{artist.username}</p>
+                  {artist.artist_profile?.commission_available && (
+                    <CommissionPill
+                      price={artist.artist_profile.commission_starting_price}
+                      estimatedDays={artist.artist_profile.commission_estimated_days}
+                      className="mt-1.5"
+                    />
+                  )}
                   {/* Artwork thumbnails */}
                   {artist.sample_artworks && artist.sample_artworks.length > 0 && (
                     <div className="flex gap-2 mt-3">
@@ -706,18 +818,8 @@ const Home = () => {
               </div>
             </div>
 
-            {/* Single artwork image */}
-            <div className="hidden lg:block relative w-64 h-64 flex-shrink-0">
-              <div className="absolute inset-0 bg-amber-500 rounded-full blur-3xl opacity-20" />
-              <div className="relative w-full h-full rounded-lg overflow-hidden">
-                <img
-                  src="https://images.unsplash.com/photo-1513364776144-60967b0f800f?auto=format&fit=crop&q=80"
-                  alt=""
-                  className="absolute inset-0 w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-stone-900/80" />
-              </div>
-            </div>
+            {/* Commission card deck */}
+            <CommissionCardDeck />
           </div>
         </section>
       </main>

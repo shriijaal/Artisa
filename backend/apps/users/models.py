@@ -10,11 +10,27 @@ class User(AbstractUser):
         CUSTOMER = 'customer', 'Customer'
         ADMIN = 'admin', 'Admin'
 
+    class AllowInquiries(models.TextChoices):
+        EVERYONE = 'everyone', 'Everyone'
+        ARTISTS = 'artists', 'Artists Only'
+        NOBODY = 'nobody', 'Nobody'
+
     role = models.CharField(
         max_length=20,
         choices=Role.choices,
         default=Role.CUSTOMER,
     )
+    allow_inquiries = models.CharField(
+        max_length=20,
+        choices=AllowInquiries.choices,
+        default=AllowInquiries.EVERYONE,
+    )
+    read_receipts = models.BooleanField(default=True)
+    typing_indicators = models.BooleanField(default=True)
+    email_commission_updates = models.BooleanField(default=True)
+    email_order_updates = models.BooleanField(default=True)
+    email_application_updates = models.BooleanField(default=True)
+    push_new_messages = models.BooleanField(default=True)
     avatar = models.ImageField(upload_to='users/avatars/', blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -48,6 +64,7 @@ class ArtistProfile(models.Model):
     commission_starting_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     commission_estimated_days = models.IntegerField(null=True, blank=True)
     province = models.CharField(max_length=100, blank=True, default='')
+    district = models.CharField(max_length=100, blank=True, default='')
     specialties = models.JSONField(default=list, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

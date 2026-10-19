@@ -21,22 +21,33 @@ const ArtistSideNav = ({ artworkCount = 0 }) => {
   return (
     <aside className={`hidden md:flex fixed top-[65px] left-0 bottom-0 z-40 ${sidebarWidth} bg-white border-r border-stone-200 flex-col transition-all duration-200`}>
       {/* Header */}
-      <div className={`border-b border-stone-200 ${compact ? 'p-3 flex justify-center' : 'p-5'}`}>
-        {compact ? (
-          <div className="relative group">
-            <div className="h-9 w-9 rounded-full bg-stone-100 flex items-center justify-center text-stone-900 text-sm font-bold shrink-0 overflow-hidden">
-              {user?.avatar ? (
-                <img src={user.avatar} alt="" className="h-full w-full object-cover" />
-              ) : (
-                user?.username?.charAt(0).toUpperCase()
-              )}
-            </div>
-            <div className="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2.5 py-1.5 rounded-md bg-stone-900 text-white text-xs font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50">
-              {user?.username}
-            </div>
-          </div>
-        ) : (
-          <div className="flex items-start justify-between">
+      <div className={`border-b border-stone-200 ${compact ? 'p-3' : 'p-5'}`}>
+        <div className={`flex items-center justify-between ${compact ? 'flex-col gap-2' : ''}`}>
+          {compact ? (
+            <>
+              <button
+                onClick={() => setCompact(!compact)}
+                title="Expand sidebar"
+                className="p-1.5 rounded-md text-stone-400 hover:bg-stone-100 hover:text-stone-600 transition-colors"
+              >
+                <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 16 16">
+                  <path d="M0 3a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2zm5-1v12h9a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1zM4 2H2a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h2z"/>
+                </svg>
+              </button>
+              <div className="relative group">
+                <div className="h-9 w-9 rounded-full bg-stone-100 flex items-center justify-center text-stone-900 text-sm font-bold shrink-0 overflow-hidden">
+                  {user?.avatar ? (
+                    <img src={user.avatar} alt="" className="h-full w-full object-cover" />
+                  ) : (
+                    user?.username?.charAt(0).toUpperCase()
+                  )}
+                </div>
+                <div className="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2.5 py-1.5 rounded-md bg-stone-900 text-white text-xs font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50">
+                  {user?.username}
+                </div>
+              </div>
+            </>
+          ) : (
             <div className="min-w-0 flex-1">
               <h2 className="text-sm font-bold text-stone-900">Artist Studio Dashboard</h2>
               <div className="flex items-center gap-2.5 mt-3">
@@ -58,30 +69,19 @@ const ArtistSideNav = ({ artworkCount = 0 }) => {
                 </div>
               </div>
             </div>
-            {/* Compact toggle */}
+          )}
+          {!compact && (
             <button
               onClick={() => setCompact(!compact)}
               title="Compact sidebar"
-              className="p-1.5 rounded-md text-stone-400 hover:bg-stone-100 hover:text-stone-600 transition-colors"
+              className="p-1.5 rounded-md text-stone-400 hover:bg-stone-100 hover:text-stone-600 transition-colors flex-shrink-0"
             >
-              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+              <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M0 3a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2zm5-1v12h9a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1zM4 2H2a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h2z"/>
               </svg>
             </button>
-          </div>
-        )}
-        {/* Compact mode expand toggle */}
-        {compact && (
-          <button
-            onClick={() => setCompact(!compact)}
-            title="Expand sidebar"
-            className="absolute -right-3 top-1/2 -translate-y-1/2 h-6 w-6 rounded-full bg-white border border-stone-200 shadow-sm flex items-center justify-center text-stone-400 hover:bg-stone-50 hover:text-stone-600 transition-colors z-50"
-          >
-            <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-            </svg>
-          </button>
-        )}
+          )}
+        </div>
       </div>
 
       {/* Nav Items */}

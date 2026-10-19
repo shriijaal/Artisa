@@ -4,6 +4,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from django.db.models import Q
 from django.http import FileResponse, Http404
+from django.views.decorators.http import require_GET
 
 from apps.artworks.models import Artwork, ArtworkImage, Category, DigitalFile
 from apps.artworks.serializers import (
@@ -13,8 +14,35 @@ from apps.artworks.serializers import (
     ArtworkSubmitSerializer,
     CategorySerializer,
 )
+from apps.artworks.watermark import artwork_image_url, get_watermarked_path  # noqa: F401
 from apps.users.models import User
 from apps.orders.models import OrderItem, Order
+
+
+@require_GET
+def serve_artwork_image(request, image_id):
+    try:
+        artwork_image = ArtworkImage.objects.select_related('artwork').get(id=image_id)
+    except ArtworkImage.DoesNotExist:
+        raise Http404('Image not found')
+
+    if not artwork_image.image:
+        raise Http404('Image not found')
+
+    size = request.GET.get('size', 'full')
+    if size not in ('full', 'thumb'):
+        size = 'full'
+
+    source_path = artwork_image.image.path
+    cache_path = get_watermarked_path(source_path, artwork_image.id, size=size)
+    if cache_path is None:
+        raise Http404('Image not found')
+
+    response = FileResponse(open(cache_path, 'rb'), content_type='image/jpeg')
+    response['Cache-Control'] = 'public, max-age=86400'
+    response['X-Content-Type-Options'] = 'nosniff'
+    response['Content-Disposition'] = 'inline'
+    return response
 
 
 @api_view(['GET'])
@@ -86,7 +114,13 @@ def submit_artwork(request, artwork_id):
             {'error': 'Can only submit draft artworks'},
             status=status.HTTP_400_BAD_REQUEST
         )
-    
+
+    if artwork.type == Artwork.Type.DIGITAL and not _has_digital_file(artwork):
+        return Response(
+            {'error': 'Upload the digital file before submitting this artwork'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
     serializer = ArtworkSubmitSerializer(data=request.data)
     if serializer.is_valid():
         artwork.status = Artwork.Status.PENDING_REVIEW
@@ -189,6 +223,10 @@ def set_primary_image(request, artwork_id, image_id):
     return Response(status=status.HTTP_200_OK)
 
 
+def _has_digital_file(artwork):
+    return DigitalFile.objects.filter(artwork=artwork).exists()
+
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def add_digital_file(request, artwork_id):
@@ -196,34 +234,42 @@ def add_digital_file(request, artwork_id):
         artwork = Artwork.objects.get(id=artwork_id, artist=request.user)
     except Artwork.DoesNotExist:
         return Response({'error': 'Artwork not found'}, status=status.HTTP_404_NOT_FOUND)
-    
+
     if artwork.type != Artwork.Type.DIGITAL:
         return Response(
             {'error': 'Digital files can only be added to digital artworks'},
             status=status.HTTP_400_BAD_REQUEST
         )
-    
-    if artwork.status != Artwork.Status.DRAFT:
+
+    has_file = _has_digital_file(artwork)
+    # Replace only while draft; allow first-time attach on pending/published so buyers can download
+    if has_file and artwork.status != Artwork.Status.DRAFT:
         return Response(
-            {'error': 'Can only add digital files to draft artworks'},
+            {'error': 'Can only replace digital files on draft artworks'},
             status=status.HTTP_400_BAD_REQUEST
         )
-    
+    if not has_file and artwork.status == Artwork.Status.REMOVED:
+        return Response(
+            {'error': 'Cannot add digital files to removed artworks'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
     file = request.FILES.get('file')
     preview_image = request.FILES.get('preview_image')
-    
+
     if not file:
         return Response({'error': 'File required'}, status=status.HTTP_400_BAD_REQUEST)
-    
-    # Delete existing digital file if any
+    if file.size == 0:
+        return Response({'error': 'Uploaded file is empty'}, status=status.HTTP_400_BAD_REQUEST)
+
     DigitalFile.objects.filter(artwork=artwork).delete()
-    
+
     digital_file = DigitalFile.objects.create(
         artwork=artwork,
         file=file,
         preview_image=preview_image
     )
-    
+
     return Response({'id': str(digital_file.id)}, status=status.HTTP_201_CREATED)
 
 
@@ -257,11 +303,6 @@ def published_artworks(request):
         artworks = artworks.filter(
             Q(artist__username__iexact=artist_param) | Q(artist__id__iexact=artist_param)
         )
-    
-    # Filter by verified artist
-    verified_only = request.query_params.get('verified', 'false').lower() == 'true'
-    if verified_only:
-        artworks = artworks.filter(artist__artist_profile__verified_badge=True)
     
     # Filter by price range
     min_price = request.query_params.get('min_price')

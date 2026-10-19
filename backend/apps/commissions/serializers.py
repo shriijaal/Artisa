@@ -128,6 +128,8 @@ class CommissionCreateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Artist not found.")
         if not hasattr(user, 'artist_profile') or user.artist_profile.status != ArtistProfile.Status.APPROVED:
             raise serializers.ValidationError("User is not an approved artist.")
+        if not user.artist_profile.commission_available:
+            raise serializers.ValidationError("This artist is not open for commissions.")
         return user.id
 
     def validate(self, attrs):

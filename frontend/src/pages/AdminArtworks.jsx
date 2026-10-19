@@ -3,13 +3,6 @@ import authFetch from '../utils/authFetch';
 import { formatPrice } from '../utils/formatPrice';
 import CustomSelect from '../components/CustomSelect';
 
-const statusColors = {
-  draft: 'bg-stone-100 text-stone-600',
-  pending_review: 'bg-amber-50 text-amber-700',
-  published: 'bg-emerald-50 text-emerald-700',
-  removed: 'bg-red-50 text-red-700',
-};
-
 const tabs = [
   { key: '', label: 'All' },
   { key: 'pending_review', label: 'Pending Review' },
@@ -133,12 +126,39 @@ const AdminArtworks = () => {
     return allArtworks.filter((a) => a.status === status).length;
   };
 
+  const statusPillClass = (status) => {
+    const base = 'inline-flex items-center gap-1.5 absolute top-2.5 right-2.5 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider shadow-sm backdrop-blur-sm';
+    const colors = {
+      draft: 'bg-white/90 text-stone-600',
+      pending_review: 'bg-amber-50/95 text-amber-700',
+      published: 'bg-emerald-50/95 text-emerald-700',
+      removed: 'bg-red-50/95 text-red-700',
+    };
+    const dots = {
+      draft: 'bg-stone-400',
+      pending_review: 'bg-amber-500',
+      published: 'bg-emerald-500',
+      removed: 'bg-red-500',
+    };
+    return `${base} ${colors[status] || colors.draft}`;
+  };
+
+  const statusDotClass = (status) => {
+    const dots = {
+      draft: 'bg-stone-400',
+      pending_review: 'bg-amber-500',
+      published: 'bg-emerald-500',
+      removed: 'bg-red-500',
+    };
+    return `h-1.5 w-1.5 rounded-full ${dots[status] || dots.draft}`;
+  };
+
   const renderPendingCard = (artwork) => (
-    <div key={artwork.id} className="bg-white rounded-lg border border-stone-200 overflow-hidden">
+    <div key={artwork.id} className="bg-white rounded-xl border border-stone-200 overflow-hidden hover:border-stone-300 transition-colors">
       <div className="flex flex-col sm:flex-row">
-        <div className="w-full sm:w-48 h-48 sm:h-auto bg-stone-100 shrink-0 overflow-hidden">
+        <div className="w-full sm:w-52 h-48 sm:h-auto bg-stone-100 shrink-0 overflow-hidden">
           {artwork.primary_image ? (
-            <img src={artwork.primary_image} alt={artwork.title} className="w-full h-full object-cover" />
+            <img src={artwork.primary_image} alt={artwork.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-stone-300">
               <svg className="h-10 w-10" fill="none" viewBox="0 0 24 24" strokeWidth={1} stroke="currentColor">
@@ -147,31 +167,43 @@ const AdminArtworks = () => {
             </div>
           )}
         </div>
-        <div className="flex-1 p-4 flex flex-col justify-between">
+        <div className="flex-1 p-5 flex flex-col justify-between">
           <div>
-            <div className="flex items-start justify-between gap-2">
-              <div>
-                <h3 className="text-sm font-semibold text-stone-900">{artwork.title}</h3>
-                <p className="text-xs text-stone-500 mt-0.5">by {artwork.artist_name}</p>
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <h3 className="text-base font-semibold text-stone-900 tracking-tight line-clamp-1">{artwork.title}</h3>
+                <p className="text-sm text-stone-500 mt-0.5">by {artwork.artist_name}</p>
               </div>
-              <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-amber-50 text-amber-700 whitespace-nowrap">Pending Review</span>
+              <span className="inline-flex items-center gap-1.5 shrink-0 rounded-full bg-amber-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-amber-700 shadow-sm">
+                <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
+                Pending Review
+              </span>
             </div>
-            <div className="flex items-center gap-3 mt-2">
-              <span className="text-sm font-bold text-stone-900">NPR {formatPrice(artwork.price)}</span>
-              <span className="text-xs text-stone-400">{artwork.type}</span>
-              {artwork.category_name && <span className="text-xs text-stone-400">{artwork.category_name}</span>}
+            <div className="flex items-center gap-2.5 mt-3">
+              <span className="text-base font-semibold text-stone-900 tabular-nums tracking-tight">NPR {formatPrice(artwork.price)}</span>
+              <span className="h-1 w-1 rounded-full bg-stone-300" />
+              <span className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-stone-500">
+                <span className={`h-1.5 w-1.5 rounded-full ${artwork.type === 'physical' ? 'bg-stone-700' : 'bg-stone-400'}`} />
+                {artwork.type}
+              </span>
+              {artwork.category_name && (
+                <>
+                  <span className="h-1 w-1 rounded-full bg-stone-300" />
+                  <span className="text-xs text-stone-400">{artwork.category_name}</span>
+                </>
+              )}
             </div>
           </div>
-          <div className="flex gap-2 mt-4">
+          <div className="flex gap-2 mt-5">
             <button
               onClick={() => handleAction(artwork.id, 'publish')}
-              className="flex-1 px-4 py-2 text-xs font-semibold text-white bg-emerald-600 rounded-lg hover:bg-emerald-700 transition-colors"
+              className="flex-1 px-4 py-2.5 text-sm font-medium text-white bg-stone-900 rounded-lg hover:bg-stone-800 transition-colors"
             >
               Publish
             </button>
             <button
               onClick={() => handleAction(artwork.id, 'reject')}
-              className="flex-1 px-4 py-2 text-xs font-semibold text-red-600 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 transition-colors"
+              className="flex-1 px-4 py-2.5 text-sm font-medium text-red-700 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 transition-colors"
             >
               Reject
             </button>
@@ -182,10 +214,10 @@ const AdminArtworks = () => {
   );
 
   const renderCompactCard = (artwork, actions) => (
-    <div key={artwork.id} className="bg-white rounded-lg border border-stone-200 overflow-hidden group">
+    <div key={artwork.id} className="bg-white rounded-xl border border-stone-200 overflow-hidden group hover:border-stone-300 transition-colors">
       <div className="aspect-square bg-stone-100 relative overflow-hidden">
         {artwork.primary_image ? (
-          <img src={artwork.primary_image} alt={artwork.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+          <img src={artwork.primary_image} alt={artwork.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-stone-300">
             <svg className="h-10 w-10" fill="none" viewBox="0 0 24 24" strokeWidth={1} stroke="currentColor">
@@ -193,18 +225,23 @@ const AdminArtworks = () => {
             </svg>
           </div>
         )}
-        <span className={`absolute top-2 right-2 text-[10px] px-2 py-0.5 rounded-full font-medium ${statusColors[artwork.status] || 'bg-stone-100 text-stone-600'}`}>
+        <span className={statusPillClass(artwork.status)}>
+          <span className={statusDotClass(artwork.status)} />
           {artwork.status.replace('_', ' ')}
         </span>
+        <span className="absolute top-2.5 left-2.5 inline-flex items-center gap-1.5 rounded-full bg-white/90 backdrop-blur-sm px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-stone-600 shadow-sm">
+          <span className={`h-1.5 w-1.5 rounded-full ${artwork.type === 'physical' ? 'bg-stone-700' : 'bg-stone-400'}`} />
+          {artwork.type}
+        </span>
       </div>
-      <div className="p-3">
-        <h3 className="text-xs font-semibold text-stone-900 truncate">{artwork.title}</h3>
-        <p className="text-[11px] text-stone-500 mt-0.5">{artwork.artist_name}</p>
-        <div className="flex items-center justify-between mt-2">
-          <span className="text-xs font-bold text-stone-900">NPR {formatPrice(artwork.price)}</span>
-          <span className="text-[10px] text-stone-400">{artwork.type}</span>
+      <div className="p-4">
+        <h3 className="text-sm font-semibold text-stone-900 truncate tracking-tight">{artwork.title}</h3>
+        <p className="text-xs text-stone-500 mt-0.5 truncate">{artwork.artist_name}</p>
+        <div className="flex items-center justify-between mt-2.5">
+          <span className="text-sm font-semibold text-stone-900 tabular-nums tracking-tight">NPR {formatPrice(artwork.price)}</span>
+          {artwork.category_name && <span className="text-xs text-stone-400 truncate ml-2">{artwork.category_name}</span>}
         </div>
-        {actions && <div className="mt-2">{actions}</div>}
+        {actions && <div className="mt-3">{actions}</div>}
       </div>
     </div>
   );
@@ -213,13 +250,13 @@ const AdminArtworks = () => {
     if (loading) {
       return (
         <div className="flex items-center justify-center h-48">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-600" />
+          <div className="animate-spin rounded-full h-8 w-8 border-2 border-stone-200 border-t-stone-900" />
         </div>
       );
     }
 
     if (artworks.length === 0) {
-      return <div className="text-center py-12 text-stone-500 text-sm">No artworks found</div>;
+      return <div className="text-center py-12 text-sm text-stone-500">No artworks found</div>;
     }
 
     if (activeTab === 'pending_review') {
@@ -232,12 +269,12 @@ const AdminArtworks = () => {
 
     if (activeTab === 'published') {
       return (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
           {artworks.map((artwork) =>
             renderCompactCard(artwork, (
               <button
                 onClick={() => handleAction(artwork.id, 'remove')}
-                className="w-full px-3 py-1.5 text-[10px] font-medium text-red-600 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 transition-colors"
+                className="w-full px-3 py-2 text-sm font-medium text-red-600 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 transition-colors"
               >
                 Remove
               </button>
@@ -249,19 +286,19 @@ const AdminArtworks = () => {
 
     if (activeTab === 'draft') {
       return (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
           {artworks.map((artwork) =>
             renderCompactCard(artwork, (
-              <div className="flex gap-1.5">
+              <div className="flex gap-2">
                 <button
                   onClick={() => handleAction(artwork.id, 'submit')}
-                  className="flex-1 px-3 py-1.5 text-[10px] font-semibold text-white bg-stone-900 rounded-lg hover:bg-stone-800 transition-colors"
+                  className="flex-1 px-3 py-2 text-sm font-medium text-white bg-stone-900 rounded-lg hover:bg-stone-800 transition-colors"
                 >
                   Submit
                 </button>
                 <button
                   onClick={() => handleAction(artwork.id, 'delete')}
-                  className="px-3 py-1.5 text-[10px] font-medium text-red-600 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 transition-colors"
+                  className="px-3 py-2 text-sm font-medium text-red-600 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 transition-colors"
                 >
                   Delete
                 </button>
@@ -274,12 +311,12 @@ const AdminArtworks = () => {
 
     if (activeTab === 'removed') {
       return (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 opacity-60">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 opacity-60">
           {artworks.map((artwork) =>
             renderCompactCard(artwork, (
               <button
                 onClick={() => handleAction(artwork.id, 'restore')}
-                className="w-full px-3 py-1.5 text-[10px] font-medium text-amber-700 bg-amber-50 border border-amber-200 rounded-lg hover:bg-amber-100 transition-colors"
+                className="w-full px-3 py-2 text-sm font-medium text-stone-600 bg-stone-100 border border-stone-200 rounded-lg hover:bg-stone-200 transition-colors"
               >
                 Restore
               </button>
@@ -293,10 +330,10 @@ const AdminArtworks = () => {
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {artworks.map((artwork) => (
-          <div key={artwork.id} className="bg-white rounded-lg border border-stone-200 overflow-hidden group">
+          <div key={artwork.id} className="bg-white rounded-xl border border-stone-200 overflow-hidden group hover:border-stone-300 transition-colors">
             <div className="aspect-square bg-stone-100 relative overflow-hidden">
               {artwork.primary_image ? (
-                <img src={artwork.primary_image} alt={artwork.title} className="w-full h-full object-cover" />
+                <img src={artwork.primary_image} alt={artwork.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-stone-300">
                   <svg className="h-12 w-12" fill="none" viewBox="0 0 24 24" strokeWidth={1} stroke="currentColor">
@@ -304,28 +341,33 @@ const AdminArtworks = () => {
                   </svg>
                 </div>
               )}
-              <span className={`absolute top-2 right-2 text-xs px-2 py-0.5 rounded-full font-medium ${statusColors[artwork.status] || 'bg-stone-100 text-stone-600'}`}>
+              <span className={statusPillClass(artwork.status)}>
+                <span className={statusDotClass(artwork.status)} />
                 {artwork.status.replace('_', ' ')}
+              </span>
+              <span className="absolute top-2.5 left-2.5 inline-flex items-center gap-1.5 rounded-full bg-white/90 backdrop-blur-sm px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-stone-600 shadow-sm">
+                <span className={`h-1.5 w-1.5 rounded-full ${artwork.type === 'physical' ? 'bg-stone-700' : 'bg-stone-400'}`} />
+                {artwork.type}
               </span>
             </div>
             <div className="p-4">
-              <h3 className="text-sm font-semibold text-stone-900 truncate">{artwork.title}</h3>
-              <p className="text-xs text-stone-500 mt-0.5">{artwork.artist_name}</p>
-              <div className="flex items-center justify-between mt-3">
-                <span className="text-sm font-bold text-stone-900">NPR {formatPrice(artwork.price)}</span>
-                <span className="text-xs text-stone-400">{artwork.type}</span>
+              <h3 className="text-sm font-semibold text-stone-900 truncate tracking-tight">{artwork.title}</h3>
+              <p className="text-xs text-stone-500 mt-0.5 truncate">{artwork.artist_name}</p>
+              <div className="flex items-center justify-between mt-2.5">
+                <span className="text-sm font-semibold text-stone-900 tabular-nums tracking-tight">NPR {formatPrice(artwork.price)}</span>
+                {artwork.category_name && <span className="text-xs text-stone-400 truncate ml-2">{artwork.category_name}</span>}
               </div>
               {artwork.status === 'pending_review' && (
-                <div className="flex gap-2 mt-3">
+                <div className="flex gap-2 mt-3.5">
                   <button
                     onClick={() => handleAction(artwork.id, 'publish')}
-                    className="flex-1 px-3 py-1.5 text-xs font-medium text-emerald-700 bg-emerald-50 rounded-lg hover:bg-emerald-100 transition-colors"
+                    className="flex-1 px-3 py-2 text-sm font-medium text-white bg-stone-900 rounded-lg hover:bg-stone-800 transition-colors"
                   >
                     Publish
                   </button>
                   <button
                     onClick={() => handleAction(artwork.id, 'reject')}
-                    className="flex-1 px-3 py-1.5 text-xs font-medium text-red-700 bg-red-50 rounded-lg hover:bg-red-100 transition-colors"
+                    className="flex-1 px-3 py-2 text-sm font-medium text-red-700 bg-red-50 rounded-lg hover:bg-red-100 transition-colors"
                   >
                     Reject
                   </button>
@@ -334,7 +376,7 @@ const AdminArtworks = () => {
               {artwork.status === 'published' && (
                 <button
                   onClick={() => handleAction(artwork.id, 'remove')}
-                  className="w-full mt-3 px-3 py-1.5 text-xs font-medium text-red-700 bg-red-50 rounded-lg hover:bg-red-100 transition-colors"
+                  className="w-full mt-3.5 px-3 py-2 text-sm font-medium text-red-700 bg-red-50 rounded-lg hover:bg-red-100 transition-colors"
                 >
                   Remove
                 </button>
@@ -342,7 +384,7 @@ const AdminArtworks = () => {
               {artwork.status === 'removed' && (
                 <button
                   onClick={() => handleAction(artwork.id, 'restore')}
-                  className="w-full mt-3 px-3 py-1.5 text-xs font-medium text-amber-700 bg-amber-50 rounded-lg hover:bg-amber-100 transition-colors"
+                  className="w-full mt-3.5 px-3 py-2 text-sm font-medium text-stone-600 bg-stone-100 rounded-lg hover:bg-stone-200 transition-colors"
                 >
                   Restore
                 </button>
@@ -357,18 +399,18 @@ const AdminArtworks = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-stone-900 tracking-tight">Artworks</h1>
+        <h1 className="text-2xl font-semibold text-stone-900 tracking-tight">Artworks</h1>
         <p className="text-sm text-stone-500 mt-1">Moderate artwork submissions</p>
       </div>
 
       {/* Toast */}
       {toast && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-80 bg-stone-900 text-white rounded-lg shadow-lg overflow-hidden animate-[slideUp_0.2s_ease-out]">
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-80 bg-stone-900 text-white rounded-xl shadow-lg overflow-hidden animate-[slideUp_0.2s_ease-out]">
           <div className="flex items-center gap-3 px-5 py-3">
             <span className="text-sm flex-1">{toast.message}</span>
             <button
               onClick={handleUndo}
-              className="text-sm font-semibold text-amber-400 hover:text-amber-300 transition-colors"
+              className="text-sm font-medium text-stone-300 hover:text-white transition-colors"
             >
               Undo ({countdown}s)
             </button>
@@ -378,7 +420,7 @@ const AdminArtworks = () => {
           </div>
           <div className="h-0.5 bg-stone-700">
             <div
-              className="h-full bg-amber-500 transition-all duration-1000 ease-linear"
+              className="h-full bg-stone-400 transition-all duration-1000 ease-linear"
               style={{ width: `${(countdown / 6) * 100}%` }}
             />
           </div>
@@ -396,7 +438,7 @@ const AdminArtworks = () => {
             placeholder="Search by title or artist..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-stone-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+            className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-stone-200 bg-white text-sm focus:outline-none focus:border-stone-400 focus:ring-1 focus:ring-stone-400 transition"
           />
         </div>
         <CustomSelect
@@ -428,7 +470,7 @@ const AdminArtworks = () => {
                 }`}
               >
                 {tab.label}
-                <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-semibold ${
+                <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${
                   activeTab === tab.key
                     ? 'bg-stone-900 text-white'
                     : 'bg-stone-100 text-stone-500'
@@ -448,13 +490,13 @@ const AdminArtworks = () => {
       {rejectModal.open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
           <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6">
-            <h3 className="text-lg font-bold text-stone-900">Reject Artwork</h3>
+            <h3 className="text-base font-semibold text-stone-900">Reject Artwork</h3>
             <p className="text-sm text-stone-500 mt-1">Please provide a reason for rejecting this artwork. The artist will be notified.</p>
             <textarea
               value={rejectModal.reason}
               onChange={(e) => setRejectModal((prev) => ({ ...prev, reason: e.target.value }))}
               placeholder="e.g. Image quality too low, description incomplete, not original work..."
-              className="mt-4 w-full rounded-lg border border-stone-200 bg-stone-50 px-3 py-2.5 text-sm text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-300 resize-none"
+              className="mt-4 w-full rounded-lg border border-stone-200 bg-white px-3 py-2.5 text-sm text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-stone-400 focus:ring-1 focus:ring-stone-400 resize-none"
               rows={4}
               autoFocus
             />
@@ -468,7 +510,7 @@ const AdminArtworks = () => {
               <button
                 onClick={handleConfirmReject}
                 disabled={!rejectModal.reason.trim()}
-                className="flex-1 px-4 py-2 text-sm font-semibold text-white bg-red-600 rounded-lg hover:bg-red-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                className="flex-1 px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
               >
                 Reject Artwork
               </button>

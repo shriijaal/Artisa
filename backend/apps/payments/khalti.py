@@ -18,10 +18,11 @@ def _get_headers():
     }
 
 
-def initiate_khalti_payment(order_id, amount_in_rs, purchase_order_name, customer_info, return_url, product_details=None):
+def initiate_khalti_payment(order_id, amount_in_rs, purchase_order_name, customer_info, return_url, product_details=None, amount_breakdown=None):
     """
     Initiate a Khalti ePayment.
     amount_in_rs: Decimal or float in Rupees. Khalti expects amount in Paisa, so we multiply by 100.
+    amount_breakdown: optional list of {'label', 'amount'} lines in paisa (Subtotal, Shipping, etc.).
     """
     amount_in_paisa = int(float(amount_in_rs) * 100)
 
@@ -40,6 +41,9 @@ def initiate_khalti_payment(order_id, amount_in_rs, purchase_order_name, custome
 
     if product_details:
         payload['product_details'] = product_details
+
+    if amount_breakdown:
+        payload['amount_breakdown'] = amount_breakdown
 
     url = f'{_get_base_url()}/epayment/initiate/'
     try:

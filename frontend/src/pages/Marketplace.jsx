@@ -7,6 +7,7 @@ import CustomSelect from '../components/CustomSelect';
 import { formatPrice } from '../utils/formatPrice';
 import LoadingSpinner from '../components/LoadingSpinner';
 import RecommendedCarousel from '../components/RecommendedCarousel';
+import ProtectedImage from '../components/ProtectedImage';
 import { useToast } from '../components/Toast';
 import authFetch from '../utils/authFetch';
 
@@ -24,7 +25,6 @@ const Marketplace = () => {
     search: '',
     category: '',
     type: '',
-    verified: false,
     min_price: '',
     max_price: '',
     sort: 'newest',
@@ -56,7 +56,6 @@ const Marketplace = () => {
       if (filters.search) params.append('search', filters.search);
       if (filters.category) params.append('category', filters.category);
       if (filters.type) params.append('type', filters.type);
-      if (filters.verified) params.append('verified', 'true');
       if (filters.min_price) params.append('min_price', filters.min_price);
       if (filters.max_price) params.append('max_price', filters.max_price);
       params.append('sort', filters.sort);
@@ -81,7 +80,6 @@ const Marketplace = () => {
       search: '',
       category: '',
       type: '',
-      verified: false,
       min_price: '',
       max_price: '',
       sort: 'newest',
@@ -127,7 +125,7 @@ const Marketplace = () => {
     }
   };
 
-  const activeFilterCount = [filters.category, filters.type, filters.verified, filters.min_price, filters.max_price].filter(Boolean).length;
+  const activeFilterCount = [filters.category, filters.type, filters.min_price, filters.max_price].filter(Boolean).length;
 
   const FilterPanel = () => (
     <div className="space-y-5">
@@ -165,17 +163,6 @@ const Marketplace = () => {
           ]}
           className="w-full"
         />
-      </div>
-
-      <div className="flex items-center gap-2.5">
-        <input
-          type="checkbox"
-          id="verified"
-          checked={filters.verified}
-          onChange={(e) => handleFilterChange('verified', e.target.checked)}
-          className="h-4 w-4 rounded border-stone-300 text-stone-900 focus:ring-stone-400"
-        />
-        <label htmlFor="verified" className="text-sm text-stone-600">Verified Artists Only</label>
       </div>
 
       <div>
@@ -318,7 +305,7 @@ const Marketplace = () => {
                     >
                       <div className="aspect-[4/5] overflow-hidden bg-stone-100 rounded-lg border border-stone-200 hover:border-stone-300 transition-all duration-300 hover:-translate-y-1 relative">
                         {primaryImage ? (
-                          <img
+                          <ProtectedImage
                             src={primaryImage.image}
                             alt={artwork.title}
                             className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500"

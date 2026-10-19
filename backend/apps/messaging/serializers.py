@@ -75,7 +75,7 @@ class MessageCreateSerializer(serializers.Serializer):
     commission_id = serializers.UUIDField(required=False)
     artwork_id = serializers.UUIDField(required=False)
     body = serializers.CharField(max_length=4000, trim_whitespace=True, required=False, default='')
-    receiver_id = serializers.UUIDField(required=False)
+    receiver_id = serializers.IntegerField(required=False)
     attachment = serializers.FileField(required=False)
     reply_to_id = serializers.UUIDField(required=False)
 

@@ -4,12 +4,14 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 from apps.users.models import User, ArtistProfile, ArtistApplication, Favorite
 from apps.users.utils import validate_image_file, validate_file_type
+from apps.artworks.watermark import artwork_image_url
+from apps.artworks.html_sanitizer import clean_rich_text
 
 
 class ArtistProfileSummarySerializer(serializers.ModelSerializer):
     class Meta:
         model = ArtistProfile
-        fields = ('status', 'verified_badge')
+        fields = ('status', 'verified_badge', 'commission_available', 'commission_starting_price', 'commission_estimated_days')
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -17,7 +19,12 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('id', 'username', 'email', 'role', 'first_name', 'last_name', 'avatar', 'artist_profile')
+        fields = (
+            'id', 'username', 'email', 'role', 'first_name', 'last_name', 'avatar', 'artist_profile',
+            'allow_inquiries', 'read_receipts', 'typing_indicators',
+            'email_commission_updates', 'email_order_updates', 'email_application_updates',
+            'push_new_messages',
+        )
         read_only_fields = ('id', 'role')
 
     def validate_username(self, value):
@@ -51,7 +58,7 @@ class FeaturedArtistSerializer(serializers.ModelSerializer):
             result.append({
                 'id': str(art.id),
                 'title': art.title,
-                'image': primary_image.image.url if primary_image and primary_image.image else None,
+                'image': artwork_image_url(primary_image.id, size='thumb') if primary_image else None,
             })
         return result
 
@@ -105,14 +112,17 @@ class ArtistProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ArtistProfile
-        fields = ('id', 'user', 'bio', 'cover_image', 'social_links', 'status', 'verified_badge', 'specialties', 'created_at', 'commission_available', 'commission_starting_price', 'province')
+        fields = ('id', 'user', 'bio', 'cover_image', 'social_links', 'status', 'verified_badge', 'specialties', 'created_at', 'commission_available', 'commission_starting_price', 'commission_estimated_days', 'province', 'district')
         read_only_fields = ('id', 'user', 'status', 'verified_badge', 'created_at')
 
 
 class ArtistProfileUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = ArtistProfile
-        fields = ('bio', 'cover_image', 'social_links', 'specialties', 'province')
+        fields = ('bio', 'cover_image', 'social_links', 'specialties', 'province', 'district', 'commission_available', 'commission_starting_price')
+
+    def validate_bio(self, value):
+        return clean_rich_text(value)
 
     def validate_cover_image(self, value):
         if value:
@@ -147,6 +157,9 @@ class ArtistApplicationSerializer(serializers.ModelSerializer):
         model = ArtistApplication
         fields = ('id', 'user', 'portfolio_samples', 'verification_document', 'reason', 'bio', 'specialties', 'social_links', 'status', 'rejection_reason', 'reviewed_at')
         read_only_fields = ('id', 'user', 'status', 'rejection_reason', 'reviewed_at')
+
+    def validate_bio(self, value):
+        return clean_rich_text(value)
 
     def create(self, validated_data):
         validated_data['user'] = self.context['request'].user

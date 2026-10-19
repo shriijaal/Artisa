@@ -53,6 +53,8 @@ def send_password_reset_email(user, reset_link):
 # --- Artist application emails ---
 
 def send_artist_approved_email(user):
+    if not user.email_application_updates:
+        return
     _send(
         subject='Your Artist Application Has Been Approved!',
         template_name='artist_approved.html',
@@ -62,6 +64,8 @@ def send_artist_approved_email(user):
 
 
 def send_artist_rejected_email(user, reason):
+    if not user.email_application_updates:
+        return
     _send(
         subject='Artist Application Update',
         template_name='artist_rejected.html',
@@ -73,6 +77,8 @@ def send_artist_rejected_email(user, reason):
 # --- Order emails ---
 
 def send_order_confirmation_email(order):
+    if not order.customer.email_order_updates:
+        return
     _send(
         subject=f'Artisa - Order #{str(order.id)[:8]} Confirmed',
         template_name='order_confirmation.html',
@@ -82,6 +88,8 @@ def send_order_confirmation_email(order):
 
 
 def send_payment_confirmation_email(order):
+    if not order.customer.email_order_updates:
+        return
     _send(
         subject=f'Artisa - Payment Received for Order #{str(order.id)[:8]}',
         template_name='payment_confirmation.html',
@@ -91,6 +99,8 @@ def send_payment_confirmation_email(order):
 
 
 def send_shipping_notification_email(order, shipment):
+    if not order.customer.email_order_updates:
+        return
     _send(
         subject=f'Artisa - Your Order #{str(order.id)[:8]} Has Shipped',
         template_name='shipping_notification.html',
@@ -104,6 +114,8 @@ def send_shipping_notification_email(order, shipment):
 
 
 def send_delivery_notification_email(order, shipment):
+    if not order.customer.email_order_updates:
+        return
     _send(
         subject=f'Artisa - Order #{str(order.id)[:8]} Delivered',
         template_name='delivery_notification.html',
@@ -119,6 +131,8 @@ def send_delivery_notification_email(order, shipment):
 # --- Commission emails ---
 
 def send_new_commission_email(commission):
+    if not commission.artist.email_commission_updates:
+        return
     _send(
         subject=f'Artisa - New Commission Request from {commission.customer.username}',
         template_name='new_commission.html',
@@ -128,6 +142,8 @@ def send_new_commission_email(commission):
 
 
 def send_commission_accepted_email(commission):
+    if not commission.customer.email_commission_updates:
+        return
     _send(
         subject=f'Artisa - Your Commission Has Been Accepted!',
         template_name='commission_accepted.html',
@@ -137,6 +153,8 @@ def send_commission_accepted_email(commission):
 
 
 def send_commission_started_email(commission):
+    if not commission.customer.email_commission_updates:
+        return
     _send(
         subject=f'Artisa - Commission Work Has Started',
         template_name='commission_started.html',
@@ -146,6 +164,8 @@ def send_commission_started_email(commission):
 
 
 def send_commission_declined_email(commission, reason=''):
+    if not commission.customer.email_commission_updates:
+        return
     _send(
         subject=f'Artisa - Commission Update',
         template_name='commission_declined.html',
@@ -159,6 +179,8 @@ def send_commission_declined_email(commission, reason=''):
 
 
 def send_commission_delivered_email(commission):
+    if not commission.customer.email_commission_updates:
+        return
     _send(
         subject=f'Artisa - Your Commission Has Been Delivered',
         template_name='commission_delivered.html',
@@ -168,6 +190,8 @@ def send_commission_delivered_email(commission):
 
 
 def send_commission_completed_email(commission):
+    if not commission.artist.email_commission_updates:
+        return
     _send(
         subject=f'Artisa - Commission Completed!',
         template_name='commission_completed.html',
@@ -177,6 +201,8 @@ def send_commission_completed_email(commission):
 
 
 def send_commission_revision_email(commission):
+    if not commission.artist.email_commission_updates:
+        return
     _send(
         subject=f'Artisa - Revision Requested on Commission',
         template_name='commission_revision.html',
@@ -187,6 +213,8 @@ def send_commission_revision_email(commission):
 
 def send_commission_cancelled_email(commission, cancelled_by=None):
     other_party = commission.artist if cancelled_by == commission.customer else commission.customer
+    if not other_party.email_commission_updates:
+        return
     _send(
         subject=f'Artisa - Commission Cancelled',
         template_name='commission_cancelled.html',
@@ -221,6 +249,8 @@ def send_order_cancelled_email(order, cancelled_by=None):
 
 def send_order_rejected_email(order, artist=None, reason=''):
     """Notify the customer when an artist rejects their order."""
+    if not order.customer.email_order_updates:
+        return
     _send(
         subject=f'Artisa - Order #{str(order.id)[:8]} Rejected by Artist',
         template_name='order_rejected.html',
